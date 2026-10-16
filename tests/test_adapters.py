@@ -64,5 +64,19 @@ class CodexAdapter(unittest.TestCase):
         self.assertEqual((h[4]["state"], h[4]["done"]), ("done", 2))
 
 
+class IdleScenes(unittest.TestCase):
+    def test_defaults(self):
+        from scenes import idle_scene
+        self.assertEqual(idle_scene("claude", {}), "robot")
+        self.assertEqual(idle_scene("codex", {}), "cursor")
+
+    def test_env_choice_and_fallback(self):
+        from scenes import idle_scene
+        self.assertEqual(idle_scene("claude", {"AGENT_STATUS_IDLE_CLAUDE": "Cursor"}), "cursor")
+        self.assertEqual(idle_scene("codex", {"AGENT_STATUS_IDLE_CODEX": "typist"}), "typist")
+        self.assertEqual(idle_scene("codex", {"AGENT_STATUS_IDLE_CODEX": "robot"}), "cursor")
+        self.assertIsNone(idle_scene("unknown", {}))
+
+
 if __name__ == "__main__":
     unittest.main()

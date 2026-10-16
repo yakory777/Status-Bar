@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Syntax check
-        run: python -m py_compile hooks/forward.py host/daemon.py host/adapters/*.py
+        run: python -m py_compile hooks/forward.py host/daemon.py host/scenes.py host/adapters/*.py tools/*.py
       - name: Adapter tests
         run: python tests/test_adapters.py
       - name: Validate manifests

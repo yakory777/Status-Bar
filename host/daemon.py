@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from adapters import ADAPTERS          # noqa: E402
 from adapters.common import IDLE       # noqa: E402
+from scenes import idle_scene          # noqa: E402
 
 try:
     import serial
@@ -41,7 +42,7 @@ lock = threading.Lock()
 ser = None
 forced_port = os.environ.get("AGENT_STATUS_SERIAL")
 
-state = dict(IDLE)
+state = dict(IDLE, agent="claude", idle=idle_scene("claude"))
 contexts = {name: {} for name in ADAPTERS}   # своё состояние у каждого агента
 
 
@@ -126,6 +127,8 @@ def handle_event(agent, ev):
         return
     with lock:
         if adapter.handle(ev, state, contexts[agent]):
+            state["agent"] = agent                  # тема экрана — по последнему агенту
+            state["idle"] = idle_scene(agent)       # сцена ожидания для этой темы
             send_state()
 
 
