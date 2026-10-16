@@ -1,0 +1,20 @@
+{
+  "name": "agent-status-bar",
+  "interface": {
+    "displayName": "Agent Status Bar"
+  },
+  "plugins": [
+    {
+      "name": "agent-status-bar",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

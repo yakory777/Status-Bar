@@ -1,0 +1,10 @@
+{
+  "name": "agent-status-bar",
+  "version": "0.1.0",
+  "description": "Физический статус-бар задач Codex на ESP32-S3 с AMOLED-дисплеем",
+  "hooks": "./hooks/codex-hooks.json",
+  "interface": {
+    "displayName": "Agent Status Bar",
+    "category": "Productivity"
+  }
+}

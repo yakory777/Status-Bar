@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Эмулятор статус-бара Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #E9EBEE;
+    --ink: #1D2127;
+    --ink-2: #5B6470;
+    --line: #C9CED6;
+    --btn: #FFFFFF;
+    --btn-hover: #F4F6F8;
+    --focus: #2F6FEB;
+    --bezel: #17191C;
+    --bezel-edge: #2A2E33;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171A;
+      --ink: #E6E8EB;
+      --ink-2: #9AA3AE;
+      --line: #343941;
+      --btn: #1F2328;
+      --btn-hover: #272C32;
+      --focus: #6C9BFF;
+      --bezel: #0A0B0C;
+      --bezel-edge: #2A2E33;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171A;
+    --ink: #E6E8EB;
+    --ink-2: #9AA3AE;
+    --line: #343941;
+    --btn: #1F2328;
+    --btn-hover: #272C32;
+    --focus: #6C9BFF;
+    --bezel: #0A0B0C;
+    --bezel-edge: #2A2E33;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 20px 56px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .lead {
+    color: var(--ink-2);
+    margin: 0 0 32px;
+    max-width: 62ch;
+  }
+
+  /* Устройство */
+  .device {
+    background: var(--bezel);
+    border: 1px solid var(--bezel-edge);
+    border-radius: 28px;
+    padding: 18px 22px;
+    max-width: 840px;
+    margin: 0 auto;
+  }
+  .screen {
+    display: block;
+    width: 100%;
+    aspect-ratio: 536 / 240;
+    border-radius: 10px;
+    background: #000;
+  }
+  .caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: var(--ink-2);
+    font-size: 14px;
+    margin: 10px 4px 32px;
+  }
+
+  /* Управление */
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  button {
+    font: inherit;
+    color: var(--ink);
+    background: var(--btn);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: background 0.15s;
+  }
+  button:hover { background: var(--btn-hover); }
+  button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button .name { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  button .hook { font-size: 13px; color: var(--ink-2); }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  button[aria-pressed="true"] { border-color: var(--ink); }
+
+  .settings {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .settings input[type="range"] { width: 180px; accent-color: var(--ink); }
+  .settings output { color: var(--ink); font-weight: 500; min-width: 2ch; }
+  .note {
+    margin-top: 28px;
+    color: var(--ink-2);
+    font-size: 14px;
+    max-width: 70ch;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Эмулятор статус-бара Claude</h1>
+  <p class="lead">Экран 536×240 с той же логикой и анимациями, что в прошивке: цвета, заливка сегментов, пульсация и счётчик. Нажимайте кнопки — каждая изображает событие хука Claude Code.</p>
+
+  <div class="device">
+    <canvas class="screen" id="scr" width="536" height="240" aria-label="Экран статус-бара"></canvas>
+  </div>
+  <div class="caption">
+    <span>LilyGO T-Display-S3 AMOLED, 1,91″</span>
+    <span id="evt">Событие: —</span>
+  </div>
+
+  <div class="controls">
+    <button id="b-start"><span class="name"><span class="swatch" style="background:#FF453A"></span>Отправить задачу</span><span class="hook">UserPromptSubmit</span></button>
+    <button id="b-step"><span class="name"><span class="swatch" style="background:#FF9F0A"></span>Следующий шаг</span><span class="hook">PostToolUse · TodoWrite</span></button>
+    <button id="b-wait"><span class="name"><span class="swatch" style="background:#FFD60A"></span>Запрос разрешения</span><span class="hook">Notification</span></button>
+    <button id="b-done"><span class="name"><span class="swatch" style="background:#30D158"></span>Завершить</span><span class="hook">Stop</span></button>
+    <button id="b-idle"><span class="name"><span class="swatch" style="background:#8E8E93"></span>Сбросить</span><span class="hook">SessionEnd</span></button>
+    <button id="b-demo" aria-pressed="false"><span class="name">Автодемо</span><span class="hook">Прогон задачи целиком</span></button>
+  </div>
+
+  <div class="settings">
+    <label for="total">Пунктов в плане</label>
+    <input type="range" id="total" min="1" max="12" step="1" value="5">
+    <output id="total-out" for="total">5</output>
+  </div>
+
+  <p class="note">В браузере экран отрисован чётче, чем на реальной плате: там 536×240 физических пикселей, а тут картинка масштабирована. Цвета, размеры, тайминги и кривые анимаций совпадают с <code>ui_status.c</code>.</p>
+</main>
+
+<script>
+(() => {
+  const W = 536, H = 240, M = 20, BAR_Y = 146, BAR_H = 14, GAP = 8, MAX_SEG = 12;
+  const C_TEXT = [255,255,255], C_GRAY = [0x8E,0x8E,0x93], C_EMPTY = [0x1C,0x1C,0x1E];
+  const FONT = '"DejaVu Sans", Verdana, "IBM Plex Sans", sans-serif';
+
+  const STATES = {
+    idle:  { hex: [0x8E,0x8E,0x93], text: 'Ожидание' },
+    start: { hex: [0xFF,0x45,0x3A], text: 'Старт' },
+    work:  { hex: [0xFF,0x9F,0x0A], text: 'В работе' },
+    wait:  { hex: [0xFF,0xD6,0x0A], text: 'Ждёт вас' },
+    done:  { hex: [0x30,0xD1,0x58], text: 'Готово' },
+  };
+  const isActive = s => s === 'start' || s === 'work' || s === 'wait';
+
+  /* ---------- мини-движок анимаций в духе lv_anim ---------- */
+  const bez = (x1, y1, x2, y2) => t => {
+    let lo = 0, hi = 1, u = t;
+    for (let i = 0; i < 20; i++) {
+      u = (lo + hi) / 2;
+      const x = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u;
+      if (x < t) lo = u; else hi = u;
+    }
+    return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u;
+  };
+  const easeOut = bez(0, 0, 0.58, 1);
+  const easeInOut = bez(0.42, 0, 0.58, 1);
+
+  const anims = new Map();
+  function anim(key, o) {
+    anims.set(key, { t: -(o.delay || 0), dir: 1, loops: 0, ...o });
+  }
+  function stopAnim(key) { anims.delete(key); }
+  function stepAnims(dt) {
+    for (const [key, a] of anims) {
+      a.t += dt;
+      if (a.t < 0) continue;
+      const d = a.dir === 1 ? a.duration : a.playback;
+      let p = Math.min(a.t / d, 1);
+      const e = (a.path || easeOut)(p);
+      const v = a.dir === 1 ? a.from + (a.to - a.from) * e : a.to + (a.from - a.to) * e;
+      a.exec(v);
+      if (p >= 1) {
+        if (a.dir === 1 && a.playback) { a.dir = -1; a.t = 0; }
+        else if (a.repeat) { a.dir = 1; a.t = 0; }
+        else anims.delete(key);
+      }
+    }
+  }
+
+  /* ---------- состояние экрана ---------- */
+  const S = {
+    state: 'idle', color: [...C_GRAY], done: 0, total: 0, segW: 0,
+    active: -1, pct: 0, startTick: 0, stateText: 'Ожидание',
+    title: '', step: '', stepOpa: 1, dotOpa: 1, timeText: '00:00',
+  };
+  const fillW = new Array(MAX_SEG).fill(0);
+  const fillOpa = new Array(MAX_SEG).fill(1);
+  const segBg = Array.from({ length: MAX_SEG }, () => [...C_EMPTY]);
+  let colFrom = S.color, colTo = S.color;
+
+  const mix = (a, b, m) => a.map((v, i) => Math.round((v * m + b[i] * (255 - m)) / 255));
+  const tint = c => mix(c, [0,0,0], 50);
+  const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+  function accentTo(target) {
+    colFrom = [...S.color]; colTo = target;
+    anim('color', { from: 0, to: 255, duration: 500, exec: v => {
+      S.color = mix(colTo, colFrom, v);
+      if (S.active >= 0) segBg[S.active] = mix(S.color, [0,0,0], 40);
+    }});
+  }
+  function pulse(key, set, period) {
+    anim(key, { from: 255, to: 76, duration: period, playback: period, repeat: true,
+                path: easeInOut, exec: v => set(v / 255) });
+  }
+  function pulseStop(key, set) { stopAnim(key); set(1); }
+
+  function animWidth(i, to, delay) {
+    stopAnim('w' + i);
+    if (fillW[i] === to) return;
+    anim('w' + i, { from: fillW[i], to, duration: 450, delay, exec: v => { fillW[i] = v; } });
+  }
+
+  function layoutSegments(total) {
+    const oldW = S.segW;
+    S.segW = Math.floor((W - 2*M - GAP*(total - 1)) / total);
+    for (let i = 0; i < MAX_SEG; i++) {
+      stopAnim('w' + i);
+      fillW[i] = i < total && oldW ? Math.floor(fillW[i] * S.segW / oldW) : 0;
+    }
+  }
+
+  function apply(st, title, step, done, total) {
+    total = Math.max(1, Math.min(MAX_SEG, total));
+    done = Math.max(0, Math.min(total, done));
+    if (st === 'done') done = total;
+    const prevDone = S.done;
+
+    if (isActive(st) && !isActive(S.state)) { S.startTick = performance.now(); S.timeText = '00:00'; }
+
+    if (title != null) S.title = title;
+    if (step != null && step !== S.step) {
+      S.step = step;
+      anim('step', { from: 0, to: 1, duration: 300, exec: v => { S.stepOpa = v; } });
+    }
+
+    if (total !== S.total) { layoutSegments(total); S.total = total; }
+
+    const oldActive = S.active;
+    S.active = (isActive(st) && done < total) ? done : -1;
+    if (oldActive >= 0 && oldActive !== S.active) {
+      segBg[oldActive] = [...C_EMPTY];
+      pulseStop('p' + oldActive, v => { fillOpa[oldActive] = v; });
+    }
+
+    if (st !== S.state) {
+      S.stateText = STATES[st].text;
+      accentTo(STATES[st].hex);
+    }
+    if (S.active >= 0) segBg[S.active] = mix(S.color, [0,0,0], 40);
+    S.state = st;
+
+    for (let i = 0; i < total; i++) {
+      const target = i < done ? S.segW : (i === S.active ? Math.floor(S.segW * 2 / 5) : 0);
+      const delay = (st === 'done' && i >= prevDone) ? (i - prevDone) * 70 : 0;
+      animWidth(i, target, delay);
+    }
+
+    if (isActive(st)) {
+      const period = st === 'wait' ? 450 : 900;
+      pulse('dot', v => { S.dotOpa = v; }, period);
+      if (S.active >= 0) { const k = S.active; pulse('p' + k, v => { fillOpa[k] = v; }, period); }
+    } else {
+      pulseStop('dot', v => { S.dotOpa = v; });
+    }
+
+    S.done = done;
+    const to = Math.floor(done * 100 / total);
+    if (S.pct !== to) anim('pct', { from: S.pct, to, duration: 600, exec: v => { S.pct = Math.round(v); } });
+  }
+
+  /* ---------- отрисовка ---------- */
+  const cv = document.getElementById('scr');
+  const ctx = cv.getContext('2d');
+
+  function fitCanvas() {
+    const k = (cv.clientWidth / W) * (window.devicePixelRatio || 1);
+    cv.width = Math.round(W * k);
+    cv.height = Math.round(H * k);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+  }
+
+  function rrect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+  }
+  function ellipsize(text, maxW) {
+    if (ctx.measureText(text).width <= maxW) return text;
+    let s = text;
+    while (s.length && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+    return s + '…';
+  }
+
+  function draw() {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    ctx.textBaseline = 'middle';
+
+    /* пилюля */
+    ctx.font = `18px ${FONT}`;
+    const tw = ctx.measureText(S.stateText).width;
+    const pw = 14 + 12 + 10 + tw + 16;
+    ctx.fillStyle = rgb(tint(S.color));
+    rrect(M, 16, pw, 32, 16); ctx.fill();
+    ctx.globalAlpha = S.dotOpa;
+    ctx.fillStyle = rgb(S.color);
+    ctx.beginPath(); ctx.arc(M + 14 + 6, 32, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillText(S.stateText, M + 14 + 12 + 10, 33);
+
+    /* время */
+    ctx.fillStyle = rgb(C_GRAY);
+    ctx.textAlign = 'right';
+    ctx.fillText(S.timeText, W - M, 33);
+    ctx.textAlign = 'left';
+
+    /* заголовок и шаг */
+    ctx.textBaseline = 'top';
+    ctx.font = `bold 27px ${FONT}`;
+    ctx.fillStyle = rgb(C_TEXT);
+    ctx.fillText(ellipsize(S.title, W - 2*M), M, 64);
+
+    ctx.font = `18px ${FONT}`;
+    ctx.globalAlpha = S.stepOpa;
+    ctx.fillStyle = rgb(C_GRAY);
+    ctx.fillText(ellipsize(S.step, W - 2*M), M, 108);
+    ctx.globalAlpha = 1;
+
+    /* сегменты */
+    for (let i = 0; i < S.total; i++) {
+      const x = M + i * (S.segW + GAP);
+      ctx.save();
+      rrect(x, BAR_Y, S.segW, BAR_H, BAR_H / 2);
+      ctx.fillStyle = rgb(segBg[i]);
+      ctx.fill();
+      ctx.clip();
+      if (fillW[i] > 0) {
+        ctx.globalAlpha = fillOpa[i];
+        ctx.fillStyle = rgb(S.color);
+        ctx.fillRect(x, BAR_Y, fillW[i], BAR_H);
+      }
+      ctx.restore();
+    }
+
+    /* счётчики */
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `bold 40px ${FONT}`;
+    ctx.fillStyle = rgb(C_TEXT);
+    const cnt = `${S.done}/${S.total}`;
+    ctx.fillText(cnt, M, 218);
+    const cw = ctx.measureText(cnt).width;
+    ctx.font = `18px ${FONT}`;
+    ctx.fillStyle = rgb(C_GRAY);
+    ctx.fillText('задач готово', M + cw + 12, 214);
+
+    ctx.font = `bold 40px ${FONT}`;
+    ctx.fillStyle = rgb(S.color);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${S.pct}%`, W - M, 218);
+    ctx.textAlign = 'left';
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    stepAnims(now - last);
+    last = now;
+    if (isActive(S.state)) {
+      const s = Math.floor((now - S.startTick) / 1000);
+      S.timeText = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    }
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- события в стиле демона ---------- */
+  const STEPS = [
+    'Изучаю структуру проекта', 'Правлю модуль авторизации', 'Обновляю логику токенов',
+    'Пишу тесты', 'Запускаю тесты', 'Чиню упавший тест', 'Обновляю типы',
+    'Проверяю импорты', 'Прогоняю линтер', 'Обновляю документацию',
+    'Собираю проект', 'Проверяю результат',
+  ];
+  const TITLE = 'Отрефактори модуль авторизации';
+  let plan = 5;
+  const evt = document.getElementById('evt');
+  const log = name => { evt.textContent = 'Событие: ' + name; };
+
+  const ev = {
+    start() { log('UserPromptSubmit'); apply('start', TITLE, 'Claude думает…', 0, 1); },
+    step() {
+      log('PostToolUse · TodoWrite');
+      if (S.state === 'idle' || S.state === 'done') ev.start();
+      if (S.state === 'start') { apply('work', null, STEPS[0], 0, plan); return; }
+      const d = Math.min(S.done + 1, S.total);
+      apply('work', null, d < S.total ? STEPS[d] : 'Проверяю результат', d, S.total);
+    },
+    wait() {
+      log('Notification');
+      if (!isActive(S.state)) ev.start();
+      apply('wait', null, 'Разрешить запуск npm test?', S.done, S.total);
+    },
+    done() { log('Stop'); apply('done', null, 'Задача выполнена', S.total, S.total); },
+    idle() { log('SessionEnd'); apply('idle', 'Жду задачу', 'Отправьте запрос в Claude', 0, 1); },
+  };
+
+  /* автодемо */
+  let demoTimer = null;
+  const demoBtn = document.getElementById('b-demo');
+  function runDemo() {
+    const seq = [];
+    seq.push([0, ev.start]);
+    let t = 2500;
+    for (let k = 0; k <= plan; k++) {
+      seq.push([t, ev.step]); t += 2000;
+      if (k === 2) { seq.push([t, ev.wait]); t += 2500; }
+    }
+    seq.push([t, ev.done]); t += 5000;
+    const t0 = performance.now();
+    let i = 0;
+    demoTimer = setInterval(() => {
+      const el = performance.now() - t0;
+      while (i < seq.length && seq[i][0] <= el) seq[i++][1]();
+      if (el > t) { clearInterval(demoTimer); if (demoBtn.getAttribute('aria-pressed') === 'true') runDemo(); }
+    }, 50);
+  }
+  function stopDemo() { clearInterval(demoTimer); demoTimer = null; demoBtn.setAttribute('aria-pressed', 'false'); }
+
+  document.getElementById('b-start').onclick = () => { stopDemo(); ev.start(); };
+  document.getElementById('b-step').onclick  = () => { stopDemo(); ev.step(); };
+  document.getElementById('b-wait').onclick  = () => { stopDemo(); ev.wait(); };
+  document.getElementById('b-done').onclick  = () => { stopDemo(); ev.done(); };
+  document.getElementById('b-idle').onclick  = () => { stopDemo(); ev.idle(); };
+  demoBtn.onclick = () => {
+    if (demoBtn.getAttribute('aria-pressed') === 'true') { stopDemo(); return; }
+    demoBtn.setAttribute('aria-pressed', 'true');
+    runDemo();
+  };
+
+  const totalIn = document.getElementById('total');
+  const totalOut = document.getElementById('total-out');
+  totalIn.oninput = () => { plan = +totalIn.value; totalOut.textContent = plan; };
+
+  window.addEventListener('resize', fitCanvas);
+  fitCanvas();
+  apply('idle', 'Жду задачу', 'Отправьте запрос в Claude', 0, 1);
+  S.stateText = STATES.idle.text;
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

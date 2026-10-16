@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ],
+    "PreToolUse": [
+      { "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "^update_plan$", "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "python3 \"${PLUGIN_ROOT}/hooks/forward.py\" codex", "timeout": 5 } ] }
+    ]
+  }
+}

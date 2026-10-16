@@ -1,0 +1,12 @@
+{
+  "name": "agent-status-bar",
+  "version": "0.1.0",
+  "description": "Физический статус-бар задач Claude Code на ESP32-S3 с AMOLED-дисплеем",
+  "author": {
+    "name": "YOUR_NAME"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_USERNAME/agent-status-bar",
+  "repository": "https://github.com/YOUR_GITHUB_USERNAME/agent-status-bar",
+  "license": "MIT",
+  "keywords": ["esp32", "hardware", "status", "hooks", "lvgl"]
+}
