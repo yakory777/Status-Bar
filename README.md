@@ -4,9 +4,16 @@
 
 A physical progress display for [Claude Code](https://claude.com/claude-code) and [OpenAI Codex](https://developers.openai.com/codex) tasks, built on an ESP32-S3 with an AMOLED screen. While the agent works, your desk shows what it is doing, how much of its plan is done, and whether it is waiting for your approval.
 
-<p align="center">
-  <img src="docs/demo.gif" width="536" alt="Screen animation: start, working through steps, permission request, done">
-</p>
+<table align="center">
+  <tr>
+    <td align="center"><img src="docs/demo.gif" width="420" alt="Task screen: start, working through steps, permission request, done"></td>
+    <td align="center"><img src="docs/idle.gif" width="420" alt="Idle screen: a pixel robot hops across the letters of Ready to work"></td>
+  </tr>
+  <tr>
+    <td align="center">Working on a task</td>
+    <td align="center">Ready to work</td>
+  </tr>
+</table>
 
 ## What the screen shows
 
@@ -21,6 +28,20 @@ A physical progress display for [Claude Code](https://claude.com/claude-code) an
 Along with the color you get your prompt, the current step ("Editing auth.ts", "$ npm test"), a segmented progress bar built from the agent's plan (up to 12 items), a "3/7" counter with a percentage, and elapsed time.
 
 Animations are made with LVGL: smooth color transitions, segment fills, a pulsing current step (faster while waiting for you) and a left-to-right wave on completion. After 3 idle minutes the screen dims to protect the AMOLED from burn-in.
+
+### Idle screen
+
+When there is no task, a small orange pixel robot takes the stage. It drops onto the first letter of *Ready to work* and hops across the words; every letter dips under its weight and lights up. It jumps down next to the text, breathes, blinks and looks around, then leaps at the camera, melts into solid orange and the scene starts over.
+
+### Wi-Fi and battery
+
+For a battery-powered, wireless build the top-right corner shows Wi-Fi signal (a pixel fan that scans while connecting) and battery charge: green above 50%, orange from 21 to 50%, red at 20% and below.
+
+<p align="center">
+  <img src="docs/status_icons.png" width="536" alt="Task screen with Wi-Fi and battery indicators">
+</p>
+
+> The idle animation and the indicators are design previews for now: [`tools/render_idle_gif.py`](tools/render_idle_gif.py) is the reference for timings and the sprite, and porting them to the firmware is the next step.
 
 > The on-screen labels are in Russian for now. They live in `state_text()` in `firmware/main/ui_status.c` and in `host/adapters/common.py`.
 
@@ -135,7 +156,8 @@ Create `host/adapters/<name>.py` with a `NAME` string and a `handle(event, state
 hooks/                 hook definitions and forward.py
 host/                  daemon.py and per-agent adapters
 firmware/              ESP-IDF project (LVGL 9, RM67162 driver)
-docs/                  demo GIF and browser emulator
+docs/                  demo GIFs, previews and browser emulator
+tools/                 preview renderer for the idle animation (Lora font, OFL)
 ```
 
 ## Status

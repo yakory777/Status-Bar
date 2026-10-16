@@ -8,6 +8,7 @@ A physical status display for coding-agent tasks. Three parts, deliberately deco
 
 - `firmware/` — ESP-IDF 5.x project in C for the LilyGO T-Display-S3 AMOLED (536×240, RM67162 over QSPI), UI on LVGL 9.2.
 - `host/` — Python daemon. Receives hook events over HTTP on `127.0.0.1:8765`, maps them to a screen state through `host/adapters/`, writes JSON lines to the board over USB serial.
+- `tools/render_idle_gif.py` — reference renderer for the idle animation (pixel robot, Wi-Fi and battery icons). Timings, easing and the sprite in firmware must match it; regenerate `docs/idle.gif` after changing it.
 - `hooks/` plus the plugin manifests — wire Claude Code (`hooks/hooks.json`) and Codex (`hooks/codex-hooks.json`) events to `hooks/forward.py`.
 
 The firmware must stay agent-agnostic. Agent-specific logic belongs in `host/adapters/` only.
