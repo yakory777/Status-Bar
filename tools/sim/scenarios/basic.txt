@@ -1,0 +1,9 @@
+# Базовый сценарий: задача Claude от старта до завершения
+2800   {"state":"start","title":"Отрефактори модуль авторизации","step":"Думает…","done":0,"total":1,"agent":"claude"}
+4800  {"state":"work","step":"Изучаю структуру проекта","done":0,"total":5}
+6800  {"state":"work","step":"Правлю модуль авторизации","done":1,"total":5}
+8800  {"state":"work","step":"Обновляю логику токенов","done":2,"total":5}
+10800  {"state":"wait","step":"Разрешить запуск npm test?"}
+13200 {"state":"work","step":"Пишу тесты","done":3,"total":5}
+15200 {"state":"work","step":"Запускаю тесты","done":4,"total":5}
+17200 {"state":"done","step":"Задача выполнена"}

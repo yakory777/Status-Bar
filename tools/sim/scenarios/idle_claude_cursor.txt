@@ -1,0 +1,7 @@
+# Сцена ожидания claude · cursor
+0 {"sim":{"battery":78,"wifi":3}}
+100 {"agent":"claude","idle":"cursor","state":"idle"}
+500 {"ping":1}
+5500 {"ping":1}
+10500 {"ping":1}
+15500 {"ping":1}

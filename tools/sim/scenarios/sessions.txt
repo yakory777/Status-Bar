@@ -1,0 +1,10 @@
+# Две сессии: Codex работает, Claude просит разрешение — экран показывает важное
+500    {"ping": 1}
+600    {"agent": "codex", "state": "start", "title": "Почини падающие тесты", "step": "Думает…", "done": 0, "total": 1, "others": 0}
+2200   {"agent": "codex", "state": "work", "step": "Правлю парсер дат", "done": 1, "total": 4, "others": 0}
+4000   {"agent": "codex", "state": "work", "step": "Правлю парсер дат", "done": 1, "total": 4, "others": 1}
+5500   {"agent": "claude", "state": "wait", "title": "Обнови документацию", "step": "Разрешить запись README.md?", "done": 0, "total": 2, "others": 1}
+5500   {"ping": 1}
+8500   {"agent": "codex", "state": "work", "title": "Почини падающие тесты", "step": "Запускаю pytest", "done": 3, "total": 4, "others": 1}
+10500  {"agent": "codex", "state": "done", "step": "Задача выполнена", "done": 4, "total": 4, "others": 1}
+10500  {"ping": 1}

@@ -1,0 +1,16 @@
+# Кнопка: удержание разрешает, короткое нажатие отклоняет, двойное — следующая сцена, долгое вне решения — звук
+0     {"sim":{"battery":71}}
+100   {"agent":"claude","idle":"robot","state":"idle"}
+2600  {"state":"work","title":"Почисти временные файлы","step":"Ищу мусор","done":0,"total":2}
+3600  {"state":"wait","step":"Разрешить: $ rm -rf build/","approve":true}
+4500  {"sim":{"press":1500}}
+6300  {"state":"work","step":"Удаляю build/","done":1,"total":2,"approve":false}
+7300  {"state":"wait","step":"Разрешить: $ git push --force","approve":true}
+8300  {"sim":{"press":150}}
+9300  {"state":"work","step":"Ищу другой способ","approve":false}
+10300 {"state":"idle","title":"Жду задачу","step":"Отправьте задачу агенту","done":0,"total":1}
+11500 {"ping":1}
+12500 {"sim":{"press":120}}
+12750 {"sim":{"press":120}}
+14500 {"sim":{"press":1400}}
+16500 {"ping":1}

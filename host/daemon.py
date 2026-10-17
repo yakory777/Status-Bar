@@ -24,8 +24,8 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from adapters import ADAPTERS          # noqa: E402
-from adapters.common import IDLE       # noqa: E402
-from scenes import idle_scene          # noqa: E402
+from sessions import Sessions          # noqa: E402
+import approvals as approvals_mod      # noqa: E402
 
 try:
     import serial
@@ -42,8 +42,9 @@ lock = threading.Lock()
 ser = None
 forced_port = os.environ.get("AGENT_STATUS_SERIAL")
 
-state = dict(IDLE, agent="claude", idle=idle_scene("claude"))
-contexts = {name: {} for name in ADAPTERS}   # своё состояние у каждого агента
+approvals = approvals_mod.Approvals()
+sessions = Sessions(approvals=approvals)
+PING_EVERY_S = 5          # плата считает связь потерянной после 15 с тишины
 
 
 # ---------------- serial ----------------
@@ -81,10 +82,14 @@ def open_serial():
 
 def send_state():
     """Отправить текущее состояние на плату. Вызывать под lock."""
+    send_line(sessions.display())
+
+
+def send_line(obj):
     global ser
     if ser is None and not open_serial():
         return
-    line = json.dumps(state, ensure_ascii=False) + "\n"
+    line = json.dumps(obj, ensure_ascii=False) + "\n"
     try:
         ser.write(line.encode("utf-8"))
     except (serial.SerialException, OSError):
@@ -111,43 +116,109 @@ def serial_watch():
         try:
             data = s.readline()
             if data:
-                print("[esp]", data.decode("utf-8", "replace").rstrip(), flush=True)
+                text = data.decode("utf-8", "replace").strip()
+                if text.startswith("{"):
+                    handle_board_line(text)
+                else:
+                    print("[esp]", text, flush=True)
         except (serial.SerialException, OSError):
             with lock:
                 ser = None
             time.sleep(1)
 
 
+def heartbeat():
+    """Пинг для платы и уборка брошенных сессий."""
+    n = 0
+    while True:
+        time.sleep(PING_EVERY_S)
+        n += 1
+        with lock:
+            if n % 6 == 0 and sessions.sweep():
+                send_state()
+            elif ser is not None:
+                send_line({"ping": 1})
+
+
+# ---------------- сообщения с платы ----------------
+
+def handle_board_line(text):
+    """Плата шлёт {"button":"approve"|"deny"|"scene_next", ...} и {"hello":...}."""
+    try:
+        msg = json.loads(text)
+    except ValueError:
+        print("[esp]", text, flush=True)
+        return
+    button = msg.get("button")
+    if not button:
+        return
+    print(f"[button] {button}", flush=True)
+    with lock:
+        if button in ("approve", "deny"):
+            key = sessions.top_key()
+            if key and approvals.resolve(key, "allow" if button == "approve" else "deny"):
+                send_state()
+        elif button == "scene_next":
+            agent = sessions.display()["agent"]
+            if sessions.choose_scene(agent, msg.get("scene")):
+                send_state()
+
+
 # ---------------- события ----------------
 
 def handle_event(agent, ev):
-    adapter = ADAPTERS.get(agent)
-    if adapter is None:
+    if agent not in ADAPTERS:
         print(f"[http] неизвестный агент: {agent}", flush=True)
         return
     with lock:
-        if adapter.handle(ev, state, contexts[agent]):
-            state["agent"] = agent                  # тема экрана — по последнему агенту
-            state["idle"] = idle_scene(agent)       # сцена ожидания для этой темы
+        if sessions.handle(agent, ev):
             send_state()
+
+
+def wait_for_button(agent, ev, timeout):
+    """Хук ждёт решения кнопкой. Возвращает "allow", "deny" или None."""
+    key = Sessions.key_for(agent, ev)
+    with lock:
+        approvals.begin(key)
+        send_state()                       # плата покажет «удержать — разрешить»
+    decision = approvals.wait(key, timeout)
+    with lock:
+        send_state()                       # подсказку убрать
+    print(f"[approve] {key}: {decision or 'нет ответа'}", flush=True)
+    return decision
 
 
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
+        body = None
         try:
             q = parse_qs(urlparse(self.path).query)
             agent = (q.get("agent") or ["claude"])[0]
             n = int(self.headers.get("Content-Length", 0))
             ev = json.loads(self.rfile.read(n) or b"{}")
             handle_event(agent, ev)
+            wait = float((q.get("wait") or ["0"])[0])
+            if wait > 0 and ev.get("hook_event_name") == "PermissionRequest" and ser is not None:
+                decision = wait_for_button(agent, ev, min(wait, 120))
+                if decision:
+                    body = json.dumps({"decision": decision}).encode()
         except Exception as e:
             print("[http] ошибка:", e, flush=True)
-        self.send_response(204)
-        self.end_headers()
+        if body:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self.send_response(204)
+            self.end_headers()
 
     def do_GET(self):
-        body = json.dumps({"service": "agent-status-bar", "state": state},
-                          ensure_ascii=False).encode("utf-8")
+        with lock:
+            payload = {"service": "agent-status-bar", "state": sessions.display(),
+                       "sessions": [{"key": x.key, "state": x.state["state"]}
+                                    for x in sessions.items.values()]}
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
@@ -194,6 +265,7 @@ def main():
         sys.exit(0)
 
     threading.Thread(target=serial_watch, daemon=True).start()
+    threading.Thread(target=heartbeat, daemon=True).start()
     if "--demo" in sys.argv:
         print("[demo] крутим демо, Ctrl+C для выхода", flush=True)
         threading.Thread(target=demo, daemon=True).start()

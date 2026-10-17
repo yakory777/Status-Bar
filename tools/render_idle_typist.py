@@ -10,7 +10,7 @@ import os
 from PIL import Image, ImageDraw
 
 import slime_common as base
-from slime_common import (W, H, K, FPS, PX, GREEN, GREEN_LT, GREEN_DK, WHITE, GRAY, DIM,
+from slime_common import (W, H, K, FPS, PX, GREEN, GREEN_LT, WHITE,
                         f_word, CH, CAP, BODY_W, BODY_H, sprite_image, draw_status_icons,
                         clamp, lerp, ease_in, ease_out_q, spring, S)
 

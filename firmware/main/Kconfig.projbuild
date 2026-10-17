@@ -1,0 +1,27 @@
+menu "Agent Status Bar"
+
+config ASB_BUTTON_GPIO
+    int "Button GPIO (BOOT button by default)"
+    range -1 48
+    default 0
+    help
+        Main button. GPIO0 is the BOOT button on the LilyGO T-Display-S3 AMOLED.
+
+config ASB_BUTTON2_GPIO
+    int "Second button GPIO (-1 = none)"
+    range -1 48
+    default -1
+    help
+        Optional second button that does the same as the first.
+        On the non-touch T-Display-S3 AMOLED the user button is GPIO21;
+        on the touch version GPIO21 is the touch interrupt, so leave -1.
+
+config ASB_BUZZER_GPIO
+    int "Passive buzzer GPIO (-1 = none)"
+    range -1 48
+    default -1
+    help
+        Passive piezo buzzer between this pin and GND (through ~100 Ω).
+        Free pins on the board header include GPIO1, GPIO10–GPIO16, GPIO43, GPIO44.
+
+endmenu
