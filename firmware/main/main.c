@@ -2,7 +2,8 @@
  * Agent status bar — ESP-IDF 5.x, LilyGO T-Display-S3 AMOLED.
  * Принимает строки JSON по USB от host/daemon.py:
  *   {"state":"work","title":"...","step":"...","done":2,"total":5}
- * state: idle | start | work | wait | done
+ * state: idle | start | work | wait | done | error | compact
+ * Плюс {"ping":1} каждые 5 с — признак, что хост жив.
  */
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -11,19 +12,17 @@
 #include "driver/usb_serial_jtag.h"
 #include "esp_timer.h"
 #include "esp_log.h"
-#include "cJSON.h"
 #include "lvgl.h"
 #include "display_rm67162.h"
 #include "ui_status.h"
-
-#define BRIGHT_ON      0xD0
-#define BRIGHT_DIM     0x18
-#define DIM_AFTER_MS   (3 * 60 * 1000)   /* беречь AMOLED от выгорания */
+#include "protocol.h"
+#include "ui_screen.h"
+#include "ui_input.h"
+#include "ui_sound.h"
+#include "input_esp.h"
 
 static const char *TAG = "agent";
 static SemaphoreHandle_t ui_mux;
-static volatile int64_t last_event_ms;
-static bool dimmed;
 
 static inline int64_t now_ms(void) { return esp_timer_get_time() / 1000; }
 
@@ -38,14 +37,7 @@ static void lvgl_task(void *arg)
     for (;;) {
         ui_lock();
         uint32_t wait = lv_timer_handler();
-
-        /* Приглушаем экран, если давно ничего не происходит и задача не идёт */
-        status_state_t st = ui_status_get_state();
-        bool idle = (st == ST_IDLE || st == ST_DONE);
-        if (idle && !dimmed && now_ms() - last_event_ms > DIM_AFTER_MS) {
-            display_set_brightness(BRIGHT_DIM);
-            dimmed = true;
-        }
+        protocol_tick((uint32_t)now_ms());          /* хост молчит 15 с — «Нет связи» */
         ui_unlock();
 
         if (wait < 5)  wait = 5;
@@ -58,32 +50,14 @@ static void lvgl_task(void *arg)
 
 static void apply_json(const char *line)
 {
-    cJSON *j = cJSON_Parse(line);
-    if (!j) {
+    proto_msg_t msg;
+    if (!protocol_parse(line, &msg)) {
         ESP_LOGW(TAG, "bad json: %.60s", line);
         return;
     }
-
-    static int done = 0, total = 1;
-    const cJSON *jd = cJSON_GetObjectItem(j, "done");
-    const cJSON *jt = cJSON_GetObjectItem(j, "total");
-    if (cJSON_IsNumber(jd)) done  = jd->valueint;
-    if (cJSON_IsNumber(jt)) total = jt->valueint;
-
-    const char *state = cJSON_GetStringValue(cJSON_GetObjectItem(j, "state"));
-    const char *title = cJSON_GetStringValue(cJSON_GetObjectItem(j, "title"));
-    const char *step  = cJSON_GetStringValue(cJSON_GetObjectItem(j, "step"));
-
     ui_lock();
-    last_event_ms = now_ms();
-    if (dimmed) {
-        display_set_brightness(BRIGHT_ON);
-        dimmed = false;
-    }
-    ui_status_apply(ui_status_parse_state(state), title, step, done, total);
+    protocol_apply(&msg, (uint32_t)now_ms());     /* яркость, сон и пробуждение — в ui_screen.c */
     ui_unlock();
-
-    cJSON_Delete(j);
 }
 
 static void usb_rx_task(void *arg)
@@ -121,8 +95,11 @@ void app_main(void)
 
     ui_lock();
     ui_status_create();
+    ui_screen_init();                             /* заставка → сцена ожидания */
+    ui_input_init();
+    ui_sound_init();
     ui_unlock();
-    last_event_ms = now_ms();
+    input_esp_start(ui_lock, ui_unlock);          /* кнопки: нажать, удерживать, дважды */
 
     xTaskCreatePinnedToCore(lvgl_task,   "lvgl",   8192, NULL, 4, NULL, 1);
     xTaskCreatePinnedToCore(usb_rx_task, "usb_rx", 6144, NULL, 5, NULL, 0);

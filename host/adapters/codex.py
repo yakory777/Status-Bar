@@ -3,9 +3,12 @@
 
 Codex ведёт план задачи через инструмент update_plan:
     {"plan": [{"step": "...", "status": "pending|in_progress|completed"}, ...]}
-Если формат в вашей версии Codex отличается, поправьте _plan_steps().
+Отдельного события об ошибке инструмента у Codex нет — смотрим на tool_response в PostToolUse.
+Если формат в вашей версии Codex отличается, поправьте _plan_steps() или common.tool_failed().
 """
-from .common import apply_plan, describe_tool, finish_task, short, start_task
+from .common import (apply_plan, describe_permission, describe_tool, fail, finish_task, start_task, subagent,
+                     tool_failed)
+from i18n import t
 
 NAME = "codex"
 
@@ -25,8 +28,7 @@ def handle(ev, state, ctx):
     name = ev.get("hook_event_name", "")
 
     if name == "UserPromptSubmit":
-        ctx["plan_step"] = None
-        start_task(state, ev.get("prompt"))
+        start_task(state, ctx, ev.get("prompt"))
         return True
 
     if name in ("PreToolUse", "PostToolUse"):
@@ -36,19 +38,38 @@ def handle(ev, state, ctx):
             steps = _plan_steps(inp)
             if steps:
                 ctx["plan_step"] = apply_plan(state, steps)
+        if name == "PostToolUse" and tool_failed(ev.get("tool_response")):
+            fail(state, t("error_prefix", what=describe_tool(tool, inp)))
+            return True
         state["state"] = "work"
         state["step"] = ctx.get("plan_step") or describe_tool(tool, inp)
         return True
 
     if name == "PermissionRequest":
         state["state"] = "wait"
-        inp = ev.get("tool_input") or {}
-        what = describe_tool(ev.get("tool_name", ""), inp)
-        state["step"] = short("Разрешить: " + what, 60)
+        state["step"] = describe_permission(ev.get("tool_name", ""), ev.get("tool_input") or {})
+        return True
+
+    if name == "SubagentStart":
+        subagent(state, ctx, +1)
+        return True
+
+    if name == "SubagentStop":
+        subagent(state, ctx, -1)
+        return True
+
+    if name == "PreCompact":
+        state["state"] = "compact"
+        state["step"] = t("compacting_auto" if ev.get("trigger") == "auto" else "compacting")
+        return True
+
+    if name == "PostCompact":
+        state["state"] = "work"
+        state["step"] = ctx.get("plan_step") or t("compacted")
         return True
 
     if name == "Stop":
-        finish_task(state)
+        finish_task(state, ctx)
         return True
 
     return False

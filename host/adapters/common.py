@@ -1,13 +1,19 @@
-"""Общие помощники для адаптеров: состояние экрана и описание действий."""
+"""Общие помощники для адаптеров: состояние экрана, план задачи, описание действий."""
 import os
+import re
 
+from i18n import stop_reason, t
+
+# Заголовок и шаг для ожидания не шлём: плата держит свою подпись на своём языке
 IDLE = {
     "state": "idle",
-    "title": "Жду задачу",
-    "step": "Отправьте задачу агенту",
     "done": 0,
     "total": 1,
+    "sub": 0,
 }
+
+# Состояния, в которых задача ещё идёт
+ACTIVE = ("start", "work", "wait", "error", "compact")
 
 
 def short(text, n):
@@ -16,24 +22,40 @@ def short(text, n):
     return text if len(text) <= n else text[: n - 1] + "…"
 
 
-def start_task(state, prompt):
+def start_task(state, ctx, prompt):
     state.update(
         state="start",
-        title=short(prompt, 60) or "Новая задача",
-        step="Думает…",
+        title=short(prompt, 60) or t("new_task"),
+        step=t("thinking"),
         done=0,
         total=1,
+        sub=0,
     )
+    ctx["plan_step"] = None
+    ctx["sub"] = 0
+    plan = ctx.get("tasks")
+    if plan and all(t["status"] == "completed" for t in plan.values()):
+        plan.clear()                      # прошлый план закрыт — начинаем с чистого листа
+    if plan:
+        sync_tasks(state, ctx)
 
 
-def finish_task(state):
+def finish_task(state, ctx):
     state["state"] = "done"
     state["done"] = state["total"]
-    state["step"] = "Задача выполнена"
+    state["step"] = t("task_done")
+    state["sub"] = 0
+    ctx["sub"] = 0
 
 
-def reset(state):
+def fail(state, step):
+    state["state"] = "error"
+    state["step"] = short(step, 60)
+
+
+def reset(state, ctx):
     state.update(IDLE)
+    ctx.clear()
 
 
 def apply_plan(state, steps):
@@ -49,6 +71,40 @@ def apply_plan(state, steps):
     return short(cur, 60) if cur else None
 
 
+# ---------- план через задачи (TaskCreate / TaskUpdate / TaskCreated / TaskCompleted) ----------
+
+def task_upsert(ctx, task_id, subject=None, active_form=None, status=None):
+    tasks = ctx.setdefault("tasks", {})
+    key = str(task_id) if task_id is not None else f"auto{len(tasks) + 1}"
+    t = tasks.setdefault(key, {"subject": "", "active": "", "status": "pending"})
+    if subject:
+        t["subject"] = subject
+    if active_form:
+        t["active"] = active_form
+    if status == "deleted":
+        tasks.pop(key, None)
+    elif status:
+        t["status"] = status
+    return key
+
+
+def sync_tasks(state, ctx):
+    """Переносит план из ctx["tasks"] на экран. Возвращает текущий шаг или None."""
+    tasks = ctx.get("tasks") or {}
+    steps = [(t["active"] or t["subject"], t["status"]) for t in tasks.values()]
+    ctx["plan_step"] = apply_plan(state, steps)
+    return ctx["plan_step"]
+
+
+# ---------- субагенты ----------
+
+def subagent(state, ctx, delta):
+    ctx["sub"] = max(0, ctx.get("sub", 0) + delta)
+    state["sub"] = ctx["sub"]
+
+
+# ---------- описание действий ----------
+
 def describe_tool(name, inp):
     """Человекочитаемое описание вызова инструмента."""
     inp = inp if isinstance(inp, dict) else {}
@@ -57,22 +113,77 @@ def describe_tool(name, inp):
     base = os.path.basename(str(path))
 
     if name in ("Edit", "MultiEdit", "apply_patch"):
-        return f"Правит {base}" if base else "Правит файлы"
+        return t("edits", file=base) if base else t("edits_files")
     if name == "Write":
-        return f"Пишет {base}"
+        return t("writes", file=base)
     if name in ("Read", "read_file"):
-        return f"Читает {base}"
-    if name in ("Bash", "shell", "exec_command", "local_shell"):
+        return t("reads", file=base)
+    if name in ("Bash", "shell", "exec_command", "local_shell", "PowerShell"):
         cmd = inp.get("command") or inp.get("cmd") or ""
         if isinstance(cmd, list):
             cmd = " ".join(str(c) for c in cmd)
-        return "$ " + short(cmd, 48) if cmd else "Выполняет команду"
+        return "$ " + short(cmd, 48) if cmd else t("runs_command")
     if name in ("Grep", "Glob"):
-        return "Ищет: " + short(inp.get("pattern", ""), 40)
+        return t("searches", pattern=short(inp.get("pattern", ""), 40))
     if name in ("WebSearch", "WebFetch", "web_search"):
-        return "Ищет в интернете"
+        return t("web")
     if name in ("Task", "Agent"):
-        return "Субагент: " + short(inp.get("description", ""), 40)
+        return t("subagent", what=short(inp.get("description", ""), 40))
+    if name in ("TodoWrite", "TaskCreate", "TaskUpdate", "update_plan"):
+        return t("plan")
     if name.startswith("mcp__"):
-        return "Инструмент: " + short(name.split("__")[-1], 40)
-    return short(name, 48) or "Работает"
+        return t("tool", name=short(name.split("__")[-1], 40))
+    return short(name, 48) or t("working")
+
+
+def describe_permission(name, inp):
+    """Текст запроса разрешения: «Разрешить запись README.md?»."""
+    inp = inp if isinstance(inp, dict) else {}
+    name = name or ""
+    base = os.path.basename(str(inp.get("file_path") or inp.get("notebook_path") or inp.get("path") or ""))
+    if name in ("Bash", "shell", "exec_command", "local_shell", "PowerShell"):
+        cmd = inp.get("command") or inp.get("cmd") or ""
+        if isinstance(cmd, list):
+            cmd = " ".join(str(c) for c in cmd)
+        return short(t("allow_cmd", cmd=cmd) if cmd else t("allow_cmd_any"), 60)
+    kinds = {
+        "Write": "write", "Edit": "edit", "MultiEdit": "edit", "apply_patch": "edit",
+        "NotebookEdit": "edit", "Read": "read",
+    }
+    if name in kinds:
+        k = kinds[name]
+        return short(t(f"allow_{k}", file=base) if base else t(f"allow_{k}_any"), 60)
+    if name in ("WebFetch", "WebSearch", "web_search"):
+        return t("allow_web")
+    if name.startswith("mcp__"):
+        return short(t("allow_tool", name=name.split("__")[-1]), 60)
+    return short(t("allow_named", name=name) if name else t("needs_you"), 60)
+
+
+_EXIT_RE = re.compile(r"exit(?:ed)?(?: with)?(?: code)?[:\s]+(-?\d+)", re.IGNORECASE)
+
+
+def tool_failed(resp):
+    """Похоже ли, что инструмент завершился с ошибкой (для агентов без отдельного события)."""
+    if isinstance(resp, dict):
+        for k in ("exit_code", "exitCode", "returncode", "status_code"):
+            v = resp.get(k)
+            if isinstance(v, int) and v != 0:
+                return True
+        if resp.get("success") is False or resp.get("is_error") is True:
+            return True
+        if resp.get("error"):
+            return True
+        for k in ("output", "stdout", "content"):
+            if isinstance(resp.get(k), str) and tool_failed(resp[k]):
+                return True
+        return False
+    if isinstance(resp, str):
+        m = _EXIT_RE.search(resp[:400])
+        return bool(m and int(m.group(1)) != 0)
+    return False
+
+
+def stop_failure_text(kind):
+    """Причина StopFailure (rate_limit, overloaded, …) → текст на экран."""
+    return stop_reason(kind)

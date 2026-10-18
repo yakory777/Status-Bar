@@ -1,4 +1,5 @@
-# ESP-IDF
+# ESP-IDF и симулятор
+build/
 firmware/build/
 firmware/managed_components/
 firmware/dependencies.lock

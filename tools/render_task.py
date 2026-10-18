@@ -6,9 +6,7 @@
     python tools/render_task.py --theme codex     # → docs/codex_task.gif
 """
 import argparse
-import math
 import os
-import sys
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))

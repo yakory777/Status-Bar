@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Syntax check
-        run: python -m py_compile hooks/forward.py host/daemon.py host/scenes.py host/adapters/*.py tools/*.py
+        run: python -m py_compile hooks/forward.py host/*.py host/adapters/*.py hardware/case/case.py tools/*.py tools/sim/*.py
       - name: Adapter tests
         run: python tests/test_adapters.py
       - name: Validate manifests
@@ -24,6 +24,28 @@ jobs:
           for f in .claude-plugin/*.json .codex-plugin/*.json .agents/plugins/*.json hooks/*.json; do
             python -m json.tool "$f" > /dev/null && echo "ok $f"
           done
+
+  sim:
+    # UI-код прошивки собирается и прогоняется на ПК — ловит ошибки без ESP-IDF
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+      - name: Build the simulator and render the basic scenario
+        run: python tools/sim/render.py tools/sim/scenarios/basic.txt build/basic.gif
+      - name: Run every scenario through the firmware UI code
+        run: |
+          for s in tools/sim/scenarios/*.txt; do
+            echo "== $s"
+            build/sim/agent_sim "$s" /dev/null 30
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-gifs
+          path: build/*.gif
 
   firmware:
     runs-on: ubuntu-latest
