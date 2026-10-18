@@ -13,7 +13,10 @@
 #include <string.h>
 #include "platform.h"
 #include "ui_draw.h"
+<<<<<<< HEAD
 #include "ui_i18n.h"
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 #include "ui_icons.h"
 #include "ui_scene.h"
 #include "ui_screen.h"
@@ -157,7 +160,11 @@ static void pairing_draw(lv_event_t *e)
     d_fill(&d, lv_color_black());
     const lv_font_t *ft = ui_status_font(1), *fb = ui_status_font(2), *fs = ui_status_font(0);
     lv_color_t accent = ui_status_state_color(ST_WORK);
+<<<<<<< HEAD
     const char *title = tr(TR_PAIR_TITLE);
+=======
+    const char *title = "Сопряжение по Wi-Fi";
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     d_text(&d, ft, title, (UI_W - text_w(ft, title)) / 2, 74, c_hex(0xFFFFFF), LV_OPA_COVER);
     int n = (int)strlen(pair_code);
     float cell = 54, gap = 10, x = (UI_W - (n * cell + (n - 1) * gap)) / 2;
@@ -167,10 +174,17 @@ static void pairing_draw(lv_event_t *e)
         char ch[2] = { pair_code[i], 0 };
         d_text(&d, fb, ch, cx + (cell - text_w(fb, ch)) / 2, 136, accent, LV_OPA_COVER);
     }
+<<<<<<< HEAD
     const char *hint1 = tr(TR_PAIR_HINT1);    /* проверка «тот же код», как при сопряжении Bluetooth */
     const char *hint2 = tr(TR_PAIR_HINT2);
     d_text(&d, fs, hint1, (UI_W - text_w(fs, hint1)) / 2, 190, ui_status_text_color(1), LV_OPA_COVER);
     d_text(&d, fs, hint2, (UI_W - text_w(fs, hint2)) / 2, 217, ui_status_text_color(1), LV_OPA_COVER);
+=======
+    const char *hint1 = "Введите код на компьютере:";
+    const char *hint2 = "python host/daemon.py pair";
+    d_text(&d, fs, hint1, (UI_W - text_w(fs, hint1)) / 2, 190, ui_status_text_color(1), LV_OPA_COVER);
+    d_text(&d, fs, hint2, (UI_W - text_w(fs, hint2)) / 2, 217, c_hex(0xFFFFFF), LV_OPA_COVER);
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 }
 
 void ui_screen_pairing(const char *code)

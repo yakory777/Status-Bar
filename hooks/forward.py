@@ -9,8 +9,13 @@
 Настройки — host/config.py: ~/.agent-status/config.toml и переменные AGENT_STATUS_*.
 Хук всегда завершается с кодом 0 и никогда не мешает работе агента.
 
+<<<<<<< HEAD
 Решение кнопкой (button_approve = true, только Claude Code): на PermissionRequest
 хук ждёт нажатия до approve_wait секунд (по умолчанию 20) и печатает решение.
+=======
+Решение кнопкой (AGENT_STATUS_BUTTON_APPROVE=1, только Claude Code): на PermissionRequest
+хук ждёт нажатия до AGENT_STATUS_APPROVE_WAIT секунд (по умолчанию 20) и печатает решение.
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 Не нажали — хук молчит, и Claude Code спрашивает как обычно.
 """
 import json
@@ -51,13 +56,22 @@ def post(agent, data, wait=0.0):
 
 def button_wait(agent, data):
     """Сколько ждать решения кнопкой для этого события (0 — не ждать)."""
+<<<<<<< HEAD
     if agent != "claude" or not SETTINGS.get("button_approve"):
+=======
+    if agent != "claude" or os.environ.get("AGENT_STATUS_BUTTON_APPROVE", "0") != "1":
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return 0.0
     try:
         if json.loads(data or b"{}").get("hook_event_name") != "PermissionRequest":
             return 0.0
+<<<<<<< HEAD
         return float(max(1, min(120, int(SETTINGS.get("approve_wait", 20)))))
     except (ValueError, TypeError):
+=======
+        return max(1.0, min(120.0, float(os.environ.get("AGENT_STATUS_APPROVE_WAIT", "20"))))
+    except ValueError:
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return 0.0
 
 
@@ -70,8 +84,12 @@ def print_decision(body):
     if decision not in ("allow", "deny"):
         return
     behavior = {"behavior": "allow"} if decision == "allow" else \
+<<<<<<< HEAD
         {"behavior": "deny", "message": i18n.t("denied_by_button") if i18n else
          "Denied with the status bar button"}
+=======
+        {"behavior": "deny", "message": "Отклонено кнопкой на статус-баре"}
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     sys.stdout.write(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PermissionRequest", "decision": behavior}}, ensure_ascii=False))
     sys.stdout.flush()

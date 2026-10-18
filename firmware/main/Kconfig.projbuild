@@ -24,6 +24,7 @@ config ASB_BUZZER_GPIO
         Passive piezo buzzer between this pin and GND (through ~100 Ω).
         Free pins on the board header include GPIO1, GPIO10–GPIO16, GPIO43, GPIO44.
 
+<<<<<<< HEAD
 choice ASB_LANGUAGE_CHOICE
     prompt "Screen language (until the host sends its own)"
     default ASB_LANGUAGE_EN
@@ -42,4 +43,6 @@ config ASB_LANGUAGE
     default "ru" if ASB_LANGUAGE_RU
     default "en"
 
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 endmenu

@@ -13,7 +13,10 @@
 #include <string.h>
 #include "lvgl.h"
 #include "ui_draw.h"
+<<<<<<< HEAD
 #include "ui_i18n.h"
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 #include "ui_status.h"
 #include "ui_sound.h"
 
@@ -61,8 +64,16 @@ static const theme_def_t THEMES[THEME_COUNT] = {
     },
 };
 
+<<<<<<< HEAD
 /* Подписи состояний — в ui_i18n.c (TR_ST_IDLE … TR_ST_COMPACT в том же порядке, что ST_*) */
 static const char *state_text(status_state_t st) { return tr((tr_id_t)(TR_ST_IDLE + st)); }
+=======
+static const char *const STATE_TEXT[ST_COUNT] = {
+    [ST_IDLE] = "Ожидание", [ST_START] = "Старт", [ST_WORK] = "В работе",
+    [ST_WAIT] = "Ждёт вас", [ST_DONE] = "Готово", [ST_ERROR] = "Ошибка",
+    [ST_COMPACT] = "Сжатие",
+};
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 /* ---------- объекты ---------- */
 
@@ -76,7 +87,11 @@ static lv_obj_t *lbl_count, *lbl_count_sub, *lbl_pct;
 static lv_obj_t *seg_bg[MAX_SEG], *seg_fill[MAX_SEG];
 static int32_t   fill_w[MAX_SEG];
 static lv_obj_t *frame;                        /* рамка-напоминание при долгом ожидании */
+<<<<<<< HEAD
 static lv_obj_t *link_banner, *link_txt;       /* «Нет связи» */
+=======
+static lv_obj_t *link_banner;                  /* «Нет связи» */
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 static lv_obj_t *approve_box, *approve_fill, *approve_lbl, *approve_lbl_inv;   /* решение кнопкой */
 static bool approve_on;
 
@@ -93,7 +108,10 @@ static struct {
     uint32_t wait_since;
     int wait_minutes;          /* сколько минут уже показано в напоминании, 0 — не эскалировано */
     bool link_ok;
+<<<<<<< HEAD
     bool had_task;             /* была ли уже задача (иначе на экране подпись ожидания) */
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     int32_t bar_h;             /* текущая высота полосы (меняется при «утрамбовке») */
 } S;
 
@@ -352,9 +370,15 @@ static void squeeze_stop(void)
 static void update_state_label(void)
 {
     if (S.state == ST_WAIT && S.wait_minutes > 0)
+<<<<<<< HEAD
         lv_label_set_text_fmt(lbl_state, tr(TR_WAIT_MIN), state_text(ST_WAIT), S.wait_minutes);
     else
         lv_label_set_text(lbl_state, state_text(S.state));
+=======
+        lv_label_set_text_fmt(lbl_state, "%s · %d мин", STATE_TEXT[ST_WAIT], S.wait_minutes);
+    else
+        lv_label_set_text(lbl_state, STATE_TEXT[S.state]);
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 }
 
 /* ---------- напоминание при долгом ожидании ---------- */
@@ -450,12 +474,26 @@ void ui_status_set_idle_scene(const char *scene)
 
 /* ---------- бейджи ---------- */
 
+<<<<<<< HEAD
 static int last_sub, last_others;
 
 void ui_status_set_counters(int subagents, int other_sessions)
 {
     last_sub = subagents;
     last_others = other_sessions;
+=======
+static const char *sessions_word(int n)
+{
+    int a = n % 100, b = n % 10;
+    if (a >= 11 && a <= 14) return "сессий";
+    if (b == 1) return "сессия";
+    if (b >= 2 && b <= 4) return "сессии";
+    return "сессий";
+}
+
+void ui_status_set_counters(int subagents, int other_sessions)
+{
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     if (subagents > 0) {
         lv_label_set_text_fmt(lbl_sub_n, "×%d", subagents);
         lv_obj_remove_flag(badge_sub, LV_OBJ_FLAG_HIDDEN);
@@ -463,9 +501,13 @@ void ui_status_set_counters(int subagents, int other_sessions)
         lv_obj_add_flag(badge_sub, LV_OBJ_FLAG_HIDDEN);
     }
     if (other_sessions > 0) {
+<<<<<<< HEAD
         char buf[32];
         tr_sessions(buf, sizeof buf, other_sessions);
         lv_label_set_text(lbl_others, buf);
+=======
+        lv_label_set_text_fmt(lbl_others, "+%d %s", other_sessions, sessions_word(other_sessions));
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         lv_obj_remove_flag(badge_others, LV_OBJ_FLAG_HIDDEN);
     } else {
         lv_obj_add_flag(badge_others, LV_OBJ_FLAG_HIDDEN);
@@ -591,6 +633,7 @@ static void title_marquee(void)
     lv_anim_start(&a);
 }
 
+<<<<<<< HEAD
 /* Подсказка кнопки: светлая надпись и её тёмная копия на полосе — в одних координатах */
 static void set_approve_text(void)
 {
@@ -601,6 +644,8 @@ static void set_approve_text(void)
     lv_obj_set_pos(approve_lbl_inv, lv_obj_get_x(approve_lbl), lv_obj_get_y(approve_lbl));
 }
 
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 /* ---------- создание ---------- */
 
 void ui_status_create(void)
@@ -686,7 +731,11 @@ void ui_status_create(void)
     lbl_count = mk_label(root, f_big, t->text);
     lv_obj_set_pos(lbl_count, M, 178);
     lbl_count_sub = mk_label(root, f_small, t->gray);
+<<<<<<< HEAD
     lv_label_set_text(lbl_count_sub, tr(TR_TASKS_DONE));
+=======
+    lv_label_set_text(lbl_count_sub, "задач готово");
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     lbl_pct = mk_label(root, f_big, t->gray);
     lv_label_set_text(lbl_pct, "0%");
     lv_obj_align(lbl_pct, LV_ALIGN_TOP_RIGHT, -M, 178);
@@ -710,8 +759,13 @@ void ui_status_create(void)
     lv_obj_set_style_pad_hor(link_banner, 22, 0);
     lv_obj_t *ldot = mk_box(link_banner, 0xFF453A, LV_RADIUS_CIRCLE);
     lv_obj_set_size(ldot, 12, 12);
+<<<<<<< HEAD
     link_txt = mk_label(link_banner, f_small, 0xFF8A80);
     lv_label_set_text(link_txt, tr(TR_LINK_LOST));
+=======
+    lv_obj_t *ltxt = mk_label(link_banner, f_small, 0xFF8A80);
+    lv_label_set_text(ltxt, "Нет связи с компьютером");
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     lv_obj_align(link_banner, LV_ALIGN_CENTER, 0, 0);     /* по центру, поверх затемнённого экрана */
     lv_obj_add_flag(link_banner, LV_OBJ_FLAG_HIDDEN);
 
@@ -723,8 +777,17 @@ void ui_status_create(void)
     approve_fill = mk_box(approve_box, t->state[ST_WAIT], 0);
     lv_obj_set_size(approve_fill, 0, 42);
     approve_lbl = mk_label(approve_box, f_small, t->text);
+<<<<<<< HEAD
     approve_lbl_inv = mk_label(approve_fill, f_small, 0x000000);   /* та же надпись, тёмная, на полосе */
     set_approve_text();
+=======
+    lv_label_set_text(approve_lbl, "Удержать — разрешить · нажать — отклонить");
+    lv_obj_center(approve_lbl);
+    lv_obj_update_layout(approve_lbl);
+    approve_lbl_inv = mk_label(approve_fill, f_small, 0x000000);   /* та же надпись, тёмная, на полосе */
+    lv_label_set_text(approve_lbl_inv, lv_label_get_text(approve_lbl));
+    lv_obj_set_pos(approve_lbl_inv, lv_obj_get_x(approve_lbl), lv_obj_get_y(approve_lbl));
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     lv_obj_move_foreground(approve_fill);    /* полоса с тёмным текстом — поверх белого */
     lv_obj_add_flag(approve_box, LV_OBJ_FLAG_HIDDEN);
 
@@ -737,7 +800,11 @@ void ui_status_create(void)
     apply_theme_static();
     lv_timer_create(tick_cb, 250, NULL);
 
+<<<<<<< HEAD
     ui_status_apply(ST_IDLE, tr(TR_IDLE_TITLE), tr(TR_IDLE_STEP), 0, 1);
+=======
+    ui_status_apply(ST_IDLE, "Жду задачу", "Отправьте задачу агенту", 0, 1);
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     update_state_label();
 }
 
@@ -767,7 +834,10 @@ void ui_status_apply(status_state_t st, const char *title, const char *step,
     if (st == ST_DONE)   done = total;
 
     int prev_done = S.done;
+<<<<<<< HEAD
     if (st != ST_IDLE) S.had_task = true;
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     status_state_t prev = S.state;
 
     /* Секундомер стартует с новой задачей */

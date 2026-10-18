@@ -8,7 +8,10 @@ Codex ведёт план задачи через инструмент update_pl
 """
 from .common import (apply_plan, describe_permission, describe_tool, fail, finish_task, start_task, subagent,
                      tool_failed)
+<<<<<<< HEAD
 from i18n import t
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 NAME = "codex"
 
@@ -39,7 +42,11 @@ def handle(ev, state, ctx):
             if steps:
                 ctx["plan_step"] = apply_plan(state, steps)
         if name == "PostToolUse" and tool_failed(ev.get("tool_response")):
+<<<<<<< HEAD
             fail(state, t("error_prefix", what=describe_tool(tool, inp)))
+=======
+            fail(state, "Ошибка: " + describe_tool(tool, inp))
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
             return True
         state["state"] = "work"
         state["step"] = ctx.get("plan_step") or describe_tool(tool, inp)
@@ -60,12 +67,20 @@ def handle(ev, state, ctx):
 
     if name == "PreCompact":
         state["state"] = "compact"
+<<<<<<< HEAD
         state["step"] = t("compacting_auto" if ev.get("trigger") == "auto" else "compacting")
+=======
+        state["step"] = "Сжимаю контекст" + (" (авто)" if ev.get("trigger") == "auto" else "")
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return True
 
     if name == "PostCompact":
         state["state"] = "work"
+<<<<<<< HEAD
         state["step"] = ctx.get("plan_step") or t("compacted")
+=======
+        state["step"] = ctx.get("plan_step") or "Контекст сжат, продолжаю"
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return True
 
     if name == "Stop":

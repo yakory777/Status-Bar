@@ -45,8 +45,12 @@ ser = None
 forced_port = settings["serial_port"] or None
 
 approvals = approvals_mod.Approvals()
+<<<<<<< HEAD
 sessions = Sessions(settings=settings, approvals=approvals)
 sessions.scene_choice.update(config.load_state().get("scene_choice") or {})
+=======
+sessions = Sessions(approvals=approvals)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 PING_EVERY_S = 5          # плата считает связь потерянной после 15 с тишины
 
 
@@ -164,7 +168,10 @@ def handle_board_line(text):
         elif button == "scene_next":
             agent = sessions.display()["agent"]
             if sessions.choose_scene(agent, msg.get("scene")):
+<<<<<<< HEAD
                 config.save_state({"scene_choice": sessions.scene_choice})   # переживёт перезапуск
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
                 send_state()
 
 
@@ -172,7 +179,11 @@ def handle_board_line(text):
 
 def handle_event(agent, ev):
     if agent not in ADAPTERS:
+<<<<<<< HEAD
         print(f"[http] unknown agent: {agent}", flush=True)
+=======
+        print(f"[http] неизвестный агент: {agent}", flush=True)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return
     with lock:
         if sessions.handle(agent, ev):
@@ -188,7 +199,11 @@ def wait_for_button(agent, ev, timeout):
     decision = approvals.wait(key, timeout)
     with lock:
         send_state()                       # подсказку убрать
+<<<<<<< HEAD
     print(f"[approve] {key}: {decision or 'no answer'}", flush=True)
+=======
+    print(f"[approve] {key}: {decision or 'нет ответа'}", flush=True)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     return decision
 
 
@@ -207,7 +222,11 @@ class Handler(BaseHTTPRequestHandler):
                 if decision:
                     body = json.dumps({"decision": decision}).encode()
         except Exception as e:
+<<<<<<< HEAD
             print("[http] error:", e, flush=True)
+=======
+            print("[http] ошибка:", e, flush=True)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         if body:
             self.send_response(200)
             self.send_header("Content-Type", "application/json")

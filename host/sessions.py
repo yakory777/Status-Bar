@@ -9,7 +9,10 @@ import time
 
 from adapters import ADAPTERS
 from adapters.common import ACTIVE, IDLE
+<<<<<<< HEAD
 import config
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 from scenes import idle_scene
 
 PRIORITY = {"wait": 5, "error": 4, "compact": 3, "work": 3, "start": 3, "done": 2, "idle": 0}
@@ -27,6 +30,7 @@ class Session:
 
 
 class Sessions:
+<<<<<<< HEAD
     def __init__(self, clock=time.monotonic, settings=None, approvals=None):
         self.clock = clock
         self.settings = config.load() if settings is None else settings
@@ -34,6 +38,15 @@ class Sessions:
         self.last_agent = "claude"
         self.approvals = approvals        # host/approvals.py — кто ждёт решения кнопкой
         self.scene_choice = {}            # тема → сцена, выбранная кнопкой (важнее настроек)
+=======
+    def __init__(self, clock=time.monotonic, env=None, approvals=None):
+        self.clock = clock
+        self.env = env
+        self.items = {}
+        self.last_agent = "claude"
+        self.approvals = approvals        # host/approvals.py — кто ждёт решения кнопкой
+        self.scene_choice = {}            # тема → сцена, выбранная кнопкой (важнее переменной окружения)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
     @staticmethod
     def key_for(agent, ev):
@@ -82,7 +95,11 @@ class Sessions:
         return self.display() != before
 
     def _scene(self, agent):
+<<<<<<< HEAD
         return self.scene_choice.get(agent) or idle_scene(agent, self.settings)
+=======
+        return self.scene_choice.get(agent) or idle_scene(agent, self.env)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
     def _pick(self):
         if not self.items:
@@ -102,6 +119,10 @@ class Sessions:
                      if s is not top and s.state["state"] in ACTIVE)
         awaiting = bool(self.approvals and top and top.state["state"] == "wait"
                         and self.approvals.awaiting(top.key))
+<<<<<<< HEAD
         out.update(agent=agent, idle=self._scene(agent), others=others, approve=awaiting,
                    lang=self.settings.get("language", "en"))
+=======
+        out.update(agent=agent, idle=self._scene(agent), others=others, approve=awaiting)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return out

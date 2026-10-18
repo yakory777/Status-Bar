@@ -33,9 +33,12 @@ typedef struct {
     bool has_agent, has_idle;
     char agent[16];               /* claude | codex — тема */
     char idle[16];                /* сцена ожидания */
+<<<<<<< HEAD
 
     bool has_lang;
     char lang[4];                 /* en | ru — язык подписей платы */
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 } proto_msg_t;
 
 /* Разбирает строку. false — не JSON или не объект. */

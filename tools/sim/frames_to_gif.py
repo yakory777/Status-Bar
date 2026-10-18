@@ -6,8 +6,11 @@
 """
 import argparse
 import os
+<<<<<<< HEAD
 import shutil
 import subprocess
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 from PIL import Image
 
@@ -26,6 +29,7 @@ def frames(path):
             yield im
 
 
+<<<<<<< HEAD
 def ffmpeg_gif(fr, dst, fps):
     """Общая палитра и перерисовка только изменившихся прямоугольников: гифка вдвое легче."""
     raw = b''.join(f.tobytes() for f in fr)
@@ -37,6 +41,8 @@ def ffmpeg_gif(fr, dst, fps):
     return r.returncode == 0
 
 
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('src')
@@ -52,10 +58,16 @@ def main():
         fr = fr[int(lo * a.fps):int(hi * a.fps)]
     if not fr:
         raise SystemExit('нет кадров')
+<<<<<<< HEAD
     if not (shutil.which('ffmpeg') and ffmpeg_gif(fr, a.dst, a.fps)):
         pal = [f.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for f in fr]
         pal[0].save(a.dst, save_all=True, append_images=pal[1:], duration=int(1000 / a.fps),
                     loop=0, optimize=True, disposal=1)
+=======
+    pal = [f.quantize(colors=128, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for f in fr]
+    pal[0].save(a.dst, save_all=True, append_images=pal[1:], duration=int(1000 / a.fps),
+                loop=0, optimize=True, disposal=1)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     base = os.path.splitext(a.dst)[0]
     for s in filter(None, a.png_at.split(',')):
         i = min(len(allfr) - 1, int(float(s) * a.fps))

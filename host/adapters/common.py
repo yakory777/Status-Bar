@@ -43,7 +43,11 @@ def start_task(state, ctx, prompt):
 def finish_task(state, ctx):
     state["state"] = "done"
     state["done"] = state["total"]
+<<<<<<< HEAD
     state["step"] = t("task_done")
+=======
+    state["step"] = "Задача выполнена"
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     state["sub"] = 0
     ctx["sub"] = 0
 
@@ -117,7 +121,11 @@ def describe_tool(name, inp):
     if name == "Write":
         return t("writes", file=base)
     if name in ("Read", "read_file"):
+<<<<<<< HEAD
         return t("reads", file=base)
+=======
+        return f"Читает {base}"
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     if name in ("Bash", "shell", "exec_command", "local_shell", "PowerShell"):
         cmd = inp.get("command") or inp.get("cmd") or ""
         if isinstance(cmd, list):
@@ -128,12 +136,21 @@ def describe_tool(name, inp):
     if name in ("WebSearch", "WebFetch", "web_search"):
         return t("web")
     if name in ("Task", "Agent"):
+<<<<<<< HEAD
         return t("subagent", what=short(inp.get("description", ""), 40))
     if name in ("TodoWrite", "TaskCreate", "TaskUpdate", "update_plan"):
         return t("plan")
     if name.startswith("mcp__"):
         return t("tool", name=short(name.split("__")[-1], 40))
     return short(name, 48) or t("working")
+=======
+        return "Субагент: " + short(inp.get("description", ""), 40)
+    if name in ("TodoWrite", "TaskCreate", "TaskUpdate", "update_plan"):
+        return "Обновляет план"
+    if name.startswith("mcp__"):
+        return "Инструмент: " + short(name.split("__")[-1], 40)
+    return short(name, 48) or "Работает"
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 
 def describe_permission(name, inp):
@@ -145,6 +162,7 @@ def describe_permission(name, inp):
         cmd = inp.get("command") or inp.get("cmd") or ""
         if isinstance(cmd, list):
             cmd = " ".join(str(c) for c in cmd)
+<<<<<<< HEAD
         return short(t("allow_cmd", cmd=cmd) if cmd else t("allow_cmd_any"), 60)
     kinds = {
         "Write": "write", "Edit": "edit", "MultiEdit": "edit", "apply_patch": "edit",
@@ -158,6 +176,20 @@ def describe_permission(name, inp):
     if name.startswith("mcp__"):
         return short(t("allow_tool", name=name.split("__")[-1]), 60)
     return short(t("allow_named", name=name) if name else t("needs_you"), 60)
+=======
+        return short(f"Разрешить: $ {cmd}" if cmd else "Разрешить команду?", 60)
+    phrases = {
+        "Write": "запись", "Edit": "правку", "MultiEdit": "правку", "apply_patch": "правку",
+        "NotebookEdit": "правку", "Read": "чтение",
+    }
+    if name in phrases:
+        return short(f"Разрешить {phrases[name]} {base}?" if base else f"Разрешить {phrases[name]}?", 60)
+    if name in ("WebFetch", "WebSearch", "web_search"):
+        return "Разрешить доступ в интернет?"
+    if name.startswith("mcp__"):
+        return short("Разрешить инструмент " + name.split("__")[-1] + "?", 60)
+    return short(f"Разрешить {name}?" if name else "Нужно ваше подтверждение", 60)
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 
 _EXIT_RE = re.compile(r"exit(?:ed)?(?: with)?(?: code)?[:\s]+(-?\d+)", re.IGNORECASE)
@@ -184,6 +216,22 @@ def tool_failed(resp):
     return False
 
 
+<<<<<<< HEAD
 def stop_failure_text(kind):
     """Причина StopFailure (rate_limit, overloaded, …) → текст на экран."""
     return stop_reason(kind)
+=======
+STOP_FAILURE_TEXT = {
+    "rate_limit": "Лимит запросов, пауза",
+    "overloaded": "Сервер перегружен",
+    "authentication_failed": "Ошибка входа",
+    "oauth_org_not_allowed": "Нет доступа к организации",
+    "account_on_hold": "Аккаунт приостановлен",
+    "billing_error": "Проблема с оплатой",
+    "invalid_request": "Некорректный запрос",
+    "model_not_found": "Модель не найдена",
+    "server_error": "Ошибка сервера",
+    "max_output_tokens": "Слишком длинный ответ",
+    "cloud_credential_error": "Ошибка облачного доступа",
+}
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046

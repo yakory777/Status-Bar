@@ -12,6 +12,7 @@
   </tr>
   <tr>
     <td><b>Claude</b></td>
+<<<<<<< HEAD
     <td><img src="docs/firmware/ru/claude/task.gif" width="400" alt="Claude: Работа над задачей"></td>
     <td><img src="docs/firmware/ru/claude/idle_robot.gif" width="400" alt="Claude: Готов к работе"></td>
   </tr>
@@ -19,6 +20,15 @@
     <td><b>Codex</b></td>
     <td><img src="docs/firmware/ru/codex/task.gif" width="400" alt="Codex: Работа над задачей"></td>
     <td><img src="docs/firmware/ru/codex/idle_cursor.gif" width="400" alt="Codex: Готов к работе"></td>
+=======
+    <td><img src="docs/firmware/claude/task.gif" width="400" alt="Claude: Работа над задачей"></td>
+    <td><img src="docs/firmware/claude/idle_robot.gif" width="400" alt="Claude: Готов к работе"></td>
+  </tr>
+  <tr>
+    <td><b>Codex</b></td>
+    <td><img src="docs/firmware/codex/task.gif" width="400" alt="Codex: Работа над задачей"></td>
+    <td><img src="docs/firmware/codex/idle_cursor.gif" width="400" alt="Codex: Готов к работе"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
@@ -51,62 +61,103 @@
     <td colspan="2"><b>Задача от старта до финиша</b> — Красный старт, пока агент думает, потом работа: меняется текст шага, заполняются сегменты плана, текущий пульсирует. Запрос разрешения красит всё в жёлтый; на «Готово» полоса заливается волной, пилюля подпрыгивает и летят конфетти.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/task.gif" width="400" alt="Задача от старта до финиша, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/task.gif" width="400" alt="Задача от старта до финиша, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/task.gif" width="400" alt="Задача от старта до финиша, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/task.gif" width="400" alt="Задача от старта до финиша, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Ошибки</b> — Упавший инструмент трясёт пилюлю статуса и красит шаг в красный; следующий вызов возвращает в работу. Если задача остановилась на лимите запросов или ошибке сервера, экран остаётся красным с причиной.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/error.gif" width="400" alt="Ошибки, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/error.gif" width="400" alt="Ошибки, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/error.gif" width="400" alt="Ошибки, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/error.gif" width="400" alt="Ошибки, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Субагенты и сжатие</b> — Бейдж считает запущенных субагентов (×3). Пока контекст сжимается, полоса прогресса «утрамбовывается».</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/compact.gif" width="400" alt="Субагенты и сжатие, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/compact.gif" width="400" alt="Субагенты и сжатие, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/compact.gif" width="400" alt="Субагенты и сжатие, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/compact.gif" width="400" alt="Субагенты и сжатие, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Долгое ожидание</b> — Через минуту без ответа в подписи появляется, сколько агент ждёт, а край экрана начинает мигать.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/wait.gif" width="400" alt="Долгое ожидание, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/wait.gif" width="400" alt="Долгое ожидание, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/wait.gif" width="400" alt="Долгое ожидание, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/wait.gif" width="400" alt="Долгое ожидание, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Кнопка: разрешить, отклонить, сцена, звук</b> — Удержали — разрешено, нажали — отклонено (Claude Code, по желанию). Двойное нажатие меняет сцену ожидания, долгое выключает звук — перечёркнутый динамик остаётся в углу.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/button.gif" width="400" alt="Кнопка: разрешить, отклонить, сцена, звук, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/button.gif" width="400" alt="Кнопка: разрешить, отклонить, сцена, звук, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/button.gif" width="400" alt="Кнопка: разрешить, отклонить, сцена, звук, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/button.gif" width="400" alt="Кнопка: разрешить, отклонить, сцена, звук, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Батарея, зарядка и Wi-Fi</b> — Зелёная выше 50%, оранжевая 21–50%, красная 20% и ниже; при зарядке появляется молния и заливка бежит до полной. Веер Wi-Fi показывает уровень сигнала.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/battery.gif" width="400" alt="Батарея, зарядка и Wi-Fi, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/battery.gif" width="400" alt="Батарея, зарядка и Wi-Fi, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/battery.gif" width="400" alt="Батарея, зарядка и Wi-Fi, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/battery.gif" width="400" alt="Батарея, зарядка и Wi-Fi, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Нет связи</b> — Демон пингует каждые 5 с. После 15 с тишины (ноутбук уснул, кабель выдернут) экран тускнеет и говорит об этом по центру, а не показывает устаревший статус как текущий.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/link_lost.gif" width="400" alt="Нет связи, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/link_lost.gif" width="400" alt="Нет связи, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/link_lost.gif" width="400" alt="Нет связи, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/link_lost.gif" width="400" alt="Нет связи, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>В работу и обратно</b> — Пришла задача: маскот выпрыгивает из кадра, выезжает экран задачи. После «Готово» или когда сессия закрылась, экран задачи гаснет и сцена ожидания начинается заново.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/transitions.gif" width="400" alt="В работу и обратно, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/transitions.gif" width="400" alt="В работу и обратно, Codex"></td>
+=======
+    <td align="center"><img src="docs/firmware/claude/transitions.gif" width="400" alt="В работу и обратно, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/transitions.gif" width="400" alt="В работу и обратно, Codex"></td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Сон</b> — Через 10 минут без событий маскот засыпает, всплывают «z z z», экран тускнеет. Через 30 минут экран гаснет совсем, чтобы AMOLED не выгорал. Любое событие будит.</td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/sleep.gif" width="400" alt="Сон, Claude"></td>
     <td align="center"><img src="docs/firmware/ru/codex/sleep.gif" width="400" alt="Сон, Codex"></td>
   </tr>
@@ -120,6 +171,21 @@
   <tr>
     <td align="center" valign="top"><img src="docs/firmware/ru/sessions.gif" width="400" alt="Несколько сессий"><br><b>Несколько сессий</b><br>Codex работает в одном терминале, Claude спрашивает разрешение в другом: на экране то, что требует вас, остальное — бейдж «+1 сессия», тема следует за сессией на экране.</td>
     <td align="center" valign="top"><img src="docs/firmware/ru/splash.gif" width="400" alt="Заставка"><br><b>Заставка</b><br>Оба маскота падают и пружинят, затем проявляются название и версия. Батарея и Wi-Fi уже в углу.</td>
+=======
+    <td align="center"><img src="docs/firmware/claude/sleep.gif" width="400" alt="Сон, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/sleep.gif" width="400" alt="Сон, Codex"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><b>Экран сопряжения</b> — Шестизначный код поверх всего, когда хост присылает <code>{"pair":"482913"}</code>. Готов для режима Wi-Fi, а сам Wi-Fi-транспорт пока не реализован.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/firmware/claude/pairing.png" width="400" alt="Экран сопряжения, Claude"></td>
+    <td align="center"><img src="docs/firmware/codex/pairing.png" width="400" alt="Экран сопряжения, Codex"></td>
+  </tr>
+  <tr>
+    <td align="center" valign="top"><img src="docs/firmware/sessions.gif" width="400" alt="Несколько сессий"><br><b>Несколько сессий</b><br>Codex работает в одном терминале, Claude спрашивает разрешение в другом: на экране то, что требует вас, остальное — бейдж «+1 сессия», тема следует за сессией на экране.</td>
+    <td align="center" valign="top"><img src="docs/firmware/splash.gif" width="400" alt="Заставка"><br><b>Заставка</b><br>Оба маскота падают и пружинят, затем проявляются название и версия. Батарея и Wi-Fi уже в углу.</td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
@@ -140,17 +206,36 @@
 
 <table align="center">
   <tr>
+<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/ru/claude/idle_robot.gif" width="400" alt="Claude · robot"><br><b>Claude · <code>robot</code></b> (по умолчанию)<br>Пиксельный робот падает на текст и скачет по буквам; каждая буква проседает под ним и загорается.</td>
     <td align="center"><img src="docs/firmware/ru/claude/idle_cursor.gif" width="400" alt="Claude · cursor"><br><b>Claude · <code>cursor</code></b><br>Оранжевый курсор просыпается, открывает глаза и печатает строку, оставляя за собой буквы.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/firmware/ru/codex/idle_cursor.gif" width="400" alt="Codex · cursor"><br><b>Codex · <code>cursor</code></b> (по умолчанию)<br>Курсор терминала оживает и печатает команду; когда он мигает, глаза остаются висеть в воздухе.</td>
     <td align="center"><img src="docs/firmware/ru/codex/idle_typist.gif" width="400" alt="Codex · typist"><br><b>Codex · <code>typist</code></b><br>Слайм сидит за пиксельной клавиатурой, стучит по клавишам двумя лапками и бьёт по Enter.</td>
+=======
+    <td align="center"><img src="docs/firmware/claude/idle_robot.gif" width="400" alt="Claude · robot"><br><b>Claude · <code>robot</code></b> (по умолчанию)<br>Пиксельный робот падает на текст и скачет по буквам; каждая буква проседает под ним и загорается.</td>
+    <td align="center"><img src="docs/firmware/claude/idle_cursor.gif" width="400" alt="Claude · cursor"><br><b>Claude · <code>cursor</code></b><br>Оранжевый курсор просыпается, открывает глаза и печатает строку, оставляя за собой буквы.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/firmware/codex/idle_cursor.gif" width="400" alt="Codex · cursor"><br><b>Codex · <code>cursor</code></b> (по умолчанию)<br>Курсор терминала оживает и печатает команду; когда он мигает, глаза остаются висеть в воздухе.</td>
+    <td align="center"><img src="docs/firmware/codex/idle_typist.gif" width="400" alt="Codex · typist"><br><b>Codex · <code>typist</code></b><br>Слайм сидит за пиксельной клавиатурой, стучит по клавишам двумя лапками и бьёт по Enter.</td>
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
 Сцену для каждой темы выберите в [файле настроек](#файл-настроек) (`idle_claude`, `idle_codex`) или переключайте двойным нажатием на плате — выбор запоминается.
 
+### Батарея и Wi-Fi
+
+<<<<<<< HEAD
+Правый верхний угол одинаковый на всех экранах — на заставке, в сценах ожидания, на экране задачи и при сопряжении. Батарея: зелёная выше 50%, оранжевая от 21 до 50%, красная 20% и ниже; при зарядке рядом появляется молния, а заливка бежит до полной; без аккумулятора корпус пустой с подписью «USB». Wi-Fi: точка и три дуги по уровню сигнала; пока плата работает по USB (режим Wi-Fi ещё не реализован), веер тусклый и перечёркнут. Перечёркнутый динамик — звук выключен. В финале сцены ожидания, когда экран заливается цветом, индикаторы на секунду уступают.
+
+Напряжение меряется на GPIO4 через делитель 1:2 на плате и переводится в проценты по кривой разряда Li-ion (`firmware/main/platform_esp.c`).
+
+### Кнопка и звук
+
+=======
 ### Батарея и Wi-Fi
 
 Правый верхний угол одинаковый на всех экранах — на заставке, в сценах ожидания, на экране задачи и при сопряжении. Батарея: зелёная выше 50%, оранжевая от 21 до 50%, красная 20% и ниже; при зарядке рядом появляется молния, а заливка бежит до полной; без аккумулятора корпус пустой с подписью «USB». Wi-Fi: точка и три дуги по уровню сигнала; пока плата работает по USB (режим Wi-Fi ещё не реализован), веер тусклый и перечёркнут. Перечёркнутый динамик — звук выключен. В финале сцены ожидания, когда экран заливается цветом, индикаторы на секунду уступают.
@@ -159,6 +244,7 @@
 
 ### Кнопка и звук
 
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 Кнопка BOOT на плате (GPIO0) работает без пайки:
 
 | Нажатие | Что делает |
@@ -168,7 +254,11 @@
 | Долгое (1,2 с) | Выключает и включает звук |
 | Любое, пока экран спит | Будит его |
 
+<<<<<<< HEAD
 **Разрешение с платы (Claude Code, по желанию).** Задайте `button_approve = true` в [файле настроек](#файл-настроек) (или `AGENT_STATUS_BUTTON_APPROVE=1`), и когда Claude спросит разрешение, на экране появится «Удержать — разрешить · нажать — отклонить» с полосой заполнения. Удержали — разрешено, нажали — отклонено. Если за `approve_wait` секунд (по умолчанию 20) никто не нажал, хук уступает, и Claude Code показывает свой обычный запрос — то есть на это время запрос в терминале появляется чуть позже. Хуки Codex не умеют отвечать на запросы разрешения, поэтому там экран только показывает, что агент ждёт.
+=======
+**Разрешение с платы (Claude Code, по желанию).** Задайте `AGENT_STATUS_BUTTON_APPROVE=1`, и когда Claude спросит разрешение, на экране появится «Удержать — разрешить · нажать — отклонить» с полосой заполнения. Удержали — разрешено, нажали — отклонено. Если за `AGENT_STATUS_APPROVE_WAIT` секунд (по умолчанию 20) никто не нажал, хук уступает, и Claude Code показывает свой обычный запрос — то есть на это время запрос в терминале появляется чуть позже. Хуки Codex не умеют отвечать на запросы разрешения, поэтому там экран только показывает, что агент ждёт.
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 Пищалка не обязательна: пассивный зуммер через резистор ~100 Ом между свободным GPIO (например, 43 или 44) и GND, затем *Buzzer GPIO* в `idf.py menuconfig → Agent Status Bar`. Плата пищит на «ждёт вас», «готово» и «ошибка», повторяет напоминание каждую минуту, пока вас нет, и щёлкает на нажатиях. Там же можно задать пин второй кнопки.
 
@@ -291,7 +381,10 @@ curl http://127.0.0.1:8765/   # текущее состояние
 | `ping` | Признак жизни, каждые 5 с; 15 с тишины — «Нет связи» |
 | `pair` | Шестизначный код сопряжения; `""` скрывает экран сопряжения |
 | `approve` | `true` — плата предлагает «удержать — разрешить / нажать — отклонить» для текущего ожидания |
+<<<<<<< HEAD
 | `lang` | `en` или `ru` — язык подписей самой платы |
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 Обратно плата присылает строки на нажатия: `{"button":"approve"}`, `{"button":"deny"}`, `{"button":"scene_next","scene":"cursor"}`.
 
@@ -348,7 +441,11 @@ approve_wait = 20        # сколько секунд хук ждёт кноп�
 | Что | Где |
 |---|---|
 | Цвета состояний по темам | `THEMES` в `firmware/main/ui_status.c` |
+<<<<<<< HEAD
 | Подписи на экране | `TEXT` в `firmware/main/ui_i18n.c` |
+=======
+| Подписи состояний | `STATE_TEXT` в `firmware/main/ui_status.c` |
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 | Когда ожидание начинает напоминать | `UI_WAIT_ESCALATE_MS` в `firmware/main/ui_status.h` (60 с) |
 | Через сколько тишины «Нет связи» | `PROTO_LINK_TIMEOUT_MS` в `firmware/main/protocol.h` (15 с) |
 | Сколько висит «Готово» до сцены ожидания | `UI_DONE_TO_IDLE_MS` в `firmware/main/ui_screen.h` (90 с) |
@@ -359,7 +456,18 @@ approve_wait = 20        # сколько секунд хук ждёт кноп�
 | Картинка зеркальная или перевёрнута | `LCD_MADCTL` в `firmware/main/display_rm67162.c`: `0x60`, `0xA0`, `0x20`, `0xE0` |
 | Полосы или артефакты | снизьте `LCD_FREQ` до 40 МГц там же |
 | Шрифт | замените TTF в `firmware/main/fonts/` (имена те же) |
+<<<<<<< HEAD
 | Пины кнопки, второй кнопки, пищалки, язык по умолчанию | `idf.py menuconfig → Agent Status Bar` |
+=======
+| Порт демона | переменная окружения `AGENT_STATUS_PORT` |
+| Последовательный порт | переменная `AGENT_STATUS_SERIAL`, например `COM5` |
+| Отключить автозапуск демона | `AGENT_STATUS_AUTOSTART=0` |
+| Сцена ожидания, тема Claude | `AGENT_STATUS_IDLE_CLAUDE`: `robot` (по умолчанию) или `cursor` |
+| Сцена ожидания, тема Codex | `AGENT_STATUS_IDLE_CODEX`: `cursor` (по умолчанию) или `typist` |
+| Разрешение с платы | `AGENT_STATUS_BUTTON_APPROVE=1` (только Claude Code) |
+| Сколько хук ждёт кнопку | `AGENT_STATUS_APPROVE_WAIT`, секунды (20, максимум 120) |
+| Пины кнопки, второй кнопки, пищалки | `idf.py menuconfig → Agent Status Bar` |
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 | Время долгого и двойного нажатия | `UI_LONG_PRESS_MS`, `UI_DOUBLE_CLICK_MS` в `firmware/main/ui_input.h` |
 
 ## Как перерисовать превью
@@ -392,7 +500,11 @@ python tools/render_idle_typist.py                # docs/codex_idle_typist.gif
 .codex-plugin/         манифест плагина Codex
 .agents/plugins/       манифест маркетплейса Codex
 hooks/                 описание хуков и forward.py
+<<<<<<< HEAD
 host/                  daemon.py, sessions.py (несколько сессий сразу), config.py (настройки), i18n.py (тексты), адаптеры агентов
+=======
+host/                  daemon.py, sessions.py (несколько сессий сразу) и адаптеры агентов
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 firmware/main/         проект ESP-IDF, LVGL 9:
   ui_status.c            экран задачи, темы, состояния сценариев
   ui_scene_*.c           сцены ожидания (robot, cursor, typist), ui_scene.c их запускает
@@ -400,7 +512,10 @@ firmware/main/         проект ESP-IDF, LVGL 9:
   ui_icons.c             индикаторы батареи и Wi-Fi
   protocol.c             строки JSON от хоста (общий с симулятором)
   ui_input.c, ui_sound.c действия кнопки и мелодии
+<<<<<<< HEAD
   ui_i18n.c              подписи экрана на английском и русском
+=======
+>>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   platform_esp.c         яркость, АЦП батареи, пищалка; input_esp.c — кнопки; display_rm67162.c — драйвер панели
 hardware/case/         корпус для 3D-печати: case.py (генератор), case.scad, STL, превью
 docs/firmware/         гифки прошивки: claude/ и codex/ — каждый экран в обеих темах; эмулятор в браузере в docs/
