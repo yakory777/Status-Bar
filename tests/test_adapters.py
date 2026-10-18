@@ -151,11 +151,7 @@ class SessionsTest(unittest.TestCase):
     def setUp(self):
         from sessions import Sessions
         self.now = [0.0]
-<<<<<<< HEAD
         self.s = Sessions(clock=lambda: self.now[0], settings=settings())
-=======
-        self.s = Sessions(clock=lambda: self.now[0], env={})
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
     def ev(self, agent, sid, **kw):
         self.now[0] += 1
@@ -197,11 +193,7 @@ class ButtonApprovals(unittest.TestCase):
         from approvals import Approvals
         from sessions import Sessions
         self.ap = Approvals()
-<<<<<<< HEAD
         self.s = Sessions(clock=lambda: 0.0, settings=settings(), approvals=self.ap)
-=======
-        self.s = Sessions(clock=lambda: 0.0, env={}, approvals=self.ap)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         self.s.handle("claude", {"hook_event_name": "PermissionRequest", "session_id": "A",
                                  "tool_name": "Bash", "tool_input": {"command": "rm -rf build"}})
 
@@ -227,15 +219,9 @@ class ButtonApprovals(unittest.TestCase):
 
     def test_env_switch(self):
         from approvals import enabled, wait_seconds
-<<<<<<< HEAD
         self.assertFalse(enabled(settings()))
         self.assertTrue(enabled(settings(AGENT_STATUS_BUTTON_APPROVE="1")))
         self.assertEqual(wait_seconds(settings(AGENT_STATUS_APPROVE_WAIT="500")), 120.0)
-=======
-        self.assertFalse(enabled({}))
-        self.assertTrue(enabled({"AGENT_STATUS_BUTTON_APPROVE": "1"}))
-        self.assertEqual(wait_seconds({"AGENT_STATUS_APPROVE_WAIT": "500"}), 120.0)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
     def test_scene_choice_from_button(self):
         self.assertEqual(self.s.display()["idle"], "robot")

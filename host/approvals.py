@@ -1,7 +1,6 @@
 """
 Решение запросов разрешения кнопкой на плате.
 
-<<<<<<< HEAD
 Хук PermissionRequest (только Claude Code, только при button_approve = true в настройках
 или AGENT_STATUS_BUTTON_APPROVE=1) ждёт ответа от демона до approve_wait секунд. Плата показывает подсказку
 «удержать — разрешить · нажать — отклонить» и присылает {"button":"approve"|"deny"}.
@@ -21,30 +20,6 @@ def wait_seconds(settings):
         return float(max(1, min(120, int(settings.get("approve_wait", 20)))))
     except (TypeError, ValueError):
         return 20.0
-=======
-Хук PermissionRequest (только Claude Code, только при AGENT_STATUS_BUTTON_APPROVE=1)
-ждёт ответа от демона до AGENT_STATUS_APPROVE_WAIT секунд. Плата показывает подсказку
-«удержать — разрешить · нажать — отклонить» и присылает {"button":"approve"|"deny"}.
-Нет нажатия — хук ничего не решает, и Claude Code показывает свой обычный запрос.
-"""
-import os
-import threading
-
-DEFAULT_WAIT_S = 20
-
-
-def enabled(env=None):
-    env = os.environ if env is None else env
-    return env.get("AGENT_STATUS_BUTTON_APPROVE", "0") == "1"
-
-
-def wait_seconds(env=None):
-    env = os.environ if env is None else env
-    try:
-        return max(1.0, min(120.0, float(env.get("AGENT_STATUS_APPROVE_WAIT", DEFAULT_WAIT_S))))
-    except ValueError:
-        return float(DEFAULT_WAIT_S)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 
 class Approvals:

@@ -2,10 +2,7 @@
 #include <string.h>
 #include "lvgl.h"
 #include "platform.h"
-<<<<<<< HEAD
 #include "ui_i18n.h"
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 #include "ui_icons.h"
 #include "ui_input.h"
 #include "ui_screen.h"
@@ -39,13 +36,8 @@ static void next_scene(void)
     char extra[48];
     snprintf(extra, sizeof extra, ",\"scene\":\"%s\"", next);
     send_button("scene_next", extra);
-<<<<<<< HEAD
     char title[48];
     snprintf(title, sizeof title, tr(TR_SCENE), tr_scene_name(next));
-=======
-    const char *title = !strcmp(next, "robot") ? "Сцена: робот"
-                      : !strcmp(next, "typist") ? "Сцена: машинистка" : "Сцена: курсор";
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     ui_screen_toast(title, ui_status_text_color(1));
 }
 
@@ -55,11 +47,7 @@ static void on_short(void)
         send_button("deny", NULL);
         ui_status_set_approve(false);
         ui_sound_play(SND_DENY);
-<<<<<<< HEAD
         ui_screen_toast(tr(TR_DENIED), ui_status_state_color(ST_ERROR));
-=======
-        ui_screen_toast("Отклонено", ui_status_state_color(ST_ERROR));
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return;
     }
     ui_sound_play(SND_CLICK);
@@ -72,22 +60,14 @@ static void on_long(void)
         send_button("approve", NULL);
         ui_status_set_approve(false);
         ui_sound_play(SND_APPROVE);
-<<<<<<< HEAD
         ui_screen_toast(tr(TR_ALLOWED), ui_status_state_color(ST_DONE));
-=======
-        ui_screen_toast("Разрешено", ui_status_state_color(ST_DONE));
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return;
     }
     bool m = !ui_sound_muted();
     ui_sound_set_muted(m);
     ui_icons_refresh();
     if (!m) ui_sound_play(SND_CLICK);
-<<<<<<< HEAD
     ui_screen_toast(tr(m ? TR_SOUND_OFF : TR_SOUND_ON), ui_status_text_color(1));
-=======
-    ui_screen_toast(m ? "Звук выключен" : "Звук включён", ui_status_text_color(1));
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 }
 
 static void tick_cb(lv_timer_t *t)

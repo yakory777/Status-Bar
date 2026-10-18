@@ -12,7 +12,6 @@ A physical progress display for [Claude Code](https://claude.com/claude-code) an
   </tr>
   <tr>
     <td><b>Claude</b></td>
-<<<<<<< HEAD
     <td><img src="docs/firmware/en/claude/task.gif" width="400" alt="Claude: Working on a task"></td>
     <td><img src="docs/firmware/en/claude/idle_robot.gif" width="400" alt="Claude: Ready to work"></td>
   </tr>
@@ -20,15 +19,6 @@ A physical progress display for [Claude Code](https://claude.com/claude-code) an
     <td><b>Codex</b></td>
     <td><img src="docs/firmware/en/codex/task.gif" width="400" alt="Codex: Working on a task"></td>
     <td><img src="docs/firmware/en/codex/idle_cursor.gif" width="400" alt="Codex: Ready to work"></td>
-=======
-    <td><img src="docs/firmware/claude/task.gif" width="400" alt="Claude: Working on a task"></td>
-    <td><img src="docs/firmware/claude/idle_robot.gif" width="400" alt="Claude: Ready to work"></td>
-  </tr>
-  <tr>
-    <td><b>Codex</b></td>
-    <td><img src="docs/firmware/codex/task.gif" width="400" alt="Codex: Working on a task"></td>
-    <td><img src="docs/firmware/codex/idle_cursor.gif" width="400" alt="Codex: Ready to work"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
@@ -50,7 +40,7 @@ Animations are made with LVGL: smooth color transitions, segment fills, a pulsin
 
 ### Every screen in both themes
 
-Every GIF here is rendered by the **real firmware UI code** running in the [simulator](#firmware-simulator), not drawn separately — each scenario in both themes. Regenerate them all with `python tools/sim/render_docs.py`.
+Every GIF here is rendered by the **real firmware UI code** running in the [simulator](#firmware-simulator), not drawn separately — each scenario in both themes. The [Russian README](README.ru.md) shows the same screens in Russian. Regenerate them all with `python tools/sim/render_docs.py`.
 
 <table align="center">
   <tr>
@@ -61,103 +51,62 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
     <td colspan="2"><b>A task from start to finish</b> — Red start while the agent thinks, then work: the step text changes, plan segments fill, the current one pulses. A permission request turns everything yellow; on “Done” the bar fills in a wave, the pill hops and confetti flies.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/task.gif" width="400" alt="A task from start to finish, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/task.gif" width="400" alt="A task from start to finish, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/task.gif" width="400" alt="A task from start to finish, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/task.gif" width="400" alt="A task from start to finish, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Errors</b> — A failed tool shakes the status pill and turns the step red; the next tool call returns to work. A task that stops on a rate limit or a server error stays red with the reason.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/error.gif" width="400" alt="Errors, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/error.gif" width="400" alt="Errors, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/error.gif" width="400" alt="Errors, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/error.gif" width="400" alt="Errors, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Subagents and compaction</b> — A badge counts running subagents (×3). While the context is compacted, the progress bar squeezes up and down.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/compact.gif" width="400" alt="Subagents and compaction, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/compact.gif" width="400" alt="Subagents and compaction, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/compact.gif" width="400" alt="Subagents and compaction, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/compact.gif" width="400" alt="Subagents and compaction, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Waiting too long</b> — After a minute without your answer the label shows how long it has waited and the screen edge starts to flash.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/wait.gif" width="400" alt="Waiting too long, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/wait.gif" width="400" alt="Waiting too long, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/wait.gif" width="400" alt="Waiting too long, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/wait.gif" width="400" alt="Waiting too long, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Button: approve, deny, next scene, mute</b> — Hold to allow, tap to deny (Claude Code, opt-in). A double press switches the idle scene, a long press mutes — the crossed-out speaker stays in the corner.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/button.gif" width="400" alt="Button: approve, deny, next scene, mute, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/button.gif" width="400" alt="Button: approve, deny, next scene, mute, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/button.gif" width="400" alt="Button: approve, deny, next scene, mute, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/button.gif" width="400" alt="Button: approve, deny, next scene, mute, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Battery, charging and Wi-Fi</b> — Green above 50%, orange 21–50%, red 20% and below; while charging a bolt appears and the fill sweeps to full. The Wi-Fi fan shows signal strength.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/battery.gif" width="400" alt="Battery, charging and Wi-Fi, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/battery.gif" width="400" alt="Battery, charging and Wi-Fi, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/battery.gif" width="400" alt="Battery, charging and Wi-Fi, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/battery.gif" width="400" alt="Battery, charging and Wi-Fi, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Link lost</b> — The daemon pings every 5 s. After 15 s of silence (laptop asleep, cable out) the screen dims and says so in the middle, instead of showing a stale status as if it were current.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/link_lost.gif" width="400" alt="Link lost, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/link_lost.gif" width="400" alt="Link lost, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/link_lost.gif" width="400" alt="Link lost, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/link_lost.gif" width="400" alt="Link lost, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Into work and back</b> — A task arrives: the mascot leaps out of frame and the task screen slides in. After “Done”, or when the session closes, the task screen fades and the idle scene starts over.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/transitions.gif" width="400" alt="Into work and back, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/transitions.gif" width="400" alt="Into work and back, Codex"></td>
-=======
-    <td align="center"><img src="docs/firmware/claude/transitions.gif" width="400" alt="Into work and back, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/transitions.gif" width="400" alt="Into work and back, Codex"></td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
   <tr>
     <td colspan="2"><b>Sleep</b> — After 10 minutes without events the mascot dozes off, “z z z” float up and the screen dims. After 30 minutes the screen turns off so the AMOLED does not burn in. Any event wakes it.</td>
   </tr>
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/sleep.gif" width="400" alt="Sleep, Claude"></td>
     <td align="center"><img src="docs/firmware/en/codex/sleep.gif" width="400" alt="Sleep, Codex"></td>
   </tr>
@@ -171,21 +120,6 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
   <tr>
     <td align="center" valign="top"><img src="docs/firmware/en/sessions.gif" width="400" alt="Several sessions"><br><b>Several sessions</b><br>Codex works in one terminal, Claude asks for permission in another: the screen shows whatever needs you, the rest is a “+1 session” badge and the theme follows the session on screen.</td>
     <td align="center" valign="top"><img src="docs/firmware/en/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>Both mascots drop in and bounce, then the name and version fade in. Battery and Wi-Fi are already in the corner.</td>
-=======
-    <td align="center"><img src="docs/firmware/claude/sleep.gif" width="400" alt="Sleep, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/sleep.gif" width="400" alt="Sleep, Codex"></td>
-  </tr>
-  <tr>
-    <td colspan="2"><b>Pairing screen</b> — A six-digit code over everything when the host sends <code>{"pair":"482913"}</code>. Ready for the Wi-Fi mode; the Wi-Fi transport itself is not implemented yet.</td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/firmware/claude/pairing.png" width="400" alt="Pairing screen, Claude"></td>
-    <td align="center"><img src="docs/firmware/codex/pairing.png" width="400" alt="Pairing screen, Codex"></td>
-  </tr>
-  <tr>
-    <td align="center" valign="top"><img src="docs/firmware/sessions.gif" width="400" alt="Several sessions"><br><b>Several sessions</b><br>Codex works in one terminal, Claude asks for permission in another: the screen shows whatever needs you, the rest is a “+1 session” badge and the theme follows the session on screen.</td>
-    <td align="center" valign="top"><img src="docs/firmware/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>Both mascots drop in and bounce, then the name and version fade in. Battery and Wi-Fi are already in the corner.</td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
@@ -194,7 +128,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
 The screen follows whichever agent sent the latest event.
 
 - **Claude** — warm orange accents, Lora serif for the idle scenes, DejaVu Sans for the task screen.
-- **Codex** — black, white and ChatGPT green `#10A37F`, monospace type like a terminal.
+- **Codex** — black, white and ChatGPT green `#10A37F`, monospace type in the idle scenes like a terminal.
 
 > The firmware switches colors, mascots and idle scenes per theme. A monospace font for the Codex task screen is planned; for now both task screens use DejaVu Sans.
 
@@ -206,21 +140,12 @@ Each theme has two idle scenes. Every scene ends with the mascot leaping at the 
 
 <table align="center">
   <tr>
-<<<<<<< HEAD
     <td align="center"><img src="docs/firmware/en/claude/idle_robot.gif" width="400" alt="Claude · robot"><br><b>Claude · <code>robot</code></b> (default)<br>A pixel robot drops onto the text and hops letter by letter; each letter dips under it and lights up.</td>
     <td align="center"><img src="docs/firmware/en/claude/idle_cursor.gif" width="400" alt="Claude · cursor"><br><b>Claude · <code>cursor</code></b><br>An orange cursor wakes up, opens its eyes and types the line, leaving letters behind as it hops.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/firmware/en/codex/idle_cursor.gif" width="400" alt="Codex · cursor"><br><b>Codex · <code>cursor</code></b> (default)<br>The terminal cursor comes alive and types the command; when it blinks, its eyes stay hanging in the air.</td>
     <td align="center"><img src="docs/firmware/en/codex/idle_typist.gif" width="400" alt="Codex · typist"><br><b>Codex · <code>typist</code></b><br>A slime sits at a pixel keyboard, taps the keys with two stubby paws and slams Enter.</td>
-=======
-    <td align="center"><img src="docs/firmware/claude/idle_robot.gif" width="400" alt="Claude · robot"><br><b>Claude · <code>robot</code></b> (default)<br>A pixel robot drops onto the text and hops letter by letter; each letter dips under it and lights up.</td>
-    <td align="center"><img src="docs/firmware/claude/idle_cursor.gif" width="400" alt="Claude · cursor"><br><b>Claude · <code>cursor</code></b><br>An orange cursor wakes up, opens its eyes and types the line, leaving letters behind as it hops.</td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/firmware/codex/idle_cursor.gif" width="400" alt="Codex · cursor"><br><b>Codex · <code>cursor</code></b> (default)<br>The terminal cursor comes alive and types the command; when it blinks, its eyes stay hanging in the air.</td>
-    <td align="center"><img src="docs/firmware/codex/idle_typist.gif" width="400" alt="Codex · typist"><br><b>Codex · <code>typist</code></b><br>A slime sits at a pixel keyboard, taps the keys with two stubby paws and slams Enter.</td>
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   </tr>
 </table>
 
@@ -228,34 +153,11 @@ Pick a scene per theme in the [settings file](#settings-file) (`idle_claude`, `i
 
 ### Battery and Wi-Fi
 
-<<<<<<< HEAD
 The top-right corner is the same on every screen — boot splash, idle scenes, the task screen and pairing. Battery: green above 50%, orange from 21 to 50%, red at 20% and below; while charging a bolt appears next to it and the fill sweeps to full; without a cell the outline is empty and labeled *USB*. Wi-Fi: a dot and three arcs by signal strength; while the board works over USB (Wi-Fi mode is not implemented yet) the fan is dim and crossed out. A crossed-out speaker appears while sound is muted. During the full-screen finale of an idle scene the indicators step aside.
 
 The battery is measured on GPIO4 through the board's 1:2 divider and converted to percent with a Li-ion discharge curve (`firmware/main/platform_esp.c`).
 
-> The screen speaks English or Russian — see [Language](#settings-file).
-
-### Button and sound
-=======
-### Battery and Wi-Fi
-
-The top-right corner is the same on every screen — boot splash, idle scenes, the task screen and pairing. Battery: green above 50%, orange from 21 to 50%, red at 20% and below; while charging a bolt appears next to it and the fill sweeps to full; without a cell the outline is empty and labeled *USB*. Wi-Fi: a dot and three arcs by signal strength; while the board works over USB (Wi-Fi mode is not implemented yet) the fan is dim and crossed out. A crossed-out speaker appears while sound is muted. During the full-screen finale of an idle scene the indicators step aside.
-
-The battery is measured on GPIO4 through the board's 1:2 divider and converted to percent with a Li-ion discharge curve (`firmware/main/platform_esp.c`).
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
-
-The board's BOOT button (GPIO0) works without any wiring:
-
-| Press | Does |
-|---|---|
-| Short | Switches between the idle scene and the last task |
-| Double | Next idle scene for the current theme; the choice is sent to the daemon and kept |
-| Long (1.2 s) | Mutes or unmutes sounds |
-| Any, while the screen sleeps | Wakes it |
-
-**Approve from the board (Claude Code, opt-in).** Set `button_approve = true` in the [settings file](#settings-file) (or `AGENT_STATUS_BUTTON_APPROVE=1`) and, when Claude asks for permission, the screen shows *hold — allow · press — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `approve_wait` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks cannot answer permission requests, so there the screen only shows that it is waiting.
-
-A passive buzzer is optional: connect it through a ~100 Ω resistor between a free GPIO (for example 43 or 44) and GND, and set *Buzzer GPIO* in `idf.py menuconfig → Agent Status Bar`. The board then chirps on *waiting*, *done* and *error*, repeats the reminder every minute while you are away, and clicks on button actions. A second button pin can be set in the same menu.
+> The screen speaks English or Russian — see [Settings file](#settings-file).
 
 ### Button and sound
 
@@ -268,7 +170,7 @@ The board's BOOT button (GPIO0) works without any wiring:
 | Long (1.2 s) | Mutes or unmutes sounds |
 | Any, while the screen sleeps | Wakes it |
 
-**Approve from the board (Claude Code, opt-in).** Set `AGENT_STATUS_BUTTON_APPROVE=1` and, when Claude asks for permission, the screen shows *hold — allow · press — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `AGENT_STATUS_APPROVE_WAIT` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks cannot answer permission requests, so there the screen only shows that it is waiting.
+**Approve from the board (Claude Code, opt-in).** Set `button_approve = true` in the [settings file](#settings-file) (or `AGENT_STATUS_BUTTON_APPROVE=1`) and, when Claude asks for permission, the screen shows *Hold — allow · tap — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `approve_wait` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks cannot answer permission requests, so there the screen only shows that it is waiting.
 
 A passive buzzer is optional: connect it through a ~100 Ω resistor between a free GPIO (for example 43 or 44) and GND, and set *Buzzer GPIO* in `idf.py menuconfig → Agent Status Bar`. The board then chirps on *waiting*, *done* and *error*, repeats the reminder every minute while you are away, and clicks on button actions. A second button pin can be set in the same menu.
 
@@ -283,7 +185,7 @@ Codex ───────┘                                      └ adapters
 1. Plugin hooks call `hooks/forward.py` on every agent event.
 2. The hook forwards the event to a local daemon at `127.0.0.1:8765` and exits immediately, so the agent is never slowed down. If the daemon is not running, the hook starts it.
 3. The daemon translates the event into a screen state through an agent-specific adapter and sends one JSON line to the board over USB.
-4. The firmware knows nothing about agent internals: it draws `state`, `title`, `step`, `done` and `total`, and picks the theme and idle scene from `agent` and `idle`.
+4. The firmware knows nothing about agent internals: it draws `state`, `title`, `step`, `done` and `total`, and picks the theme, idle scene and language from `agent`, `idle` and `lang`.
 
 ## Hardware
 
@@ -327,19 +229,19 @@ pip install pyserial
 **Claude Code**
 
 ```
-/plugin marketplace add YOUR_GITHUB_USERNAME/agent-status-bar
+/plugin marketplace add yakory777/Status-Bar
 /plugin install agent-status-bar@agent-status-bar
 ```
 
 **Codex**
 
 ```bash
-codex plugin marketplace add YOUR_GITHUB_USERNAME/agent-status-bar
+codex plugin marketplace add yakory777/Status-Bar
 ```
 
 Then install **Agent Status Bar** from the plugin list. Codex does not trust plugin hooks automatically: review and enable them when Codex asks.
 
-That's it. The first agent event starts the daemon, which finds the board by its Espressif USB VID.
+That's it. The first agent event starts the daemon, which finds the board by its Espressif USB VID (or uses `serial_port` from the [settings file](#settings-file)).
 
 On Windows the hook command is `python3`. If your Python is only available as `python`, edit the commands in `hooks/hooks.json` and `hooks/codex-hooks.json`.
 
@@ -359,7 +261,7 @@ A scenario is a text file of `<time_ms> <JSON line>`, exactly what the daemon se
 
 ### Browser emulator
 
-Open [`docs/emulator.html`](docs/emulator.html) in a browser. It reproduces the interface in JavaScript with the same colors, sizes and timings; the buttons simulate hook events.
+Open [`docs/emulator.html`](docs/emulator.html) in a browser for a quick interactive preview: the buttons simulate hook events. It is an older JavaScript copy of the task screen and lacks the newer screens (idle scenes, indicators, button, languages); the simulator above is the accurate one.
 
 You can also run the daemon in demo mode or poke it with curl:
 
@@ -375,7 +277,7 @@ curl http://127.0.0.1:8765/   # current state
 The daemon sends one JSON line per update:
 
 ```json
-{"state":"work","title":"Refactor the auth module","step":"Writing tests","done":3,"total":5,"sub":2,"others":1,"agent":"claude","idle":"robot"}
+{"state":"work","title":"Refactor the auth module","step":"Writing tests","done":3,"total":5,"sub":2,"others":1,"agent":"claude","idle":"robot","lang":"en"}
 {"ping":1}
 ```
 
@@ -391,10 +293,7 @@ The daemon sends one JSON line per update:
 | `ping` | Keep-alive, sent every 5 s; 15 s of silence shows “link lost” |
 | `pair` | Six-digit pairing code to show; `""` hides the pairing screen |
 | `approve` | `true` — the board offers hold-to-allow / tap-to-deny for the current wait |
-<<<<<<< HEAD
 | `lang` | `en` or `ru` — language of the board's own labels |
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 The board sends lines back on button actions: `{"button":"approve"}`, `{"button":"deny"}`, `{"button":"scene_next","scene":"cursor"}`.
 
@@ -406,7 +305,7 @@ Every field is optional; the board remembers the last value. Anything that can w
 |---|---|---|
 | Start | `UserPromptSubmit` | `UserPromptSubmit` |
 | Work, current step | `PreToolUse`, `PostToolUse` | `PreToolUse`, `PostToolUse` |
-| Plan progress | `TaskCreated`, `TaskCompleted`, `TaskUpdate`, legacy `TodoWrite` | `update_plan` |
+| Plan progress | `TaskCreated`, `TaskCompleted` events; `TaskCreate`, `TaskUpdate`, legacy `TodoWrite` tools | `update_plan` tool |
 | Waiting for you | `PermissionRequest`, `Notification` (permission and input prompts) | `PermissionRequest` |
 | Error | `PostToolUseFailure`, `StopFailure` | non-zero exit code in `PostToolUse` |
 | Subagents | `SubagentStart`, `SubagentStop` | `SubagentStart`, `SubagentStop` |
@@ -451,11 +350,7 @@ The idle scene picked with a double press on the board is saved next to it in `s
 | What | Where |
 |---|---|
 | State colors per theme | `THEMES` in `firmware/main/ui_status.c` |
-<<<<<<< HEAD
 | On-screen labels | `TEXT` in `firmware/main/ui_i18n.c` |
-=======
-| State labels | `STATE_TEXT` in `firmware/main/ui_status.c` |
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 | When waiting starts to nag | `UI_WAIT_ESCALATE_MS` in `firmware/main/ui_status.h` (60 s) |
 | Link-lost timeout | `PROTO_LINK_TIMEOUT_MS` in `firmware/main/protocol.h` (15 s) |
 | How long “Done” stays before the idle scene | `UI_DONE_TO_IDLE_MS` in `firmware/main/ui_screen.h` (90 s) |
@@ -466,31 +361,21 @@ The idle scene picked with a double press on the board is saved next to it in `s
 | Mirrored or upside-down image | `LCD_MADCTL` in `firmware/main/display_rm67162.c`: `0x60`, `0xA0`, `0x20`, `0xE0` |
 | Stripes or artifacts | lower `LCD_FREQ` to 40 MHz in the same file |
 | Font | replace the TTF files in `firmware/main/fonts/` (keep the names) |
-<<<<<<< HEAD
 | Button, second button, buzzer pins, default language | `idf.py menuconfig → Agent Status Bar` |
-=======
-| Daemon port | `AGENT_STATUS_PORT` environment variable |
-| Serial port | `AGENT_STATUS_SERIAL` environment variable, e.g. `COM5` |
-| Disable daemon autostart | `AGENT_STATUS_AUTOSTART=0` |
-| Idle scene, Claude theme | `AGENT_STATUS_IDLE_CLAUDE`: `robot` (default) or `cursor` |
-| Idle scene, Codex theme | `AGENT_STATUS_IDLE_CODEX`: `cursor` (default) or `typist` |
-| Approve from the board | `AGENT_STATUS_BUTTON_APPROVE=1` (Claude Code only) |
-| How long the hook waits for the button | `AGENT_STATUS_APPROVE_WAIT`, seconds (20, max 120) |
-| Button, second button, buzzer pins | `idf.py menuconfig → Agent Status Bar` |
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 | Long-press and double-press timing | `UI_LONG_PRESS_MS`, `UI_DOUBLE_CLICK_MS` in `firmware/main/ui_input.h` |
 
 ## Regenerating the previews
 
-Firmware GIFs (everything in `docs/firmware/`, both themes) come from the simulator:
+Firmware GIFs (everything in `docs/firmware/`, both themes and both languages) come from the simulator; `ffmpeg`, if installed, makes them about half the size:
 
 ```bash
-pip install pillow
-python tools/sim/render_docs.py                   # all of them, ~1.5 min
+pip install pillow                                # plus cmake and a C compiler
+python tools/sim/render_docs.py                   # all of them, ~1 min
+python tools/sim/render_docs.py --lang en         # one language
 python tools/sim/render_docs.py task button       # just these
 ```
 
-The original design previews in Python:
+The original design previews in Python (only the first two are kept in `docs/`):
 
 ```bash
 python tools/render_task.py --theme claude        # docs/claude_task.gif
@@ -510,32 +395,25 @@ Fonts used by the renderers live in `tools/fonts/` with their licenses (Lora —
 .codex-plugin/         Codex plugin manifest
 .agents/plugins/       Codex marketplace manifest
 hooks/                 hook definitions and forward.py
-<<<<<<< HEAD
 host/                  daemon.py, sessions.py (several sessions at once), config.py (settings), i18n.py (texts), per-agent adapters
-=======
-host/                  daemon.py, sessions.py (several sessions at once) and per-agent adapters
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 firmware/main/         ESP-IDF project, LVGL 9:
   ui_status.c            task screen, themes, scenario states
   ui_scene_*.c           idle scenes (robot, cursor, typist), ui_scene.c runs them
   ui_screen.c            splash, transitions, confetti, sleep, pairing
-  ui_icons.c             battery and Wi-Fi indicators
+  ui_icons.c             battery, Wi-Fi and mute indicators
   protocol.c             JSON lines from the host (shared with the simulator)
   ui_input.c, ui_sound.c button actions and melodies
-<<<<<<< HEAD
   ui_i18n.c              on-screen labels in English and Russian
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
   platform_esp.c         brightness, battery ADC, buzzer; input_esp.c — buttons; display_rm67162.c — the panel driver
 hardware/case/         3D-printable case: case.py (generator), case.scad, STL, preview
-docs/firmware/         firmware GIFs: claude/ and codex/ — every screen in both themes; browser emulator in docs/
+docs/firmware/         firmware GIFs: en/ and ru/, each with claude/ and codex/; browser emulator in docs/
 tools/                 renderers for the design previews
 tools/sim/             firmware simulator: real UI code + LVGL on a PC, scenarios, GIF export
 ```
 
 ## Status
 
-The daemon, adapters, session handling and idle-scene selection are covered by tests. Every screen, scene and animation runs in the firmware simulator and in CI. The display driver follows the RM67162 pinout and protocol from the LilyGO and ESPHome examples but has not yet been run on real hardware, so the first build may need the tweaks from the table above. The Codex adapter assumes the `update_plan` tool format; if your Codex version differs, adjust `_plan_steps()` in `host/adapters/codex.py`.
+The daemon, adapters, session handling, idle-scene selection, settings and both languages are covered by tests. Every screen, scene and animation runs in the firmware simulator and in CI. The display driver follows the RM67162 pinout and protocol from the LilyGO and ESPHome examples but has not yet been run on real hardware, so the first build may need the tweaks from the [firmware constants](#firmware-constants) table. The Codex adapter assumes the `update_plan` tool format; if your Codex version differs, adjust `_plan_steps()` in `host/adapters/codex.py`.
 
 Issues with error output or a photo of the screen are very welcome.
 

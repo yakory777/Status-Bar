@@ -2,7 +2,6 @@
 """
 Перерисовать все гифки README из настоящего кода прошивки — для обеих тем.
 
-<<<<<<< HEAD
     python tools/sim/render_docs.py                  # всё: 2 языка × 2 темы
     python tools/sim/render_docs.py task error       # только эти
     python tools/sim/render_docs.py --lang ru task   # только русский
@@ -11,14 +10,6 @@
 Вариант Codex получается из сценария заменой "agent":"claude" → "codex"
 и сцены ожидания robot → cursor (сцена Codex по умолчанию). Английский вариант —
 переводом текстов задач по таблице EN ниже и полем "lang" для подписей платы.
-=======
-    python tools/sim/render_docs.py            # всё
-    python tools/sim/render_docs.py task error # только эти
-
-Кладёт файлы в docs/firmware/claude/, docs/firmware/codex/ и docs/firmware/ (общие).
-Вариант Codex получается из сценария заменой "agent":"claude" → "codex"
-и сцены ожидания robot → cursor (сцена Codex по умолчанию).
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 """
 import os
 import re
@@ -34,14 +25,9 @@ OUT = os.path.join(ROOT, 'docs', 'firmware')
 sys.path.insert(0, HERE)
 from render import build  # noqa: E402
 
-<<<<<<< HEAD
 FPS = 20                   # README: 20 кадров/с выглядят так же, а весят меньше
 BOTH = ('claude', 'codex')
 LANGS = ('en', 'ru')
-=======
-FPS = 30
-BOTH = ('claude', 'codex')
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 # имя: (сценарий, окно «от-до» в секундах, темы, кадр в PNG вместо GIF)
 JOBS = {
@@ -64,7 +50,6 @@ JOBS = {
 }
 
 
-<<<<<<< HEAD
 # Тексты задач в сценариях написаны по-русски; для английских гифок — перевод
 EN = {
     "Думает…": "Thinking…", "Жду задачу": "Waiting for a task", "Задача выполнена": "Task complete",
@@ -108,46 +93,23 @@ def variant(text, theme, lang):
 def out_path(name, theme, png, lang):
     base = os.path.join(OUT, lang)
     folder = base if theme is None else os.path.join(base, theme)
-=======
-def variant(text, theme):
-    if theme != 'codex':
-        return text
-    text = re.sub(r'"agent":\s*"claude"', '"agent":"codex"', text)
-    return re.sub(r'"idle":\s*"robot"', '"idle":"cursor"', text)
-
-
-def out_path(name, theme, png):
-    folder = OUT if theme is None else os.path.join(OUT, theme)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     os.makedirs(folder, exist_ok=True)
     name = name.replace('idle_codex_cursor', 'idle_cursor')
     return os.path.join(folder, name + ('.png' if png else '.gif'))
 
 
-<<<<<<< HEAD
 def run(exe, name, theme, lang):
-=======
-def run(exe, name, theme):
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     scn, (lo, hi), _, png_at = JOBS[name]
     with tempfile.TemporaryDirectory() as tmp:
         src = os.path.join(tmp, 'scenario.txt')
         with open(os.path.join(SCN, scn), encoding='utf-8') as f:
-<<<<<<< HEAD
             text = variant(f.read(), theme, lang)
-=======
-            text = variant(f.read(), theme)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         with open(src, 'w', encoding='utf-8') as f:
             f.write(text)
         raw = os.path.join(tmp, 'frames.rgb565')
         subprocess.run([exe, src, raw, str(FPS), str(int(hi * 1000)), str(int(lo * 1000))],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-<<<<<<< HEAD
         dst = out_path(name, theme, png_at is not None, lang)
-=======
-        dst = out_path(name, theme, png_at is not None)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         gif = dst if png_at is None else os.path.join(tmp, 'x.gif')
         cmd = [sys.executable, os.path.join(HERE, 'frames_to_gif.py'), raw, gif, '--fps', str(FPS)]
         if png_at is not None:
@@ -159,7 +121,6 @@ def run(exe, name, theme):
 
 
 def main():
-<<<<<<< HEAD
     args = sys.argv[1:]
     langs = LANGS
     if '--lang' in args:
@@ -171,13 +132,6 @@ def main():
     tasks = [(n, t, lg) for lg in langs for n in names for t in JOBS[n][2]]
     with ThreadPoolExecutor(max_workers=4) as pool:
         for path in pool.map(lambda job: run(exe, *job), tasks):
-=======
-    names = sys.argv[1:] or list(JOBS)
-    exe = build()
-    tasks = [(n, t) for n in names for t in JOBS[n][2]]
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        for path in pool.map(lambda nt: run(exe, *nt), tasks):
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
             print(path)
 
 

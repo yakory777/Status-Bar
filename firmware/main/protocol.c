@@ -39,10 +39,7 @@ bool protocol_parse(const char *line, proto_msg_t *m)
     copy_str(m->agent, sizeof m->agent, cJSON_GetObjectItem(j, "agent"), &m->has_agent);
     copy_str(m->idle,  sizeof m->idle,  cJSON_GetObjectItem(j, "idle"),  &m->has_idle);
     copy_str(m->pair,  sizeof m->pair,  cJSON_GetObjectItem(j, "pair"),  &m->has_pair);
-<<<<<<< HEAD
     copy_str(m->lang,  sizeof m->lang,  cJSON_GetObjectItem(j, "lang"),  &m->has_lang);
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
     copy_int(&m->done,   cJSON_GetObjectItem(j, "done"),   &m->has_done);
     copy_int(&m->total,  cJSON_GetObjectItem(j, "total"),  &m->has_total);
     copy_int(&m->sub,    cJSON_GetObjectItem(j, "sub"),    &m->has_sub);
@@ -67,10 +64,7 @@ void protocol_apply(const proto_msg_t *m, uint32_t now_ms)
 
     if (m->has_agent) ui_status_set_theme(m->agent);
     if (m->has_idle)  ui_status_set_idle_scene(m->idle);
-<<<<<<< HEAD
     if (m->has_lang)  ui_status_set_language(m->lang);
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
     ui_status_set_counters(sub, others);
     bool to_idle = m->has_state && ui_status_parse_state(m->state) == ST_IDLE &&

@@ -1,12 +1,7 @@
 """Адаптер Claude Code: события хуков → состояние экрана."""
-<<<<<<< HEAD
 from .common import (stop_failure_text, apply_plan, describe_permission, describe_tool, fail, finish_task, reset,
                      short, start_task, subagent, sync_tasks, task_upsert)
 from i18n import t
-=======
-from .common import (STOP_FAILURE_TEXT, apply_plan, describe_permission, describe_tool, fail, finish_task, reset,
-                     short, start_task, subagent, sync_tasks, task_upsert)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 
 NAME = "claude"
 
@@ -55,11 +50,7 @@ def handle(ev, state, ctx):
 
     if name == "PostToolUseFailure":
         what = describe_tool(ev.get("tool_name", ""), ev.get("tool_input") or {})
-<<<<<<< HEAD
         fail(state, t("error_prefix", what=what))
-=======
-        fail(state, "Ошибка: " + what)
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         return True
 
     if name in ("TaskCreated", "TaskCompleted"):
@@ -101,40 +92,13 @@ def handle(ev, state, ctx):
         state["step"] = ctx.get("plan_step") or t("compacted")
         return True
 
-    if name == "PermissionRequest":
-        state["state"] = "wait"
-        state["step"] = describe_permission(ev.get("tool_name", ""), ev.get("tool_input") or {})
-        return True
-
-    if name == "SubagentStart":
-        subagent(state, ctx, +1)
-        return True
-
-    if name == "SubagentStop":
-        subagent(state, ctx, -1)
-        return True
-
-    if name == "PreCompact":
-        state["state"] = "compact"
-        state["step"] = "Сжимаю контекст" + (" (авто)" if ev.get("trigger") == "auto" else "")
-        return True
-
-    if name == "PostCompact" or (name == "SessionStart" and ev.get("source") == "compact"):
-        state["state"] = "work"
-        state["step"] = ctx.get("plan_step") or "Контекст сжат, продолжаю"
-        return True
-
     if name == "Stop":
         finish_task(state, ctx)
         return True
 
     if name == "StopFailure":
         kind = ev.get("error_type") or ev.get("reason") or ev.get("error") or ev.get("matcher")
-<<<<<<< HEAD
         fail(state, stop_failure_text(kind))
-=======
-        fail(state, STOP_FAILURE_TEXT.get(str(kind), "Задача прервана"))
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
         state["sub"] = 0
         ctx["sub"] = 0
         return True

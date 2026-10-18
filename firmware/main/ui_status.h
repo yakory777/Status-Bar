@@ -23,12 +23,9 @@ void ui_status_create(void);
  * а картинка остаётся последней задачей (её и покажет кнопка), без «Жду задачу» на полсекунды. */
 void ui_status_park(void);
 
-<<<<<<< HEAD
 /* Язык подписей: "en" | "ru". Перерисовывает уже показанные подписи. */
 void ui_status_set_language(const char *code);
 
-=======
->>>>>>> e5c9d72a9298cb89b6bad1e778c1d4711e7ac046
 void ui_status_apply(status_state_t st, const char *title, const char *step,
                      int done, int total);
 

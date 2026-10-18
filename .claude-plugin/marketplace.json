@@ -1,14 +1,14 @@
 {
   "name": "agent-status-bar",
   "owner": {
-    "name": "YOUR_NAME"
+    "name": "yakory777"
   },
   "plugins": [
     {
       "name": "agent-status-bar",
       "source": "./",
-      "description": "Физический статус-бар задач Claude Code на ESP32-S3 с AMOLED-дисплеем",
-      "version": "0.1.0"
+      "description": "Physical status bar for Claude Code and Codex tasks on an ESP32-S3 with an AMOLED screen",
+      "version": "0.2.0"
     }
   ]
 }
