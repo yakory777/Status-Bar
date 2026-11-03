@@ -24,6 +24,14 @@ config ASB_BUZZER_GPIO
         Passive piezo buzzer between this pin and GND (through ~100 Ω).
         Free pins on the board header include GPIO1, GPIO10–GPIO16, GPIO43, GPIO44.
 
+config ASB_DISPLAY_SELFTEST
+    bool "Flash red, green and blue at boot (display self-test)"
+    default y
+    help
+        Before the UI starts, fill the screen red, green and blue for 0.4 s each.
+        If you see the colours, the panel, its power and wiring work, and any
+        remaining problem is in the UI. Turn off once the screen works.
+
 choice ASB_LANGUAGE_CHOICE
     prompt "Screen language (until the host sends its own)"
     default ASB_LANGUAGE_EN

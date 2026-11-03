@@ -23,7 +23,7 @@
 #define PIN_EN    38          /* питание панели на Touch-версии, на Basic — светодиод */
 
 #define LCD_HOST  SPI2_HOST
-#define LCD_FREQ  (75 * 1000 * 1000)   /* при артефактах снизьте до 40 МГц */
+#define LCD_FREQ  (40 * 1000 * 1000)   /* 40 МГц — с запасом; заработает — можно поднять до 75 */
 
 /* 0x60 — ландшафт. Если картинка зеркальная или вверх ногами, попробуйте 0xA0, 0x20 или 0xE0 */
 #define LCD_MADCTL 0x60
@@ -107,6 +107,8 @@ static void panel_hw_init(void)
     };
     gpio_config(&io);
     gpio_set_level(PIN_EN, 1);
+    vTaskDelay(pdMS_TO_TICKS(20));          /* дать питанию панели установиться */
+    ESP_LOGI(TAG, "panel power on (GPIO%d)", PIN_EN);
 
     spi_bus_config_t bus = {
         .sclk_io_num     = PIN_SCK,
@@ -130,21 +132,31 @@ static void panel_hw_init(void)
     };
     ESP_ERROR_CHECK(spi_bus_add_device(LCD_HOST, &dev, &spi));
 
-    /* Аппаратный сброс */
+    /* Аппаратный сброс — с теми же паузами, что в примере LilyGO */
     gpio_set_level(PIN_RST, 1); vTaskDelay(pdMS_TO_TICKS(10));
-    gpio_set_level(PIN_RST, 0); vTaskDelay(pdMS_TO_TICKS(20));
-    gpio_set_level(PIN_RST, 1); vTaskDelay(pdMS_TO_TICKS(120));
+    gpio_set_level(PIN_RST, 0); vTaskDelay(pdMS_TO_TICKS(300));
+    gpio_set_level(PIN_RST, 1); vTaskDelay(pdMS_TO_TICKS(200));
 
-    lcd_cmd(0x11, NULL, 0);                 /* sleep out */
-    vTaskDelay(pdMS_TO_TICKS(120));
+    /* Последовательность из примера LilyGO; там её шлют трижды «для надёжности» — делаем так же */
+    for (int i = 0; i < 3; i++) {
+        lcd_cmd(0x11, NULL, 0);             /* sleep out */
+        vTaskDelay(pdMS_TO_TICKS(120));
+        lcd_cmd1(0x3A, 0x55);               /* 16 бит на пиксель */
+        lcd_cmd1(0x51, 0x00);               /* яркость 0, пока чистим экран */
+        lcd_cmd(0x29, NULL, 0);             /* display on */
+        vTaskDelay(pdMS_TO_TICKS(120));
+    }
     lcd_cmd1(0x36, LCD_MADCTL);             /* ориентация */
-    lcd_cmd1(0x3A, 0x55);                   /* 16 бит на пиксель */
-    lcd_cmd1(0x51, 0x00);                   /* яркость 0, пока чистим экран */
+    ESP_LOGI(TAG, "panel init sent, SPI %d MHz", LCD_FREQ / 1000000);
 }
 
-static void panel_clear(uint8_t *buf)
+/* Залить весь экран одним цветом RGB565 (без LVGL — для чистки и самопроверки) */
+static void panel_fill(uint8_t *buf, uint16_t rgb565)
 {
-    memset(buf, 0, BUF_BYTES);
+    for (int i = 0; i < LCD_W * BUF_LINES; i++) {      /* панель ждёт big-endian */
+        buf[2 * i] = rgb565 >> 8;
+        buf[2 * i + 1] = rgb565 & 0xFF;
+    }
     for (int y = 0; y < LCD_H; y += BUF_LINES) {
         int h = (y + BUF_LINES > LCD_H) ? LCD_H - y : BUF_LINES;
         lcd_set_window(0, y, LCD_W - 1, y + h - 1);
@@ -160,9 +172,19 @@ lv_display_t *display_init(void)
     uint8_t *buf2 = heap_caps_malloc(BUF_BYTES, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
     assert(buf1 && buf2);
 
-    panel_clear(buf1);
-    lcd_cmd(0x29, NULL, 0);                 /* display on */
-    vTaskDelay(pdMS_TO_TICKS(20));
+    panel_fill(buf1, 0x0000);
+    display_set_brightness(0xFF);           /* для самопроверки — на полную */
+    ESP_LOGI(TAG, "panel on");
+
+#if CONFIG_ASB_DISPLAY_SELFTEST
+    /* Самопроверка панели до LVGL: красный, зелёный, синий. Видно цвета — панель и провода в порядке */
+    static const uint16_t test[] = { 0xF800, 0x07E0, 0x001F, 0x0000 };
+    for (int i = 0; i < 4; i++) {
+        panel_fill(buf1, test[i]);
+        ESP_LOGI(TAG, "self-test color %d", i);
+        vTaskDelay(pdMS_TO_TICKS(700));
+    }
+#endif
     display_set_brightness(0xD0);
 
     lv_init();

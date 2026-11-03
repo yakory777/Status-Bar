@@ -7,8 +7,9 @@ CONFIG_SPIRAM=y
 CONFIG_SPIRAM_MODE_OCT=y
 CONFIG_SPIRAM_SPEED_80M=y
 
-# USB (Serial/JTAG) отдаём целиком под данные от ПК, логи идут в UART0
-CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+# Логи — в тот же USB (Serial/JTAG), что и данные от ПК: на этой плате UART0 наружу не выведен,
+# а так их видно в `idf.py monitor`. Демон показывает строки не-JSON как логи платы.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
 CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
 
 # --- LVGL 9 ---

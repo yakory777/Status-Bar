@@ -10,6 +10,15 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "driver/usb_serial_jtag.h"
+#include "esp_idf_version.h"
+#include "esp_heap_caps.h"
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+#include "driver/usb_serial_jtag_vfs.h"
+#define CONSOLE_USE_DRIVER() usb_serial_jtag_vfs_use_driver()
+#else
+#include "esp_vfs_usb_serial_jtag.h"
+#define CONSOLE_USE_DRIVER() esp_vfs_usb_serial_jtag_use_driver()
+#endif
 #include "esp_timer.h"
 #include "esp_log.h"
 #include "lvgl.h"
@@ -90,8 +99,15 @@ void app_main(void)
 
     usb_serial_jtag_driver_config_t usb_cfg = USB_SERIAL_JTAG_DRIVER_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&usb_cfg));
+#if CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG
+    CONSOLE_USE_DRIVER();                         /* логи и данные идут через один драйвер, не мешая друг другу */
+#endif
+    ESP_LOGI(TAG, "boot: psram %u KB free, internal %u KB free",
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
 
     display_init();
+    ESP_LOGI(TAG, "display ok, building UI");
 
     ui_lock();
     ui_status_create();
@@ -99,6 +115,8 @@ void app_main(void)
     ui_input_init();
     ui_sound_init();
     ui_unlock();
+    ESP_LOGI(TAG, "UI ok, psram %u KB free",
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024));
     input_esp_start(ui_lock, ui_unlock);          /* кнопки: нажать, удерживать, дважды */
 
     xTaskCreatePinnedToCore(lvgl_task,   "lvgl",   8192, NULL, 4, NULL, 1);
