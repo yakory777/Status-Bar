@@ -189,8 +189,14 @@ Codex ───────┘                                      └ adapters
 
 ## Hardware
 
-- [LilyGO T-Display-S3 AMOLED](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED): ESP32-S3R8, 8 MB PSRAM, 1.91″ 536×240 AMOLED (RM67162 over QSPI).
-- A USB-C data cable.
+One of two LilyGO boards (ESP32-S3R8, 8 MB PSRAM, 16 MB flash) and a USB-C data cable:
+
+| Board | Screen | How the UI is shown |
+|---|---|---|
+| [T-Display-S3](https://github.com/Xinyuan-LilyGO/T-Display-S3) | 1.9″ LCD 320×170, ST7789, 8-bit parallel | Scaled down smoothly to 320×143 and centered; same physical size, coarser pixels |
+| [T-Display-S3 AMOLED](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED) | 1.91″ AMOLED 536×240, RM67162, QSPI | Pixel for pixel, as in the GIFs above |
+
+The two look almost the same. Tell them apart by the screen: an AMOLED is pitch black where the picture is black, an LCD has a backlight that glows grey. Firmware for the wrong board leaves the screen black (or just backlit).
 
 No soldering required.
 
@@ -208,15 +214,18 @@ Dimensions come from the board specs (60 × 25.5 × 10 mm), not from a drawing �
 
 ### 1. Flash the board
 
-You need [ESP-IDF](https://docs.espressif.com/projects/esp-idf/) 5.1 or newer. LVGL 9.2 is fetched automatically by the component manager.
+You need [ESP-IDF](https://docs.espressif.com/projects/esp-idf/) 5.1 or newer (on Windows, use the *ESP-IDF CMD* shortcut it installs). LVGL 9.2 is fetched automatically by the component manager.
 
 ```bash
 cd firmware
 idf.py set-target esp32s3
-idf.py build flash
+idf.py menuconfig          # Agent Status Bar → Board: T-Display-S3 (LCD, default) or T-Display-S3 AMOLED
+idf.py build flash monitor # monitor shows the board's log; quit with Ctrl+]
 ```
 
-If flashing fails, hold BOOT, press RST, release BOOT.
+If flashing fails, hold BOOT, press RST, release BOOT. After flashing, unplug and replug the cable.
+
+On boot the screen flashes red, green and blue — a self-test of the panel before the UI starts (turn it off in the same menu: *Flash red, green and blue at boot*). No colours means the wrong board is selected. Upside down? Turn on *Rotate the picture 180 degrees*.
 
 ### 2. Install the Python dependency
 
@@ -243,7 +252,7 @@ Then install **Agent Status Bar** from the plugin list. Codex does not trust plu
 
 That's it. The first agent event starts the daemon, which finds the board by its Espressif USB VID (or uses `serial_port` from the [settings file](#settings-file)).
 
-On Windows the hook command is `python3`. If your Python is only available as `python`, edit the commands in `hooks/hooks.json` and `hooks/codex-hooks.json`.
+The hooks try `python3` and fall back to `python`, so a standard Windows install of Python works as is (tick *Add python.exe to PATH* in the installer).
 
 ## Try it without a board
 
@@ -358,8 +367,8 @@ The idle scene picked with a double press on the board is saved next to it in `s
 | Screen turns off | `UI_OFF_AFTER_MS` in the same file (30 min) |
 | Battery pin and thresholds | `BAT_ADC_CHANNEL`, `BAT_NO_BATTERY_MV`, `BAT_USB_MV` in `firmware/main/platform_esp.c` |
 | Normal brightness | `UI_BRIGHT_ON` in `firmware/main/ui_screen.h` |
-| Mirrored or upside-down image | `LCD_MADCTL` in `firmware/main/display_rm67162.c`: `0x60`, `0xA0`, `0x20`, `0xE0` |
-| Stripes or artifacts | lower `LCD_FREQ` to 40 MHz in the same file |
+| Upside-down image | `idf.py menuconfig → Agent Status Bar → Rotate the picture 180 degrees`; mirrored on AMOLED — `LCD_MADCTL` in `firmware/main/display_rm67162.c` |
+| Stripes or artifacts | AMOLED: `LCD_FREQ` in `firmware/main/display_rm67162.c` (40 MHz; 75 MHz is faster if stable). LCD: `PCLK_HZ` in `firmware/main/display_st7789.c` (10 MHz) |
 | Font | replace the TTF files in `firmware/main/fonts/` (keep the names) |
 | Button, second button, buzzer pins, default language | `idf.py menuconfig → Agent Status Bar` |
 | Long-press and double-press timing | `UI_LONG_PRESS_MS`, `UI_DOUBLE_CLICK_MS` in `firmware/main/ui_input.h` |
@@ -404,7 +413,7 @@ firmware/main/         ESP-IDF project, LVGL 9:
   protocol.c             JSON lines from the host (shared with the simulator)
   ui_input.c, ui_sound.c button actions and melodies
   ui_i18n.c              on-screen labels in English and Russian
-  platform_esp.c         brightness, battery ADC, buzzer; input_esp.c — buttons; display_rm67162.c — the panel driver
+  platform_esp.c         brightness, battery ADC, buzzer; input_esp.c — buttons; display_st7789.c, display_rm67162.c — panel drivers (LCD, AMOLED), display_scale.c — scaling for the LCD
 hardware/case/         3D-printable case: case.py (generator), case.scad, STL, preview
 docs/firmware/         firmware GIFs: en/ and ru/, each with claude/ and codex/; browser emulator in docs/
 tools/                 renderers for the design previews

@@ -6,7 +6,7 @@ Instructions for AI coding agents (Codex, Claude Code and others) working in thi
 
 A physical status display for coding-agent tasks. Three parts, deliberately decoupled:
 
-- `firmware/` — ESP-IDF 5.x project in C for the LilyGO T-Display-S3 AMOLED (536×240, RM67162 over QSPI), UI on LVGL 9.2.
+- `firmware/` — ESP-IDF 5.x project in C, UI on LVGL 9.2. Two boards, chosen in Kconfig (`ASB_BOARD_*`): LilyGO T-Display-S3 LCD (ST7789 320×170, `display_st7789.c`) and T-Display-S3 AMOLED (RM67162 536×240, `display_rm67162.c`). The UI always renders at 536×240; the LCD driver scales each flushed area down with `display_scale.c` (pure C, testable on a PC). Both drivers implement `display.h`.
 - `host/` — Python daemon. Receives hook events over HTTP on `127.0.0.1:8765`, maps them to a screen state through `host/adapters/`, keeps one state per session in `host/sessions.py` and sends the most important one (wait > error > work > done > idle) as JSON lines over USB serial, plus `{"ping":1}` every 5 s.
 - `tools/sim/` — firmware simulator: compiles `firmware/main/ui_*.c` and `protocol.c` with LVGL on a PC and renders scenarios from `tools/sim/scenarios/*.txt` to GIF. Use it to verify any change to screen code; CI runs all scenarios.
 - `firmware/main/ui_*.c` — everything that draws: `ui_status.c` (task screen, themes, scenario states), `ui_scene_*.c` (idle scenes), `ui_screen.c` (splash, transitions, confetti, sleep, pairing), `ui_icons.c` (battery, Wi-Fi), `ui_draw.c` (drawing helpers). They must not touch hardware directly — only through `platform.h`, implemented by `platform_esp.c` on the board and `tools/sim/sim_platform.c` in the simulator.
@@ -71,4 +71,5 @@ cd firmware && idf.py set-target esp32s3 && idf.py build
 - Keep `README.md` (English) and `README.ru.md` (Russian) in sync when behavior or setup changes.
 - Mascots are original characters. Do not add logos or brand characters of Anthropic, OpenAI or anyone else; brand colors are fine.
 - Bump `version` in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` and `.codex-plugin/plugin.json` together.
+- Never hard-code screen sizes in UI code beyond `UI_W`/`UI_H` (536×240): the LCD board relies on scaling that size.
 - Hardware behavior cannot be verified in CI. Say so explicitly instead of claiming firmware changes work.

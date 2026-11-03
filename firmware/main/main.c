@@ -22,7 +22,7 @@
 #include "esp_timer.h"
 #include "esp_log.h"
 #include "lvgl.h"
-#include "display_rm67162.h"
+#include "display.h"
 #include "ui_status.h"
 #include "protocol.h"
 #include "ui_screen.h"

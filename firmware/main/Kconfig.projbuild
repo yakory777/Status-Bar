@@ -1,18 +1,39 @@
 menu "Agent Status Bar"
 
+choice ASB_BOARD
+    prompt "Board"
+    default ASB_BOARD_TDISPLAY_S3
+    help
+        Both boards look alike; check the screen. AMOLED stays pitch black when off,
+        the LCD has a backlight that glows grey.
+
+config ASB_BOARD_TDISPLAY_S3
+    bool "LilyGO T-Display-S3 (LCD 1.9\", ST7789, 320x170)"
+config ASB_BOARD_AMOLED
+    bool "LilyGO T-Display-S3 AMOLED (1.91\", RM67162, 536x240)"
+endchoice
+
+config ASB_DISPLAY_FLIP
+    bool "Rotate the picture 180 degrees"
+    default n
+    help
+        Turn on if the picture is upside down (USB connector on the other side).
+
 config ASB_BUTTON_GPIO
     int "Button GPIO (BOOT button by default)"
     range -1 48
     default 0
     help
-        Main button. GPIO0 is the BOOT button on the LilyGO T-Display-S3 AMOLED.
+        Main button. GPIO0 is the BOOT button on both LilyGO T-Display-S3 boards.
 
 config ASB_BUTTON2_GPIO
     int "Second button GPIO (-1 = none)"
     range -1 48
+    default 14 if ASB_BOARD_TDISPLAY_S3
     default -1
     help
         Optional second button that does the same as the first.
+        On the LCD T-Display-S3 it is GPIO14 (the KEY button).
         On the non-touch T-Display-S3 AMOLED the user button is GPIO21;
         on the touch version GPIO21 is the touch interrupt, so leave -1.
 
@@ -22,7 +43,8 @@ config ASB_BUZZER_GPIO
     default -1
     help
         Passive piezo buzzer between this pin and GND (through ~100 Ω).
-        Free pins on the board header include GPIO1, GPIO10–GPIO16, GPIO43, GPIO44.
+        Free on both boards: GPIO43, GPIO44 (and GPIO1–3, GPIO10–13, GPIO16 on the header).
+        On the LCD T-Display-S3 do not use GPIO14 (second button) or GPIO15 (display power).
 
 config ASB_DISPLAY_SELFTEST
     bool "Flash red, green and blue at boot (display self-test)"

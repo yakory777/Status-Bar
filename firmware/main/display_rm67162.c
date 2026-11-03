@@ -3,6 +3,8 @@
  * Протокол: команды 0x02 + адрес (reg << 8) по одной линии,
  *           пиксели 0x32 + 0x002C00, данные по четырём линиям.
  */
+#include "sdkconfig.h"
+#if CONFIG_ASB_BOARD_AMOLED
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,7 +13,10 @@
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
 #include "esp_log.h"
-#include "display_rm67162.h"
+#include "display.h"
+
+#define LCD_W 536
+#define LCD_H 240
 
 #define PIN_SCK   47
 #define PIN_D0    18
@@ -26,7 +31,11 @@
 #define LCD_FREQ  (40 * 1000 * 1000)   /* 40 МГц — с запасом; заработает — можно поднять до 75 */
 
 /* 0x60 — ландшафт. Если картинка зеркальная или вверх ногами, попробуйте 0xA0, 0x20 или 0xE0 */
+#if CONFIG_ASB_DISPLAY_FLIP
+#define LCD_MADCTL 0xA0              /* перевёрнуто на 180° */
+#else
 #define LCD_MADCTL 0x60
+#endif
 
 /* Буфер LVGL: одна SPI-транзакция на S3 — максимум 32 КБ */
 #define BUF_LINES 24
@@ -199,3 +208,5 @@ lv_display_t *display_init(void)
     ESP_LOGI(TAG, "display ready %dx%d", LCD_W, LCD_H);
     return disp;
 }
+
+#endif /* CONFIG_ASB_BOARD_AMOLED */

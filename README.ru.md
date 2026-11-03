@@ -189,8 +189,14 @@ Codex ───────┘                                     └ adapters/
 
 ## Железо
 
-- [LilyGO T-Display-S3 AMOLED](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED): ESP32-S3R8, 8 МБ PSRAM, 1,91″ AMOLED 536×240 (RM67162 по QSPI).
-- USB-C кабель с передачей данных.
+Одна из двух плат LilyGO (ESP32-S3R8, 8 МБ PSRAM, 16 МБ флеш) и USB-C кабель с передачей данных:
+
+| Плата | Экран | Как показывается интерфейс |
+|---|---|---|
+| [T-Display-S3](https://github.com/Xinyuan-LilyGO/T-Display-S3) | LCD 1,9″ 320×170, ST7789, 8-битная параллельная шина | Плавно уменьшен до 320×143 и стоит по центру; физически того же размера, просто точки крупнее |
+| [T-Display-S3 AMOLED](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED) | AMOLED 1,91″ 536×240, RM67162, QSPI | Точка в точку, как на гифках выше |
+
+Платы почти не отличить на вид. Отличаются экраном: AMOLED там, где картинка чёрная, совсем чёрный, а у LCD есть подсветка, которая светится серым. Прошивка для другой платы оставит экран чёрным (или только с подсветкой).
 
 Паять ничего не нужно.
 
@@ -208,15 +214,18 @@ Codex ───────┘                                     └ adapters/
 
 ### 1. Прошивка
 
-Нужен [ESP-IDF](https://docs.espressif.com/projects/esp-idf/) 5.1 или новее. LVGL 9.2 скачается автоматически через менеджер компонентов.
+Нужен [ESP-IDF](https://docs.espressif.com/projects/esp-idf/) 5.1 или новее (на Windows команды вводятся в окне *ESP-IDF CMD*, ярлык появляется после установки). LVGL 9.2 скачается автоматически через менеджер компонентов.
 
 ```bash
 cd firmware
 idf.py set-target esp32s3
-idf.py build flash
+idf.py menuconfig          # Agent Status Bar → Board: T-Display-S3 (LCD, по умолчанию) или T-Display-S3 AMOLED
+idf.py build flash monitor # monitor показывает лог платы; выход — Ctrl+]
 ```
 
-Если плата не прошивается, зажмите BOOT, нажмите RST и отпустите BOOT.
+Если плата не прошивается, зажмите BOOT, нажмите RST и отпустите BOOT. После прошивки выньте и вставьте кабель.
+
+При включении экран мигает красным, зелёным и синим — это самопроверка панели до запуска интерфейса (выключается в том же меню: *Flash red, green and blue at boot*). Цветов нет — выбрана не та плата. Картинка вверх ногами — включите *Rotate the picture 180 degrees*.
 
 ### 2. Зависимость Python
 
@@ -243,7 +252,7 @@ codex plugin marketplace add yakory777/Status-Bar
 
 Всё. Первое же событие агента запустит демон, а он найдёт плату по USB VID Espressif (или возьмёт `serial_port` из [файла настроек](#файл-настроек)).
 
-На Windows в командах хуков указан `python3`. Если Python у вас доступен только как `python`, поправьте команды в `hooks/hooks.json` и `hooks/codex-hooks.json`.
+Хуки пробуют `python3`, а если его нет — `python`, поэтому обычная установка Python на Windows подходит как есть (в установщике отметьте *Add python.exe to PATH*).
 
 ## Попробовать без платы
 
@@ -358,8 +367,8 @@ approve_wait = 20        # сколько секунд хук ждёт кноп�
 | Экран гаснет | `UI_OFF_AFTER_MS` там же (30 мин) |
 | Пин батареи и пороги | `BAT_ADC_CHANNEL`, `BAT_NO_BATTERY_MV`, `BAT_USB_MV` в `firmware/main/platform_esp.c` |
 | Обычная яркость | `UI_BRIGHT_ON` в `firmware/main/ui_screen.h` |
-| Картинка зеркальная или перевёрнута | `LCD_MADCTL` в `firmware/main/display_rm67162.c`: `0x60`, `0xA0`, `0x20`, `0xE0` |
-| Полосы или артефакты | снизьте `LCD_FREQ` до 40 МГц там же |
+| Картинка вверх ногами | `idf.py menuconfig → Agent Status Bar → Rotate the picture 180 degrees`; зеркальная на AMOLED — `LCD_MADCTL` в `firmware/main/display_rm67162.c` |
+| Полосы или артефакты | AMOLED: `LCD_FREQ` в `firmware/main/display_rm67162.c` (40 МГц; 75 МГц быстрее, если стабильно). LCD: `PCLK_HZ` в `firmware/main/display_st7789.c` (10 МГц) |
 | Шрифт | замените TTF в `firmware/main/fonts/` (имена те же) |
 | Пины кнопки, второй кнопки, пищалки, язык по умолчанию | `idf.py menuconfig → Agent Status Bar` |
 | Время долгого и двойного нажатия | `UI_LONG_PRESS_MS`, `UI_DOUBLE_CLICK_MS` в `firmware/main/ui_input.h` |
@@ -404,7 +413,7 @@ firmware/main/         проект ESP-IDF, LVGL 9:
   protocol.c             строки JSON от хоста (общий с симулятором)
   ui_input.c, ui_sound.c действия кнопки и мелодии
   ui_i18n.c              подписи экрана на английском и русском
-  platform_esp.c         яркость, АЦП батареи, пищалка; input_esp.c — кнопки; display_rm67162.c — драйвер панели
+  platform_esp.c         яркость, АЦП батареи, пищалка; input_esp.c — кнопки; display_st7789.c, display_rm67162.c — драйверы панелей (LCD, AMOLED), display_scale.c — уменьшение кадра для LCD
 hardware/case/         корпус для 3D-печати: case.py (генератор), case.scad, STL, превью
 docs/firmware/         гифки прошивки: en/ и ru/, в каждой claude/ и codex/; эмулятор в браузере в docs/
 tools/                 скрипты превью дизайна
