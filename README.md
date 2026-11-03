@@ -252,7 +252,7 @@ Then install **Agent Status Bar** from the plugin list. Codex does not trust plu
 
 That's it. The first agent event starts the daemon, which finds the board by its Espressif USB VID (or uses `serial_port` from the [settings file](#settings-file)).
 
-The hooks try `python3` and fall back to `python`, so a standard Windows install of Python works as is (tick *Add python.exe to PATH* in the installer).
+The hooks try `python3`, then `python`, then the `py -3` launcher, so a standard Windows install of Python works as is. On Windows, install pyserial for that same Python: `py -3 -m pip install pyserial`. If `python` opens the Microsoft Store, turn off the *python.exe* and *python3.exe* app execution aliases in Settings.
 
 ## Try it without a board
 

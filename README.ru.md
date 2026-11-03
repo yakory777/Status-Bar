@@ -252,7 +252,7 @@ codex plugin marketplace add yakory777/Status-Bar
 
 Всё. Первое же событие агента запустит демон, а он найдёт плату по USB VID Espressif (или возьмёт `serial_port` из [файла настроек](#файл-настроек)).
 
-Хуки пробуют `python3`, а если его нет — `python`, поэтому обычная установка Python на Windows подходит как есть (в установщике отметьте *Add python.exe to PATH*).
+Хуки пробуют `python3`, потом `python`, потом лаунчер `py -3`, поэтому обычная установка Python на Windows подходит как есть. На Windows ставьте pyserial в тот же Python: `py -3 -m pip install pyserial`. Если `python` открывает Microsoft Store, выключите псевдонимы *python.exe* и *python3.exe* в Параметрах («Псевдонимы выполнения приложений»).
 
 ## Попробовать без платы
 

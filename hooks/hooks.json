@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 130
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -120,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -142,7 +142,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -153,7 +153,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -164,7 +164,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
@@ -175,7 +175,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
+            "command": "P=python3; $P -c '' 2>/dev/null || P=python; $P -c '' 2>/dev/null || P='py -3'; $P \"${CLAUDE_PLUGIN_ROOT}/hooks/forward.py\" claude",
             "timeout": 5
           }
         ]
