@@ -24,6 +24,8 @@ DEFAULTS = {
     "idle_codex": "cursor",    # cursor | typist
     "button_approve": False,   # решать запросы разрешения кнопкой (Claude Code)
     "approve_wait": 20,        # сколько секунд хук ждёт кнопку, 1..120
+    "transport": "auto",       # auto — кабель, а без него Wi-Fi | usb | wifi
+    "wifi_host": "",           # IP платы, если поиск в сети не проходит (роутер режет широковещание)
 }
 
 ENV = {
@@ -35,6 +37,8 @@ ENV = {
     "idle_codex": "AGENT_STATUS_IDLE_CODEX",
     "button_approve": "AGENT_STATUS_BUTTON_APPROVE",
     "approve_wait": "AGENT_STATUS_APPROVE_WAIT",
+    "transport": "AGENT_STATUS_TRANSPORT",
+    "wifi_host": "AGENT_STATUS_WIFI_HOST",
 }
 
 TEMPLATE = """\
@@ -61,6 +65,12 @@ idle_codex = "{idle_codex}"
 button_approve = {button_approve}
 # How long the hook waits for the button before Claude Code asks as usual, seconds (1..120)
 approve_wait = {approve_wait}
+
+# How to reach the board: "auto" (USB cable, otherwise Wi-Fi), "usb" or "wifi".
+# Add networks with: python host/daemon.py wifi add "SSID" "password"
+transport = "{transport}"
+# The board's IP address, only if it is not found automatically (some routers block broadcasts)
+wifi_host = "{wifi_host}"
 """
 
 
@@ -164,6 +174,8 @@ def load(env=None, read_file=True):
     lang = str(cfg["language"]).lower()
     cfg["language"] = lang if lang in ("en", "ru") else system_language(env)
     cfg["approve_wait"] = max(1, min(120, cfg["approve_wait"]))
+    if cfg["transport"] not in ("auto", "usb", "wifi"):
+        cfg["transport"] = "auto"
     cfg["_errors"] = errors
     return cfg
 
@@ -205,3 +217,11 @@ def save_state(data, env=None):
         os.replace(tmp, path)
     except OSError:
         pass
+
+
+def update_state(env=None, **values):
+    """Дописать ключи в state.json, не трогая остальные (сцена, токен компьютера, id платы)."""
+    data = load_state(env)
+    data.update(values)
+    save_state(data, env)
+    return data

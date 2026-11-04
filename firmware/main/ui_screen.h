@@ -23,6 +23,9 @@ void ui_screen_on_state(status_state_t st, bool activity);
 /* Экран сопряжения с кодом; NULL или "" — скрыть. */
 void ui_screen_pairing(const char *code);
 
+/* Показан ли экран сопряжения (кнопка тогда отвечает на него) */
+bool ui_screen_pairing_visible(void);
+
 /* Разбудить экран (кнопка, касание). true — экран спал или был выключен. */
 bool ui_screen_wake(void);
 

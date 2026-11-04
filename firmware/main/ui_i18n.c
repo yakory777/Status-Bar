@@ -32,8 +32,10 @@ static const char *const TEXT[TR_COUNT][LANG_COUNT] = {
     [TR_SCENE_CURSOR] = { "cursor",        "курсор" },
     [TR_SCENE_TYPIST] = { "typist",        "машинистка" },
     [TR_PAIR_TITLE]   = { "Wi-Fi pairing", "Сопряжение по Wi-Fi" },
-    [TR_PAIR_HINT1]   = { "Check that this code matches", "Проверьте, что код совпадает" },
-    [TR_PAIR_HINT2]   = { "the one on your computer", "с кодом на компьютере" },
+    [TR_PAIR_HINT1]   = { "Same code on the computer?", "Тот же код на компьютере?" },
+    [TR_PAIR_HINT2]   = { "Press — confirm · hold — cancel", "Нажать — подтвердить · удержать — отмена" },
+    [TR_PAIRED]       = { "Paired", "Сопряжено" },
+    [TR_PAIR_CANCELLED] = { "Pairing cancelled", "Сопряжение отменено" },
 };
 
 static ui_lang_t lang = (CONFIG_ASB_LANGUAGE[0] == 'r') ? LANG_RU : LANG_EN;

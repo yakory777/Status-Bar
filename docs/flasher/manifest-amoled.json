@@ -1,0 +1,9 @@
+{
+  "name": "Agent Status Bar — T-Display-S3 AMOLED",
+  "version": "0.4.0",
+  "new_install_prompt_erase": false,
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    { "chipFamily": "ESP32-S3", "parts": [ { "path": "firmware/agent-status-bar-tdisplay-s3-amoled.bin", "offset": 0 } ] }
+  ]
+}

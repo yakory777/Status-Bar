@@ -19,7 +19,7 @@ void platform_set_brightness(uint8_t level);
 /* Заряд батареи. Можно звать часто: значение кешируется и сглаживается. */
 platform_battery_t platform_battery(void);
 
-/* Уровень Wi-Fi: -1 — режим Wi-Fi выключен (плата на USB), 0..3 — полоски. */
+/* Уровень Wi-Fi: -1 — не подключена к сети (перечёркнутый веер), 0..3 — полоски. */
 int platform_wifi_level(void);
 
 /* Пищалка: включить тон, Гц; 0 — тишина. Не блокирует — длительность ведёт ui_sound.c. */
@@ -27,3 +27,7 @@ void platform_tone(uint16_t hz);
 
 /* Отправить хосту строку JSON (без перевода строки — добавится сам). */
 void platform_send_line(const char *json);
+
+/* Ответ на запрос сопряжения по Wi-Fi: true — кнопкой подтвердили, false — отменили.
+ * Экран сопряжения прячет сам интерфейс (ui_input.c). */
+void platform_pair_answer(bool accept);

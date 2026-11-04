@@ -37,3 +37,8 @@ void sim_set_battery(bool present, int pct, bool charging)
 }
 
 void sim_set_wifi(int level) { wifi = level; }
+
+void platform_pair_answer(bool accept)
+{
+    fprintf(tx_log ? tx_log : stderr, "[pair] %s\n", accept ? "confirmed" : "cancelled");
+}

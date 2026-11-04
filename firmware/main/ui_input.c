@@ -41,8 +41,21 @@ static void next_scene(void)
     ui_screen_toast(title, ui_status_text_color(1));
 }
 
+/* Экран сопряжения: нажать — подтвердить, удержать — отменить */
+static bool answer_pairing(bool accept)
+{
+    if (!ui_screen_pairing_visible()) return false;
+    ui_screen_pairing("");
+    platform_pair_answer(accept);
+    ui_sound_play(accept ? SND_APPROVE : SND_DENY);
+    ui_screen_toast(tr(accept ? TR_PAIRED : TR_PAIR_CANCELLED),
+                    accept ? ui_status_state_color(ST_DONE) : ui_status_text_color(1));
+    return true;
+}
+
 static void on_short(void)
 {
+    if (answer_pairing(true)) return;
     if (ui_status_approve_pending()) {
         send_button("deny", NULL);
         ui_status_set_approve(false);
@@ -56,6 +69,7 @@ static void on_short(void)
 
 static void on_long(void)
 {
+    if (answer_pairing(false)) return;
     if (ui_status_approve_pending()) {
         send_button("approve", NULL);
         ui_status_set_approve(false);

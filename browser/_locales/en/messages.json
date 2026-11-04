@@ -1,0 +1,71 @@
+{
+  "ext_name": {
+    "message": "Agent Status Bar"
+  },
+  "ext_description": {
+    "message": "Shows what Claude is doing in the claude.ai chat on the Agent Status Bar board."
+  },
+  "popup_on": {
+    "message": "On"
+  },
+  "popup_daemon": {
+    "message": "Program on the computer"
+  },
+  "popup_running": {
+    "message": "running"
+  },
+  "popup_stopped": {
+    "message": "not running"
+  },
+  "popup_board": {
+    "message": "Board"
+  },
+  "popup_board_usb": {
+    "message": "connected by cable"
+  },
+  "popup_board_wifi": {
+    "message": "connected over Wi-Fi"
+  },
+  "popup_board_none": {
+    "message": "not found"
+  },
+  "popup_page": {
+    "message": "On this page"
+  },
+  "popup_signals": {
+    "message": "Signals"
+  },
+  "popup_not_claude": {
+    "message": "not claude.ai"
+  },
+  "popup_port": {
+    "message": "Daemon port"
+  },
+  "page_idle": {
+    "message": "waiting for a question"
+  },
+  "page_thinking": {
+    "message": "thinking"
+  },
+  "page_writing": {
+    "message": "writing the answer"
+  },
+  "page_wait": {
+    "message": "needs your permission"
+  },
+  "page_done": {
+    "message": "answer ready"
+  },
+  "hint_start_daemon": {
+    "message": "Start it: py -3 host\\daemon.py in the project folder (or set it to start with Windows — see README)."
+  },
+  "hint_no_board": {
+    "message": "Plug the board in with a cable or check Wi-Fi."
+  },
+  "hint_open_claude": {
+    "message": "Open a chat on claude.ai."
+  },
+  "hint_reload": {
+    "message": "Reload the claude.ai tab (F5) — the extension was installed after it was opened."
+  }
+}

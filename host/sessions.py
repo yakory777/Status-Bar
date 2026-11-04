@@ -7,7 +7,7 @@
 """
 import time
 
-from adapters import ADAPTERS
+from adapters import ADAPTERS, theme
 from adapters.common import ACTIVE, IDLE
 import config
 from scenes import idle_scene
@@ -49,11 +49,11 @@ class Sessions:
         key = self.key_for(agent, ev)
         s = self.items.get(key)
         if s is None:
-            s = self.items[key] = Session(agent, key, now)
+            s = self.items[key] = Session(theme(agent), key, now)
         if not adapter.handle(ev, s.state, s.ctx):
             return False
         s.updated = now
-        self.last_agent = agent
+        self.last_agent = theme(agent)
         if ev.get("hook_event_name") == "SessionEnd":
             del self.items[key]
         return self.display() != before

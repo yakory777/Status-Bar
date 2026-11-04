@@ -46,9 +46,17 @@ config ASB_BUZZER_GPIO
         Free on both boards: GPIO43, GPIO44 (and GPIO1–3, GPIO10–13, GPIO16 on the header).
         On the LCD T-Display-S3 do not use GPIO14 (second button) or GPIO15 (display power).
 
+config ASB_WIFI
+    bool "Wi-Fi mode"
+    default y
+    help
+        Connect to saved Wi-Fi networks and accept status updates over the network
+        (add networks over USB: python host/daemon.py wifi add "SSID" "password").
+        The board still works over USB either way.
+
 config ASB_DISPLAY_SELFTEST
     bool "Flash red, green and blue at boot (display self-test)"
-    default y
+    default n
     help
         Before the UI starts, fill the screen red, green and blue for 0.4 s each.
         If you see the colours, the panel, its power and wiring work, and any

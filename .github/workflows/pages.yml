@@ -1,0 +1,45 @@
+# Страница прошивки и настройки Wi-Fi (docs/flasher) на GitHub Pages вместе с последней прошивкой.
+# Один раз: Settings → Pages → Source: GitHub Actions. Адрес: https://<user>.github.io/<repo>/
+name: Setup page
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/flasher/**", "firmware/prebuilt/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/firmware
+          cp -r docs/flasher/. _site/
+          cp firmware/prebuilt/*.bin _site/firmware/
+          # версия в манифестах должна совпадать с прошивкой
+          v=$(sed -n 's/.*FW_VERSION "\(.*\)".*/\1/p' firmware/main/version.h)
+          for m in _site/manifest-*.json; do
+            grep -q "\"version\": \"$v\"" "$m" || { echo "$m: version is not $v"; exit 1; }
+            for p in $(python3 -c "import json,sys; print(' '.join(x['path'] for b in json.load(open('$m'))['builds'] for x in b['parts']))"); do
+              test -f "_site/$p" || { echo "$m: missing $p"; exit 1; }
+            done
+          done
+          ls -la _site _site/firmware
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+      - id: deployment
+        uses: actions/deploy-pages@v4

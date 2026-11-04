@@ -701,18 +701,19 @@ void ui_status_create(void)
     lv_obj_remove_flag(frame, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(frame, LV_OBJ_FLAG_HIDDEN);
 
-    /* Плашка «Нет связи» — по центру поверх затемнённого экрана */
-    link_banner = mk_badge(scr);
+    /* Плашка «Нет связи» */
+    /* На верхнем слое, поверх и экрана задачи, и сцены ожидания: слева вверху, напротив значков */
+    link_banner = mk_badge(lv_layer_top());
     lv_obj_set_style_bg_color(link_banner, hex(0x3A1012), 0);
     lv_obj_set_style_border_width(link_banner, 1, 0);
     lv_obj_set_style_border_color(link_banner, hex(0x7A2420), 0);
-    lv_obj_set_height(link_banner, 48);
-    lv_obj_set_style_pad_hor(link_banner, 22, 0);
+    lv_obj_set_height(link_banner, 36);
+    lv_obj_set_style_pad_hor(link_banner, 16, 0);
     lv_obj_t *ldot = mk_box(link_banner, 0xFF453A, LV_RADIUS_CIRCLE);
     lv_obj_set_size(ldot, 12, 12);
     link_txt = mk_label(link_banner, f_small, 0xFF8A80);
     lv_label_set_text(link_txt, tr(TR_LINK_LOST));
-    lv_obj_align(link_banner, LV_ALIGN_CENTER, 0, 0);     /* по центру, поверх затемнённого экрана */
+    lv_obj_align(link_banner, LV_ALIGN_TOP_LEFT, M, 12);
     lv_obj_add_flag(link_banner, LV_OBJ_FLAG_HIDDEN);
 
     /* Подсказка «удерживайте — разрешить» на месте счётчиков; полоса растёт, пока держат кнопку */

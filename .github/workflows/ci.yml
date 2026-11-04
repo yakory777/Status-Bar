@@ -19,9 +19,13 @@ jobs:
         run: python -m py_compile hooks/forward.py host/*.py host/adapters/*.py hardware/case/case.py tools/*.py tools/sim/*.py
       - name: Adapter tests
         run: python tests/test_adapters.py
+      - name: Wi-Fi link against a fake board
+        run: python tests/test_links.py
+      - name: Browser extension syntax
+        run: for f in browser/*.js docs/flasher/app.js; do node --check "$f" && echo "ok $f"; done
       - name: Validate manifests
         run: |
-          for f in .claude-plugin/*.json .codex-plugin/*.json .agents/plugins/*.json hooks/*.json; do
+          for f in .claude-plugin/*.json .codex-plugin/*.json .agents/plugins/*.json hooks/*.json browser/manifest.json browser/_locales/*/messages.json docs/flasher/manifest-*.json; do
             python -m json.tool "$f" > /dev/null && echo "ok $f"
           done
 

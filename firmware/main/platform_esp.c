@@ -2,9 +2,9 @@
  * Платформа на плате LilyGO T-Display-S3 AMOLED.
  *   яркость  — команда 0x51 контроллера RM67162;
  *   батарея  — АЦП на GPIO4 через делитель 1:2 (как в библиотеке LilyGO);
- *   Wi-Fi    — пока не используется (плата работает по USB), возвращаем -1;
+ *   Wi-Fi    — уровень сигнала из net_esp.c (-1 — не подключена);
  *   пищалка  — LEDC на CONFIG_ASB_BUZZER_GPIO (menuconfig → Agent Status Bar);
- *   связь    — строки JSON хосту по USB Serial/JTAG.
+ *   связь    — строки JSON хосту по USB Serial/JTAG и доверенному компьютеру по Wi-Fi.
  */
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
@@ -16,6 +16,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "display.h"
+#include "net_esp.h"
 #include "platform.h"
 
 #define BAT_ADC_UNIT    ADC_UNIT_1
@@ -95,7 +96,9 @@ platform_battery_t platform_battery(void)
     return b;
 }
 
-int platform_wifi_level(void) { return -1; }
+int platform_wifi_level(void) { return net_wifi_level(); }
+
+void platform_pair_answer(bool accept) { net_pair_answer(accept); }
 
 void platform_tone(uint16_t hz)
 {
@@ -123,4 +126,5 @@ void platform_send_line(const char *json)
 {
     usb_serial_jtag_write_bytes(json, strlen(json), pdMS_TO_TICKS(20));
     usb_serial_jtag_write_bytes("\n", 1, pdMS_TO_TICKS(20));
+    net_send_line(json);
 }

@@ -29,6 +29,8 @@
 #include "ui_input.h"
 #include "ui_sound.h"
 #include "input_esp.h"
+#include "net_esp.h"
+#include "nvs_flash.h"
 
 static const char *TAG = "agent";
 static SemaphoreHandle_t ui_mux;
@@ -83,7 +85,7 @@ static void usb_rx_task(void *arg)
             if (c == '\n' || c == '\r') {
                 if (len) {
                     line[len] = '\0';
-                    apply_json(line);
+                    if (!net_filter_line(NET_SRC_USB, line)) apply_json(line);   /* служебное — Wi-Fi и доверие */
                     len = 0;
                 }
             } else if (len < sizeof(line) - 1) {
@@ -106,6 +108,13 @@ void app_main(void)
              (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
              (unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
 
+    esp_err_t nv = nvs_flash_init();                 /* сети Wi-Fi и доверенные компьютеры */
+    if (nv == ESP_ERR_NVS_NO_FREE_PAGES || nv == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        nvs_flash_erase();
+        nvs_flash_init();
+    }
+    net_init();                                      /* до экрана: Wi-Fi нужна своя внутренняя память */
+
     display_init();
     ESP_LOGI(TAG, "display ok, building UI");
 
@@ -118,6 +127,7 @@ void app_main(void)
     ESP_LOGI(TAG, "UI ok, psram %u KB free",
              (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024));
     input_esp_start(ui_lock, ui_unlock);          /* кнопки: нажать, удерживать, дважды */
+    net_start(ui_lock, ui_unlock, apply_json);    /* Wi-Fi: строки из сети идут туда же, что и из USB */
 
     xTaskCreatePinnedToCore(lvgl_task,   "lvgl",   8192, NULL, 4, NULL, 1);
     xTaskCreatePinnedToCore(usb_rx_task, "usb_rx", 6144, NULL, 5, NULL, 0);

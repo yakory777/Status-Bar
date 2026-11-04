@@ -10,6 +10,8 @@ LANGS = ("en", "ru")
 TEXT = {
     "new_task":        {"en": "New task",                    "ru": "Новая задача"},
     "thinking":        {"en": "Thinking…",                   "ru": "Думает…"},
+    "writing":         {"en": "Writing the answer",          "ru": "Пишет ответ"},
+    "answer_ready":    {"en": "Answer ready",                "ru": "Ответ готов"},
     "task_done":       {"en": "Task complete",               "ru": "Задача выполнена"},
     "task_stopped":    {"en": "Task interrupted",            "ru": "Задача прервана"},
     "error_prefix":    {"en": "Error: {what}",               "ru": "Ошибка: {what}"},

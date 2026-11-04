@@ -2,7 +2,7 @@
 
 **English** · [Русский](README.ru.md)
 
-A physical progress display for [Claude Code](https://claude.com/claude-code) and [OpenAI Codex](https://developers.openai.com/codex) tasks, built on an ESP32-S3 with an AMOLED screen. While the agent works, your desk shows what it is doing, how much of its plan is done, and whether it is waiting for your approval.
+A physical progress display for [Claude Code](https://claude.com/claude-code) and [OpenAI Codex](https://developers.openai.com/codex) tasks, built on an ESP32-S3 with a color screen (LilyGO T-Display-S3, LCD or AMOLED). While the agent works, your desk shows what it is doing, how much of its plan is done, and whether it is waiting for your approval.
 
 <table align="center">
   <tr>
@@ -21,6 +21,8 @@ A physical progress display for [Claude Code](https://claude.com/claude-code) an
     <td><img src="docs/firmware/en/codex/idle_cursor.gif" width="400" alt="Codex: Ready to work"></td>
   </tr>
 </table>
+
+> **First build?** [Step-by-step setup from scratch](#step-by-step-setup-from-scratch) — from the bare board to statuses on screen, no ESP-IDF needed. Something went wrong — see [Troubleshooting](#troubleshooting).
 
 ## What the screen shows
 
@@ -90,7 +92,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
     <td align="center"><img src="docs/firmware/en/codex/battery.gif" width="400" alt="Battery, charging and Wi-Fi, Codex"></td>
   </tr>
   <tr>
-    <td colspan="2"><b>Link lost</b> — The daemon pings every 5 s. After 15 s of silence (laptop asleep, cable out) the screen dims and says so in the middle, instead of showing a stale status as if it were current.</td>
+    <td colspan="2"><b>Link lost</b> — The daemon pings every 5 s. After 15 s of silence (laptop asleep, cable out) the screen dims and a banner at the top says so, instead of showing a stale status as if it were current.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/firmware/en/claude/link_lost.gif" width="400" alt="Link lost, Claude"></td>
@@ -111,7 +113,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
     <td align="center"><img src="docs/firmware/en/codex/sleep.gif" width="400" alt="Sleep, Codex"></td>
   </tr>
   <tr>
-    <td colspan="2"><b>Pairing screen</b> — A six-digit code over everything when the host sends <code>{"pair":"482913"}</code>, to check that it matches the code on the computer — like Bluetooth pairing. The screen is ready for the Wi-Fi mode; the Wi-Fi transport itself is not implemented yet.</td>
+    <td colspan="2"><b>Pairing screen</b> — When a computer pairs with the board over Wi-Fi, the same six-digit code is shown in its console and on the board — like Bluetooth pairing. Press the button to confirm, hold it to cancel. See <a href="#wi-fi">Wi-Fi</a>.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/firmware/en/claude/pairing.png" width="400" alt="Pairing screen, Claude"></td>
@@ -153,7 +155,7 @@ Pick a scene per theme in the [settings file](#settings-file) (`idle_claude`, `i
 
 ### Battery and Wi-Fi
 
-The top-right corner is the same on every screen — boot splash, idle scenes, the task screen and pairing. Battery: green above 50%, orange from 21 to 50%, red at 20% and below; while charging a bolt appears next to it and the fill sweeps to full; without a cell the outline is empty and labeled *USB*. Wi-Fi: a dot and three arcs by signal strength; while the board works over USB (Wi-Fi mode is not implemented yet) the fan is dim and crossed out. A crossed-out speaker appears while sound is muted. During the full-screen finale of an idle scene the indicators step aside.
+The top-right corner is the same on every screen — boot splash, idle scenes, the task screen and pairing. Battery: green above 50%, orange from 21 to 50%, red at 20% and below; while charging a bolt appears next to it and the fill sweeps to full; without a cell the outline is empty and labeled *USB*. Wi-Fi: a dot and three arcs by signal strength; dim and crossed out while the board is not on Wi-Fi. A crossed-out speaker appears while sound is muted. During the full-screen finale of an idle scene the indicators step aside.
 
 The battery is measured on GPIO4 through the board's 1:2 divider and converted to percent with a Li-ion discharge curve (`firmware/main/platform_esp.c`).
 
@@ -178,13 +180,14 @@ A passive buzzer is optional: connect it through a ~100 Ω resistor between a fr
 
 ```
 Claude Code ─┐
-             ├─ hook ─▶ hooks/forward.py ─ HTTP ─▶ host/daemon.py ─ USB ─▶ ESP32-S3
-Codex ───────┘                                      └ adapters/claude.py, codex.py
+             ├─ hook ─▶ hooks/forward.py ─ HTTP ─▶ host/daemon.py ─┬─ USB ─────────────────▶ ESP32-S3
+Codex ───────┘                                       │             └─ Wi-Fi (TCP 8766) ───▶ ESP32-S3
+                                                     └ adapters/claude.py, codex.py
 ```
 
 1. Plugin hooks call `hooks/forward.py` on every agent event.
 2. The hook forwards the event to a local daemon at `127.0.0.1:8765` and exits immediately, so the agent is never slowed down. If the daemon is not running, the hook starts it.
-3. The daemon translates the event into a screen state through an agent-specific adapter and sends one JSON line to the board over USB.
+3. The daemon translates the event into a screen state through an agent-specific adapter and sends one JSON line to the board over USB or, without the cable, over [Wi-Fi](#wi-fi).
 4. The firmware knows nothing about agent internals: it draws `state`, `title`, `step`, `done` and `total`, and picks the theme, idle scene and language from `agent`, `idle` and `lang`.
 
 ## Hardware
@@ -210,9 +213,128 @@ No soldering required.
 
 Dimensions come from the board specs (60 × 25.5 × 10 mm), not from a drawing — measure your board and change `PARAMS` in `hardware/case/case.py` (or the variables in `case.scad` for OpenSCAD), then run `python hardware/case/case.py` (needs `numpy` and `matplotlib`) to regenerate the STL. LilyGO also publishes an official case model in the [board repository](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED) (`shell/`).
 
+## Step-by-step setup from scratch
+
+For anyone who has never flashed a board. Everything is on Windows and no ESP-IDF is needed: the project ships ready-made firmware for the LCD board. On macOS and Linux the commands are the same — write `python3` instead of `py -3` and `/` instead of `\` in paths.
+
+**You need:** the board, a USB-C cable **that carries data** (charge-only cables won't show the board), a computer with internet, and [Claude Code](https://claude.com/claude-code) or Codex.
+
+### The easiest way — the setup page
+
+**[yakory777.github.io/Status-Bar](https://yakory777.github.io/Status-Bar/)** — flashing and Wi-Fi right from Chrome or Edge, no console, Python or ESP-IDF. Plug the board in, pick it on the page, press **Flash the board**, then **Connect to the board** and add a network. The page shows the firmware version on the board and offers an update when a new one is out. Steps 2–6 and 9 below do the same from the command line.
+
+<p align="center">
+  <img src="docs/setup-page-en.png" width="380" alt="Setup page">
+</p>
+
+### Step 1. Identify your board
+
+Look at the screen with the stock firmware, or tilt it against the light: the LCD board (**T-Display-S3**) has a visible backlight — black looks grey. On the **T-Display-S3 AMOLED** black is pitch black, and the board or its box usually says *AMOLED*. Ready-made firmware exists for both; the AMOLED build hasn't been tried on a real board yet.
+
+### Step 2. Install Python
+
+Download Python 3.10 or newer from [python.org](https://www.python.org/downloads/) and install it. Check in a command prompt (`Win+R` → `cmd` → Enter):
+
+```
+py -3 --version
+```
+
+It should answer `Python 3.x.x`. If the Microsoft Store opens instead, Python is not installed — install it from python.org.
+
+### Step 3. Download the project
+
+On the repository page press the green **Code → Download ZIP** button and unpack it, for example to the desktop. Or, with git: `git clone https://github.com/yakory777/Status-Bar`.
+
+Open a command prompt **right in the project folder**: go there in Explorer (where `README.md`, `host` and `firmware` are), click the address bar at the top, type `cmd` and press Enter. Type every command below in that window.
+
+### Step 4. Install the Python packages
+
+```
+py -3 -m pip install pyserial esptool
+```
+
+`pyserial` talks to the board over the cable, `esptool` flashes it.
+
+### Step 5. Find the board's COM port
+
+Plug the board in. Open *Device Manager* (right-click Start) → **Ports (COM & LPT)**. You'll see "USB Serial Device (**COM3**)" — the number may differ, note it.
+
+Only COM1, or nothing new? Either the cable has no data lines or the board isn't answering: hold **BOOT** on the board, press **RST** briefly, release BOOT — the port should appear.
+
+### Step 6. Flash
+
+Put your port number instead of `COM3`:
+
+```
+py -3 -m esptool --chip esp32s3 -p COM3 -b 460800 write_flash 0x0 firmware\prebuilt\agent-status-bar-tdisplay-s3.bin
+```
+
+It takes about a minute and ends with `Hash of data verified`. `Failed to connect` — hold BOOT, press RST, release BOOT and run it again.
+
+After flashing press RST or replug the cable. You'll see the splash and then the idle scene with **"No connection to the computer"** at the top — that's expected: nothing on the computer is talking to the board yet.
+
+### Step 7. Test without an agent
+
+```
+py -3 host\daemon.py --demo
+```
+
+A couple of seconds later the banner disappears and a sample task runs on the screen. Stop it with `Ctrl+C`. If it says the port is busy, close whatever may hold the COM port (ESP-IDF monitor, Arduino IDE, another daemon window).
+
+### Step 8. Connect Claude Code
+
+Statuses come from hooks, which exist in **Claude Code** — in the terminal and in the Code tab of the Claude desktop app — and in Codex. Using the regular claude.ai chat in a browser? Install the [extension](#claudeai-chat-in-the-browser).
+
+In Claude Code enter **one command at a time** (two commands in one input don't work):
+
+```
+/plugin marketplace add yakory777/Status-Bar
+```
+
+```
+/plugin install agent-status-bar@agent-status-bar
+```
+
+Restart Claude Code and give it any task — the screen switches to it. No need to start the daemon by hand: the first agent event starts it.
+
+For Codex: `codex plugin marketplace add yakory777/Status-Bar`, then enable **Agent Status Bar** in the plugin list and allow its hooks.
+
+### Step 9 (optional). No cable, over Wi-Fi
+
+With the board on the cable, from the project folder:
+
+```
+py -3 host\daemon.py wifi add "NetworkName" "password"
+```
+
+The name must match the Wi-Fi list exactly, including capital letters; the network must be **2.4 GHz** (the board can't see 5 GHz networks). The board restarts; after 15 seconds check:
+
+```
+py -3 host\daemon.py wifi list
+```
+
+It shows the board's IP, and the Wi-Fi icon on the screen is no longer crossed out. Put the IP into the settings so the daemon reaches the board without searching:
+
+```
+py -3 host\daemon.py config --init
+notepad %USERPROFILE%\.agent-status\config.toml
+```
+
+Last line: `wifi_host = "192.168.1.50"` (your IP). Save. Now the board can run from any charger — the daemon finds it on the network and returns to the cable when you plug it in. This computer needs no pairing: the board already knows it from the cable. More in [Wi-Fi](#wi-fi).
+
 ## Installation
 
+The short version, for those who know ESP-IDF. New to this? Follow the [steps above](#step-by-step-setup-from-scratch).
+
 ### 1. Flash the board
+
+Ready-made firmware is in [`firmware/prebuilt/`](firmware/prebuilt/) (`…-tdisplay-s3.bin` — LCD, `…-amoled.bin` — AMOLED) — no ESP-IDF needed. Easiest is the [setup page](https://yakory777.github.io/Status-Bar/), or:
+
+```bash
+python -m esptool --chip esp32s3 -p COM3 -b 460800 write_flash 0x0 firmware/prebuilt/agent-status-bar-tdisplay-s3.bin
+```
+
+To build it yourself:
 
 You need [ESP-IDF](https://docs.espressif.com/projects/esp-idf/) 5.1 or newer (on Windows, use the *ESP-IDF CMD* shortcut it installs). LVGL 9.2 is fetched automatically by the component manager.
 
@@ -225,12 +347,12 @@ idf.py build flash monitor # monitor shows the board's log; quit with Ctrl+]
 
 If flashing fails, hold BOOT, press RST, release BOOT. After flashing, unplug and replug the cable.
 
-On boot the screen flashes red, green and blue — a self-test of the panel before the UI starts (turn it off in the same menu: *Flash red, green and blue at boot*). No colours means the wrong board is selected. Upside down? Turn on *Rotate the picture 180 degrees*.
+Black screen? Turn on *Flash red, green and blue at boot* in the same menu: the panel is then tested before the UI starts, and no colours means the wrong board is selected. Upside down? Turn on *Rotate the picture 180 degrees*. `idf.py monitor` prints the frame rate every 5 s (`perf: … fps`).
 
 ### 2. Install the Python dependency
 
 ```bash
-pip install pyserial
+pip install pyserial          # on Windows: py -3 -m pip install pyserial
 ```
 
 ### 3. Install the plugin
@@ -253,6 +375,115 @@ Then install **Agent Status Bar** from the plugin list. Codex does not trust plu
 That's it. The first agent event starts the daemon, which finds the board by its Espressif USB VID (or uses `serial_port` from the [settings file](#settings-file)).
 
 The hooks try `python3`, then `python`, then the `py -3` launcher, so a standard Windows install of Python works as is. On Windows, install pyserial for that same Python: `py -3 -m pip install pyserial`. If `python` opens the Microsoft Store, turn off the *python.exe* and *python3.exe* app execution aliases in Settings.
+
+## Wi-Fi
+
+The board works over the USB cable out of the box. To put it anywhere on your desk with just a charger, teach it your networks — it remembers up to five and joins the strongest one in range.
+
+**1. Add networks** (board connected with the cable, from the project folder):
+
+```bash
+python host/daemon.py wifi add "Home" "password"
+python host/daemon.py wifi add "Office" "password"
+python host/daemon.py wifi list            # saved networks, current one, IP and signal
+python host/daemon.py wifi remove "Office"
+```
+
+Networks are kept in the board's memory and survive restarts and reflashing. The board sees **2.4 GHz** networks only; type the name exactly as in the network list, same capitalization. The board restarts after each change and connects within a few seconds; the Wi-Fi icon in the corner shows the signal. Adding networks over the cable also makes the board trust this computer, so no pairing is needed for it.
+
+**2. Unplug the data cable.** Power the board from a charger or its battery. The daemon finds it on the network by itself (the computer must be on the same network) and switches back to the cable whenever you plug it in again. After the board, the router or the computer restarts, the link comes back on its own: the daemon remembers the board's last IP and, if the router handed out a new one, tries every address of its network. It notices a vanished board within about 25 seconds and starts looking for it again.
+
+**Another computer** that never saw the board over USB pairs over the network:
+
+```bash
+python host/daemon.py pair
+```
+
+A computer the board already knows gets no code — `pair` just says it is paired. For a new computer a six-digit code appears in the console and on the board. Same code — press the board's button; hold it to cancel. The board then accepts status updates only from computers it trusts, so a colleague's agent on the office network will not show up on your screen.
+
+`python host/daemon.py boards` lists the boards on the network. If none is found although the board is connected (the broadcast went into a VPN or WSL adapter, or the router or firewall drops it), give its IP from `wifi list`: `python host/daemon.py pair --ip 192.168.1.50` — and put it into `wifi_host` in the [settings file](#settings-file) so the daemon always goes straight to it. `transport = "usb"` or `"wifi"` there forces one way.
+
+<p align="center">
+  <img src="docs/firmware/en/claude/pairing.png" width="400" alt="Pairing screen">
+</p>
+
+## claude.ai chat in the browser
+
+The regular claude.ai chat has no hooks, so a Chrome extension in [`browser/`](browser/) passes its status on. It works in other Chromium browsers too — Edge, Yandex Browser, Opera. Firefox and Safari are not supported, and neither is the Chat tab of the Claude desktop app, which takes no extensions.
+
+The extension watches the page and shows it on the board with the Claude theme:
+
+| On the page | On the board |
+|---|---|
+| You sent a question | "Thinking…", title — your question |
+| Claude is writing the answer | "Writing the answer", title — the chat name |
+| An "Allow" prompt for a tool | Waiting for you |
+| The answer is ready | Done · "Answer ready" |
+| The tab was closed | Idle scene |
+
+Every tab is a separate session, so the chat and Claude Code share the screen: the most important task is shown, the rest as a "+N" badge. The chat has no plan, so the progress bar simply fills when the answer is ready.
+
+**Install**
+
+1. Open `chrome://extensions`, turn on **Developer mode** (top right), press **Load unpacked** and pick the project's `browser` folder.
+2. Reload open claude.ai tabs (F5).
+3. Start the daemon. The chat has no hooks to start it, so on Windows turn on autostart: double-click `tools\windows\autostart.cmd`. The daemon starts right away and then with every Windows sign-in, without a window. To turn it off: `tools\windows\autostart.cmd remove`. By hand: `py -3 host\daemon.py`; on macOS and Linux `python3 host/daemon.py`.
+4. Click the extension icon. The popup shows whether the program on the computer is running, how the board is connected, what the page looks like and which signals fired. You can switch the extension off there too.
+
+<p align="center">
+  <img src="docs/browser-popup-en.png" width="320" alt="Extension popup">
+</p>
+
+**If the status stops being detected.** claude.ai changes its markup from time to time. Everything the extension knows about the page is in [`browser/detect.js`](browser/detect.js). While Claude is writing, the popup's *Signals* line should show `streaming` or `stop_button`. If it's empty, the signals are out of date: open an issue, and after editing `detect.js` press ⟳ on the extension in `chrome://extensions`.
+
+## Troubleshooting
+
+Everything we have already run into, with causes and fixes.
+
+**Flashing**
+
+| What you see | Why | What to do |
+|---|---|---|
+| `'esptool.py' is not recognized as an internal or external command` | Newer versions drop the `.py` | `esptool …` in the ESP-IDF window or `py -3 -m esptool …` in a normal one |
+| `The system cannot find the path specified`, `CMakeLists.txt not found` | The command runs in the wrong folder | `idf.py` only from `firmware`, `py -3 host\daemon.py` from the project root. Quote paths with spaces |
+| Only COM1 in Device Manager, `Failed to connect` | Charge-only cable, or the board isn't in download mode | Another cable or USB port; hold BOOT, press RST, release BOOT |
+| `could not open port 'COM3'`, `Access is denied`, port busy | Another program holds the port — usually a running daemon or `idf.py monitor` | Close Claude Code and the monitor. Still busy — in PowerShell: `Get-CimInstance Win32_Process -Filter "Name like 'py%'" \| ? CommandLine -like '*daemon.py*' \| % { Stop-Process -Id $_.ProcessId }` |
+| After flashing the screen is black, flickers or only the backlight glows | Firmware for the other board (AMOLED firmware on the LCD board or vice versa) | LCD — `firmware\prebuilt\agent-status-bar-tdisplay-s3.bin` or *Board: T-Display-S3* in menuconfig; AMOLED — *T-Display-S3 AMOLED*. Panel test — *Flash red, green and blue at boot* |
+| Picture upside down | The board is mounted the other way | menuconfig → *Rotate the picture 180 degrees* |
+| After flashing, `wifi list` says `Saved networks: none` | Firmware before 0.4.0 kept networks where the ready-made image writes, so every flash wiped them | Flash the current one and add the networks once more (`wifi add`). From then on they survive any reflash |
+| Animation slow and choppy | Old firmware | Flash the current one. `idf.py -p COM3 monitor` prints `perf: … fps` every 5 s — attach that line to an issue |
+
+**Computer and Claude Code**
+
+| What you see | Why | What to do |
+|---|---|---|
+| `python` opens the Microsoft Store, hooks do nothing | On Windows `python` and `python3` are Store stubs | Install Python from python.org and use `py -3`; the hooks try `py -3` themselves. Optionally turn off the *python.exe* and *python3.exe* app execution aliases in Settings |
+| `No module named serial` | pyserial went into another Python | `py -3 -m pip install pyserial` |
+| `Path does not exist: …\Status-Bar \plugin install …` | Both `/plugin` commands pasted into one input | Enter them one by one |
+| "No connection to the computer" on the board | The daemon isn't running (Claude Code closed or no events yet) | Give the agent a task or run `py -3 host\daemon.py` |
+| Nothing arrives from the claude.ai chat | The browser chat has no hooks | Install the [extension](#claudeai-chat-in-the-browser) and start the daemon (`tools\windows\autostart.cmd`). The popup shows what is wrong |
+
+**Wi-Fi**
+
+| What you see | Why | What to do |
+|---|---|---|
+| `wifi list` → `Saved networks: none` | No networks added yet | `py -3 host\daemon.py wifi add "NetworkName" "password"` |
+| Network saved but never connects | 5 GHz network, typo in the name or password | Pick the 2.4 GHz network (no *5G* in the name); same capitalization; `wifi remove` and add again |
+| `No board found on the network` | The broadcast went out the wrong adapter (VPN, WSL, Hyper-V), or the router or firewall drops it | Give the IP from `wifi list`: `py -3 host\daemon.py pair --ip 192.168.1.50` and put it into `wifi_host`. When Windows asks about network access for Python, allow it |
+| Wi-Fi doesn't come back after the board or router restarts | Old daemon: the board got a new IP and the daemon kept knocking on the old one | Update the project — the new daemon finds the board at its new IP too. If the Wi-Fi icon on the board is crossed out, the board itself isn't on the network: check `wifi list` over the cable |
+| The pairing code never appears on the board | This computer has used the cable before and the board trusts it — no pairing needed | Nothing to do: `pair` says so. Only another computer needs the code |
+| Pairing drops by itself | The background daemon reconnects and pushes the pairing out (the board keeps one network connection) | Close Claude Code and the daemon first, then `pair` |
+
+To test pairing on the same computer, introduce it to the board as a new one — in a separate `cmd` window, with the daemon stopped:
+
+```
+set AGENT_STATUS_HOME=%TEMP%\asb-test
+py -3 host\daemon.py pair --ip 192.168.1.50
+```
+
+`set` lasts only for that window; close it afterwards — your settings stay as they were.
+
+Not listed? Open an issue with the error text, the output of `wifi list` and the last lines of `idf.py -p COM3 monitor`.
 
 ## Try it without a board
 
@@ -300,7 +531,7 @@ The daemon sends one JSON line per update:
 | `agent` | Theme: `claude` or `codex` |
 | `idle` | Idle scene for the theme |
 | `ping` | Keep-alive, sent every 5 s; 15 s of silence shows “link lost” |
-| `pair` | Six-digit pairing code to show; `""` hides the pairing screen |
+| `pair` | Six-digit code to show on the pairing screen; `""` hides it. Over Wi-Fi it comes with `pair_token` — see [`net_esp.h`](firmware/main/net_esp.h) for `hello`, `pair`, `wifi_add`/`wifi_remove`/`wifi_list` |
 | `approve` | `true` — the board offers hold-to-allow / tap-to-deny for the current wait |
 | `lang` | `en` or `ru` — language of the board's own labels |
 
@@ -310,17 +541,17 @@ Every field is optional; the board remembers the last value. Anything that can w
 
 ### Events the daemon listens to
 
-| Screen | Claude Code | Codex |
-|---|---|---|
-| Start | `UserPromptSubmit` | `UserPromptSubmit` |
-| Work, current step | `PreToolUse`, `PostToolUse` | `PreToolUse`, `PostToolUse` |
-| Plan progress | `TaskCreated`, `TaskCompleted` events; `TaskCreate`, `TaskUpdate`, legacy `TodoWrite` tools | `update_plan` tool |
-| Waiting for you | `PermissionRequest`, `Notification` (permission and input prompts) | `PermissionRequest` |
-| Error | `PostToolUseFailure`, `StopFailure` | non-zero exit code in `PostToolUse` |
-| Subagents | `SubagentStart`, `SubagentStop` | `SubagentStart`, `SubagentStop` |
-| Compacting | `PreCompact`, `PostCompact` | `PreCompact`, `PostCompact` |
-| Done | `Stop` | `Stop` |
-| Session closed | `SessionEnd` | — |
+| Screen | Claude Code | Codex | claude.ai chat (extension) |
+|---|---|---|---|
+| Start | `UserPromptSubmit` | `UserPromptSubmit` | `WebPrompt` |
+| Work, current step | `PreToolUse`, `PostToolUse` | `PreToolUse`, `PostToolUse` | `WebBusy` (thinking / writing) |
+| Plan progress | `TaskCreated`, `TaskCompleted` events; `TaskCreate`, `TaskUpdate`, legacy `TodoWrite` tools | `update_plan` tool | — |
+| Waiting for you | `PermissionRequest`, `Notification` (permission and input prompts) | `PermissionRequest` | `WebWait` |
+| Error | `PostToolUseFailure`, `StopFailure` | non-zero exit code in `PostToolUse` | `WebError` |
+| Subagents | `SubagentStart`, `SubagentStop` | `SubagentStart`, `SubagentStop` | — |
+| Compacting | `PreCompact`, `PostCompact` | `PreCompact`, `PostCompact` | — |
+| Done | `Stop` | `Stop` | `WebDone` |
+| Session closed | `SessionEnd` | — | `SessionEnd` (tab closed) |
 
 ## Adding another agent
 
@@ -346,9 +577,11 @@ idle_claude = "robot"    # robot | cursor
 idle_codex = "cursor"    # cursor | typist
 button_approve = false   # answer Claude Code permission requests with the button
 approve_wait = 20        # seconds the hook waits for the button (1–120)
+transport = "auto"       # auto (cable, otherwise Wi-Fi) | usb | wifi
+wifi_host = ""           # the board's IP, only if it is not found on the network by itself
 ```
 
-Every key has an environment variable that wins over the file: `AGENT_STATUS_LANG`, `AGENT_STATUS_SERIAL`, `AGENT_STATUS_PORT`, `AGENT_STATUS_AUTOSTART`, `AGENT_STATUS_IDLE_CLAUDE`, `AGENT_STATUS_IDLE_CODEX`, `AGENT_STATUS_BUTTON_APPROVE`, `AGENT_STATUS_APPROVE_WAIT`. The folder can be moved with `AGENT_STATUS_HOME`, the file alone with `AGENT_STATUS_CONFIG`.
+Every key has an environment variable that wins over the file: `AGENT_STATUS_LANG`, `AGENT_STATUS_SERIAL`, `AGENT_STATUS_PORT`, `AGENT_STATUS_AUTOSTART`, `AGENT_STATUS_IDLE_CLAUDE`, `AGENT_STATUS_IDLE_CODEX`, `AGENT_STATUS_BUTTON_APPROVE`, `AGENT_STATUS_APPROVE_WAIT`, `AGENT_STATUS_TRANSPORT`, `AGENT_STATUS_WIFI_HOST`. The folder can be moved with `AGENT_STATUS_HOME`, the file alone with `AGENT_STATUS_CONFIG`.
 
 The idle scene picked with a double press on the board is saved next to it in `state.json` and survives restarts.
 
@@ -404,7 +637,10 @@ Fonts used by the renderers live in `tools/fonts/` with their licenses (Lora —
 .codex-plugin/         Codex plugin manifest
 .agents/plugins/       Codex marketplace manifest
 hooks/                 hook definitions and forward.py
-host/                  daemon.py, sessions.py (several sessions at once), config.py (settings), i18n.py (texts), per-agent adapters
+browser/               Chrome extension for the claude.ai chat: detect.js (page signals), content.js, background.js, popup
+host/                  daemon.py, sessions.py (several sessions at once), links.py (USB and Wi-Fi), config.py (settings), i18n.py (texts), per-agent adapters
+firmware/prebuilt/     ready-made firmware for the T-Display-S3 (LCD) and AMOLED, flashed from the setup page or with one esptool command
+docs/flasher/          the setup page (GitHub Pages): flashing via ESP Web Tools and Wi-Fi via Web Serial
 firmware/main/         ESP-IDF project, LVGL 9:
   ui_status.c            task screen, themes, scenario states
   ui_scene_*.c           idle scenes (robot, cursor, typist), ui_scene.c runs them
@@ -413,16 +649,20 @@ firmware/main/         ESP-IDF project, LVGL 9:
   protocol.c             JSON lines from the host (shared with the simulator)
   ui_input.c, ui_sound.c button actions and melodies
   ui_i18n.c              on-screen labels in English and Russian
+  net_esp.c              Wi-Fi: saved networks, discovery, TCP link, trusted computers, pairing
   platform_esp.c         brightness, battery ADC, buzzer; input_esp.c — buttons; display_st7789.c, display_rm67162.c — panel drivers (LCD, AMOLED), display_scale.c — scaling for the LCD
 hardware/case/         3D-printable case: case.py (generator), case.scad, STL, preview
 docs/firmware/         firmware GIFs: en/ and ru/, each with claude/ and codex/; browser emulator in docs/
 tools/                 renderers for the design previews
+tools/windows/         autostart.cmd — start the daemon at Windows sign-in (for the extension)
 tools/sim/             firmware simulator: real UI code + LVGL on a PC, scenarios, GIF export
 ```
 
 ## Status
 
-The daemon, adapters, session handling, idle-scene selection, settings and both languages are covered by tests. Every screen, scene and animation runs in the firmware simulator and in CI. The display driver follows the RM67162 pinout and protocol from the LilyGO and ESPHome examples but has not yet been run on real hardware, so the first build may need the tweaks from the [firmware constants](#firmware-constants) table. The Codex adapter assumes the `update_plan` tool format; if your Codex version differs, adjust `_plan_steps()` in `host/adapters/codex.py`.
+The daemon, adapters, session handling, idle-scene selection, settings, both languages and the Wi-Fi link (against a fake board) are covered by tests. Every screen, scene and animation runs in the firmware simulator and in CI.
+
+Tested on a real **T-Display-S3 (LCD)**: the screen, animations, the USB link, joining Wi-Fi, finding the board on the network and running without the cable. The **AMOLED** driver follows the RM67162 pinout and protocol from the LilyGO and ESPHome examples but has not yet been run on real hardware, so the first build may need the tweaks from the [firmware constants](#firmware-constants) table. The claude.ai extension is tested against a mock page with the same signals but not yet on the live claude.ai — if the status isn't detected, see [what to do](#claudeai-chat-in-the-browser). The Codex adapter assumes the `update_plan` tool format; if your Codex version differs, adjust `_plan_steps()` in `host/adapters/codex.py`.
 
 Issues with error output or a photo of the screen are very welcome.
 

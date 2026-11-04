@@ -23,7 +23,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define FW_VERSION "0.2.0"
+#include "version.h"
 
 
 typedef enum { MODE_BOOT, MODE_IDLE, MODE_TO_TASK, MODE_TASK, MODE_TO_IDLE } mode_t_;
@@ -170,7 +170,7 @@ static void pairing_draw(lv_event_t *e)
     const char *hint1 = tr(TR_PAIR_HINT1);    /* проверка «тот же код», как при сопряжении Bluetooth */
     const char *hint2 = tr(TR_PAIR_HINT2);
     d_text(&d, fs, hint1, (UI_W - text_w(fs, hint1)) / 2, 190, ui_status_text_color(1), LV_OPA_COVER);
-    d_text(&d, fs, hint2, (UI_W - text_w(fs, hint2)) / 2, 217, ui_status_text_color(1), LV_OPA_COVER);
+    d_text(&d, fs, hint2, (UI_W - text_w(fs, hint2)) / 2, 217, c_hex(0xFFFFFF), LV_OPA_COVER);
 }
 
 void ui_screen_pairing(const char *code)
@@ -185,6 +185,8 @@ void ui_screen_pairing(const char *code)
         lv_obj_add_flag(pairing, LV_OBJ_FLAG_HIDDEN);
     }
 }
+
+bool ui_screen_pairing_visible(void) { return !lv_obj_has_flag(pairing, LV_OBJ_FLAG_HIDDEN); }
 
 /* ---------- переходы ---------- */
 

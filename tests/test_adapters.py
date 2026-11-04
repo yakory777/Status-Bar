@@ -147,6 +147,44 @@ class CodexScenarios(unittest.TestCase):
         self.assertEqual(h[1]["state"], "work")
 
 
+class ClaudeWebAdapter(unittest.TestCase):
+    def test_chat_answer(self):
+        h = run("claude-web", [
+            {"hook_event_name": "WebPrompt", "prompt": "Объясни  рекурсию", "title": ""},
+            {"hook_event_name": "WebBusy", "phase": "thinking"},
+            {"hook_event_name": "WebBusy", "phase": "tool", "tool": "Ищу в интернете"},
+            {"hook_event_name": "WebBusy", "phase": "writing", "title": "Рекурсия простыми словами"},
+            {"hook_event_name": "WebDone"},
+        ])
+        self.assertEqual((h[0]["state"], h[0]["title"], h[0]["step"]), ("start", "Объясни рекурсию", "Думает…"))
+        self.assertEqual((h[1]["state"], h[1]["step"]), ("work", "Думает…"))
+        self.assertEqual(h[2]["step"], "Ищу в интернете")
+        self.assertEqual((h[3]["step"], h[3]["title"]), ("Пишет ответ", "Рекурсия простыми словами"))
+        self.assertEqual((h[4]["state"], h[4]["done"], h[4]["total"], h[4]["step"]), ("done", 1, 1, "Ответ готов"))
+
+    def test_wait_error_and_restart(self):
+        h = run("claude-web", [
+            {"hook_event_name": "WebBusy", "phase": "writing", "prompt": "Вопрос"},   # демон поднялся посреди ответа
+            {"hook_event_name": "WebWait"},
+            {"hook_event_name": "WebError", "message": "Ответ прерван"},
+        ])
+        self.assertEqual((h[0]["state"], h[0]["title"]), ("work", "Вопрос"))
+        self.assertEqual((h[1]["state"], h[1]["step"]), ("wait", "Нужно ваше подтверждение"))
+        self.assertEqual((h[2]["state"], h[2]["step"]), ("error", "Ответ прерван"))
+
+    def test_done_without_task_ignored(self):
+        self.assertEqual(run("claude-web", [{"hook_event_name": "WebDone"}]), [])
+
+    def test_theme_is_claude(self):
+        from sessions import Sessions
+        s = Sessions(settings=settings())
+        s.handle("claude-web", {"hook_event_name": "WebPrompt", "prompt": "Q", "session_id": "tab-1"})
+        d = s.display()
+        self.assertEqual((d["agent"], d["idle"], d["title"]), ("claude", "robot", "Q"))
+        s.handle("claude-web", {"hook_event_name": "SessionEnd", "session_id": "tab-1"})
+        self.assertEqual((s.display()["state"], s.display()["agent"]), ("idle", "claude"))
+
+
 class SessionsTest(unittest.TestCase):
     def setUp(self):
         from sessions import Sessions

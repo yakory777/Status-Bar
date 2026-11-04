@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --bg: #FFFFFF; --fg: #1F1E1D; --muted: #6B6A66; --line: #E5E3DC; --ok: #2E8B57; --bad: #C2410C; --accent: #D97757; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1F1E1D; --fg: #F5F4EF; --muted: #A8A69E; --line: #3A3936; --ok: #4ADE80; --bad: #FB923C; }
+  }
+  body { margin: 0; width: 300px; background: var(--bg); color: var(--fg);
+         font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  header img { width: 20px; height: 20px; }
+  header b { flex: 1; font-size: 14px; }
+  section { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .row { display: flex; justify-content: space-between; gap: 10px; margin: 3px 0; }
+  .row span:first-child { color: var(--muted); }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  .hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+  code { font: 11px ui-monospace, Consolas, monospace; text-align: right; overflow-wrap: anywhere; }
+  #signals { word-break: normal; overflow-wrap: normal; }
+  label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  input[type=number] { width: 70px; background: transparent; color: var(--fg); border: 1px solid var(--line);
+                       border-radius: 6px; padding: 3px 6px; }
+  input[type=checkbox] { accent-color: var(--accent); }
+</style>
+</head>
+<body>
+  <header><img src="icons/48.png" alt=""><b data-i18n="ext_name"></b>
+    <label><input type="checkbox" id="enabled"><span data-i18n="popup_on"></span></label></header>
+  <section>
+    <div class="row"><span data-i18n="popup_daemon"></span><span id="daemon">…</span></div>
+    <div class="row"><span data-i18n="popup_board"></span><span id="board">…</span></div>
+    <p class="hint" id="daemon_hint" hidden></p>
+  </section>
+  <section>
+    <div class="row"><span data-i18n="popup_page"></span><span id="page">…</span></div>
+    <div class="row"><span data-i18n="popup_signals"></span><code id="signals"></code></div>
+    <p class="hint" id="page_hint" hidden></p>
+  </section>
+  <section>
+    <label><span data-i18n="popup_port"></span><input type="number" id="port" min="1" max="65535"></label>
+  </section>
+  <script src="popup.js"></script>
+</body>
+</html>

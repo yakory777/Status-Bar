@@ -1,0 +1,71 @@
+{
+  "ext_name": {
+    "message": "Agent Status Bar"
+  },
+  "ext_description": {
+    "message": "Показывает на плате Agent Status Bar, что Claude делает в чате claude.ai."
+  },
+  "popup_on": {
+    "message": "Вкл."
+  },
+  "popup_daemon": {
+    "message": "Программа на компьютере"
+  },
+  "popup_running": {
+    "message": "работает"
+  },
+  "popup_stopped": {
+    "message": "не запущена"
+  },
+  "popup_board": {
+    "message": "Плата"
+  },
+  "popup_board_usb": {
+    "message": "по кабелю"
+  },
+  "popup_board_wifi": {
+    "message": "по Wi-Fi"
+  },
+  "popup_board_none": {
+    "message": "не найдена"
+  },
+  "popup_page": {
+    "message": "На этой странице"
+  },
+  "popup_signals": {
+    "message": "Признаки"
+  },
+  "popup_not_claude": {
+    "message": "не claude.ai"
+  },
+  "popup_port": {
+    "message": "Порт демона"
+  },
+  "page_idle": {
+    "message": "ждёт вопроса"
+  },
+  "page_thinking": {
+    "message": "думает"
+  },
+  "page_writing": {
+    "message": "пишет ответ"
+  },
+  "page_wait": {
+    "message": "ждёт разрешения"
+  },
+  "page_done": {
+    "message": "ответ готов"
+  },
+  "hint_start_daemon": {
+    "message": "Запустите: py -3 host\\daemon.py в папке проекта (или настройте автозапуск — см. README)."
+  },
+  "hint_no_board": {
+    "message": "Подключите плату кабелем или проверьте Wi-Fi."
+  },
+  "hint_open_claude": {
+    "message": "Откройте чат на claude.ai."
+  },
+  "hint_reload": {
+    "message": "Обновите вкладку claude.ai (F5) — расширение поставлено после того, как она открылась."
+  }
+}
