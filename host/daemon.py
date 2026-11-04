@@ -333,9 +333,16 @@ class Handler(BaseHTTPRequestHandler):
             agent = (q.get("agent") or ["claude"])[0]
             n = int(self.headers.get("Content-Length", 0))
             ev = json.loads(self.rfile.read(n) or b"{}")
+            name = ev.get("hook_event_name")
+            web_wait = agent == "claude-web" and name == "WebWait"
+            if agent == "claude-web" and not web_wait:      # в чате ответили сами — кнопка больше не нужна
+                if approvals.cancel(Sessions.key_for(agent, ev)):
+                    print(f"[approve] {Sessions.key_for(agent, ev)}: answered in the chat", flush=True)
             handle_event(agent, ev)
             wait = float((q.get("wait") or ["0"])[0])
-            if wait > 0 and ev.get("hook_event_name") == "PermissionRequest" and link is not None:
+            if web_wait and not approvals_mod.enabled(config.load()):
+                wait = 0                                     # button_approve = false — только показываем
+            if wait > 0 and (name == "PermissionRequest" or web_wait) and link is not None:
                 decision = wait_for_button(agent, ev, min(wait, 120))
                 if decision:
                     body = json.dumps({"decision": decision}).encode()

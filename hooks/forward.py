@@ -10,7 +10,7 @@
 Хук всегда завершается с кодом 0 и никогда не мешает работе агента.
 
 Решение кнопкой (button_approve, по умолчанию включено, только Claude Code): на PermissionRequest
-хук ждёт нажатия до approve_wait секунд (по умолчанию 20) и печатает решение.
+хук ждёт нажатия до approve_wait секунд (по умолчанию 60) и печатает решение.
 Не нажали — хук молчит, и Claude Code спрашивает как обычно.
 """
 import json
@@ -33,7 +33,7 @@ try:
     i18n.set_language(SETTINGS["language"])
 except Exception:                       # хук не должен падать ни при каких настройках
     config = i18n = None
-    SETTINGS = {"http_port": 8765, "autostart": True, "button_approve": True, "approve_wait": 20}
+    SETTINGS = {"http_port": 8765, "autostart": True, "button_approve": True, "approve_wait": 60}
 
 PORT = SETTINGS["http_port"]
 URL = f"http://127.0.0.1:{PORT}/"
@@ -56,22 +56,42 @@ def button_wait(agent, data):
     try:
         if json.loads(data or b"{}").get("hook_event_name") != "PermissionRequest":
             return 0.0
-        return float(max(1, min(120, int(SETTINGS.get("approve_wait", 20)))))
+        return float(max(1, min(120, int(SETTINGS.get("approve_wait", 60)))))
     except (ValueError, TypeError):
         return 0.0
 
 
-def print_decision(body):
+def ask_answers(tool_input):
+    """AskUserQuestion: «удержать» = первый вариант в каждом вопросе. Ключ — текст вопроса, значение — вариант."""
+    answers = {}
+    for q in (tool_input or {}).get("questions") or []:
+        opts = q.get("options") or []
+        if q.get("question") and opts and isinstance(opts[0], dict) and opts[0].get("label"):
+            answers[q["question"]] = opts[0]["label"]
+    return answers
+
+
+def print_decision(body, data=b""):
     """Решение для Claude Code — единственное, что хук печатает в stdout."""
     try:
         decision = json.loads(body or b"{}").get("decision")
+        ev = json.loads(data or b"{}")
     except ValueError:
         return
     if decision not in ("allow", "deny"):
         return
-    behavior = {"behavior": "allow"} if decision == "allow" else \
-        {"behavior": "deny", "message": i18n.t("denied_by_button") if i18n else
-         "Denied with the status bar button"}
+    ask = ev.get("tool_name") == "AskUserQuestion"
+    if decision == "allow":
+        behavior = {"behavior": "allow"}
+        if ask:                                    # без answers Claude Code так и будет ждать ответа
+            answers = ask_answers(ev.get("tool_input"))
+            if not answers:
+                return
+            behavior["updatedInput"] = dict(ev.get("tool_input") or {}, answers=answers)
+    else:
+        key = "skipped_by_button" if ask else "denied_by_button"
+        behavior = {"behavior": "deny", "message": i18n.t(key) if i18n else
+                    ("Skipped" if ask else "Denied") + " with the status bar button"}
     sys.stdout.write(json.dumps({"hookSpecificOutput": {
         "hookEventName": "PermissionRequest", "decision": behavior}}, ensure_ascii=False))
     sys.stdout.flush()
@@ -98,7 +118,7 @@ def main():
     try:
         body = post(agent, data, wait)
         if wait:
-            print_decision(body)
+            print_decision(body, data)
         return
     except (urllib.error.URLError, OSError):
         pass

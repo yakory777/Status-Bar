@@ -51,7 +51,11 @@ async function checkPage() {
     var state = p.waiting ? t("page_wait") : p.busy ? t(p.phase === "writing" ? "page_writing" : "page_thinking")
               : res.mode === "done" ? t("page_done") : t("page_idle");
     show("page", state, p.busy || p.waiting ? "ok" : "");
-    document.getElementById("signals").textContent = p.signals.join(", ") || "—";
+    var sig = p.signals.slice();
+    var s = await chrome.storage.session.get({ last_decision: null });
+    var d = s.last_decision;                      // последнее нажатие кнопки на плате
+    if (d && Date.now() - d.at < 10 * 60 * 1000) sig.push("board_" + d.decision + (d.clicked ? "" : "_not_clicked"));
+    document.getElementById("signals").textContent = sig.join(", ") || "—";
     hint("page_hint", "");
   }
 }

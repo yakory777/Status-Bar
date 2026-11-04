@@ -24,7 +24,7 @@ DEFAULTS = {
     "idle_claude": "robot",    # robot | cursor
     "idle_codex": "cursor",    # cursor | typist
     "button_approve": True,    # решать запросы разрешения кнопкой (Claude Code); ждём, только если плата на связи
-    "approve_wait": 20,        # сколько секунд хук ждёт кнопку, 1..120
+    "approve_wait": 60,        # сколько секунд хук ждёт кнопку, 1..120
     "transport": "auto",       # auto — кабель, а без него Wi-Fi | usb | wifi
     "wifi_host": "",           # IP платы, если поиск в сети не проходит (роутер режет широковещание)
 }

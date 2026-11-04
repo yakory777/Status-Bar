@@ -21,6 +21,9 @@ TEXT = {
     "compacted":       {"en": "Context compacted, going on", "ru": "Контекст сжат, продолжаю"},
     "denied_by_button": {"en": "Denied with the status bar button",
                          "ru": "Отклонено кнопкой на статус-баре"},
+    "skipped_by_button": {"en": "Skipped with the status bar button",
+                          "ru": "Пропущено кнопкой на статус-баре"},
+    "ask_first":       {"en": "{q} → {a}",                    "ru": "{q} → {a}"},
 
     # что делает агент
     "edits":           {"en": "Editing {file}",              "ru": "Правит {file}"},

@@ -6,6 +6,7 @@
   var TICK_MS = 500;
   var DONE_AFTER_MS = 1500;       // ответ кончился, если «занят» не появлялся полторы секунды
   var KEEPALIVE_MS = 30000;       // пока занят — напоминаем демону (вдруг он перезапустился)
+  var WAIT_RENEW_MS = 100000;     // ждём разрешения — продлеваем ожидание кнопки на плате
 
   var mode = "idle";              // idle | busy | wait | done
   var phase = "";
@@ -34,7 +35,7 @@
     if (p.waiting) {
       quietSince = 0;
       if (mode === "idle" || mode === "done") send("WebPrompt", info);
-      if (mode !== "wait") send("WebWait", info);
+      if (mode !== "wait" || now - lastSent > WAIT_RENEW_MS) send("WebWait", Object.assign({}, info, p.request || {}));
       mode = "wait";
       return;
     }
@@ -66,6 +67,11 @@
   chrome.runtime.onMessage.addListener(function (msg, _sender, reply) {
     if (msg && msg.type === "probe") {
       reply({ mode: mode, page: last || AgentStatusDetect.detectPage() });
+    }
+    if (msg && msg.type === "decision") {                 // нажали кнопку на плате
+      var ok = mode === "wait" && AgentStatusDetect.answerPermission(msg.decision);
+      reply({ ok: ok });
+      if (ok) setTimeout(tick, 300);
     }
   });
 

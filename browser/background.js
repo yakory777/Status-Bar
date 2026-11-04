@@ -8,19 +8,32 @@ function settings() {
   return chrome.storage.local.get(DEFAULTS);
 }
 
-async function post(ev) {
+var WAIT_S = 110;                 // сколько демон держит запрос, ожидая кнопку на плате
+
+/* Отправить событие. WebWait — длинный запрос: демон ответит {"decision": "allow"|"deny"},
+   когда на плате нажмут кнопку, или пустым ответом, если в чате ответили сами. */
+async function post(ev, tabId) {
   var s = await settings();
   if (!s.enabled) return;
-  var url = "http://127.0.0.1:" + s.port + "/?agent=claude-web";
-  var ok = false;
+  var wait = ev.hook_event_name === "WebWait";
+  var url = "http://127.0.0.1:" + s.port + "/?agent=claude-web" + (wait ? "&wait=" + WAIT_S : "");
+  var ok = false, body = null;
   try {
     var r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
                                body: JSON.stringify(ev) });
     ok = r.ok;
+    if (wait && r.status === 200) body = await r.json();
   } catch (e) {
     ok = false;
   }
   chrome.storage.session.set({ daemon_ok: ok, daemon_checked: Date.now() });
+  if (body && body.decision && tabId !== undefined) {
+    chrome.tabs.sendMessage(tabId, { type: "decision", decision: body.decision }, function (res) {
+      void chrome.runtime.lastError;
+      chrome.storage.session.set({ last_decision: { decision: body.decision, clicked: !!(res && res.ok),
+                                                    at: Date.now() } });
+    });
+  }
 }
 
 async function rememberTab(tabId) {
@@ -44,7 +57,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender) {
   if (!msg || msg.type !== "event" || !sender.tab) return;
   var ev = Object.assign({}, msg.event, { session_id: "tab-" + sender.tab.id });
   rememberTab(sender.tab.id);
-  post(ev);
+  post(ev, sender.tab.id);
 });
 
 // вкладку закрыли или ушли с claude.ai — сессия закончилась

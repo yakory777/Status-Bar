@@ -164,7 +164,31 @@ class CleanPrompt(unittest.TestCase):
         self.assertEqual(clean_prompt("Почему a < b и b > c?"), "Почему a < b и b > c?")
 
 
+class AskUserQuestionButton(unittest.TestCase):
+    Q = {"questions": [{"question": "Продолжить?", "multiSelect": False,
+                        "options": [{"label": "Да, продолжить"}, {"label": "Нет"}]}]}
+
+    def test_step_and_answer(self):
+        from adapters.common import describe_permission
+        self.assertEqual(describe_permission("AskUserQuestion", self.Q), "Продолжить? → Да, продолжить")
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hooks"))
+        try:
+            import forward                     # хук сам выбирает язык по настройкам
+        finally:
+            i18n.set_language("ru")
+        self.assertEqual(forward.ask_answers(self.Q), {"Продолжить?": "Да, продолжить"})
+
+
 class ClaudeWebAdapter(unittest.TestCase):
+    def test_permission_command(self):
+        h = run("claude-web", [
+            {"hook_event_name": "WebPrompt", "prompt": "еще раз"},
+            {"hook_event_name": "WebWait", "command": "echo confirm-demo"},
+            {"hook_event_name": "WebWait", "message": "Allow Gmail?"},
+        ])
+        self.assertEqual((h[1]["state"], h[1]["step"]), ("wait", "Разрешить: $ echo confirm-demo"))
+        self.assertEqual(h[2]["step"], "Allow Gmail?")
+
     def test_chat_answer(self):
         h = run("claude-web", [
             {"hook_event_name": "WebPrompt", "prompt": "Объясни  рекурсию", "title": ""},
@@ -269,6 +293,20 @@ class ButtonApprovals(unittest.TestCase):
         self.assertEqual(result["d"], "allow")
         self.assertFalse(self.ap.resolve("claude:A", "deny"))   # второй раз решать нечего
 
+    def test_cancel_when_answered_elsewhere(self):
+        import threading
+        out = []
+        th = threading.Thread(target=lambda: out.append(self.ap.wait("claude-web:tab-1", 5)))
+        th.start()
+        for _ in range(100):
+            if self.ap.awaiting("claude-web:tab-1"):
+                break
+            threading.Event().wait(0.01)
+        self.assertTrue(self.ap.cancel("claude-web:tab-1"))
+        th.join(2)
+        self.assertEqual(out, [None])
+        self.assertFalse(self.ap.cancel("claude-web:tab-1"))
+
     def test_timeout_returns_none(self):
         self.assertIsNone(self.ap.wait("claude:A", 0.05))
 
@@ -362,7 +400,7 @@ class Config(unittest.TestCase):
             with open(path, encoding="utf-8") as f:
                 text = f.read()
             text = (text.replace('idle_codex = "cursor"', 'idle_codex = "typist"')
-                        .replace("approve_wait = 20", "approve_wait = 45")
+                        .replace("approve_wait = 60", "approve_wait = 45")
                         .replace('language = "auto"', 'language = "ru"'))
             with open(path, "w", encoding="utf-8") as f:
                 f.write(text)

@@ -177,6 +177,13 @@ def describe_permission(name, inp):
         return short(t(f"allow_{k}", file=base) if base else t(f"allow_{k}_any"), 60)
     if name in ("WebFetch", "WebSearch", "web_search"):
         return t("allow_web")
+    if name == "AskUserQuestion":                      # вопрос с вариантами: кнопка выбирает первый
+        qs = inp.get("questions") or []
+        q = qs[0] if qs and isinstance(qs[0], dict) else {}
+        first = ((q.get("options") or [{}])[0] or {}).get("label", "")
+        if q.get("question") and first:
+            return short(t("ask_first", q=q["question"], a=first), 60)
+        return short(q.get("question") or t("needs_you"), 60)
     if name.startswith("mcp__"):
         return short(t("allow_tool", name=name.split("__")[-1]), 60)
     return short(t("allow_named", name=name) if name else t("needs_you"), 60)

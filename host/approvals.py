@@ -5,6 +5,10 @@
 выключить — AGENT_STATUS_BUTTON_APPROVE=0) ждёт ответа, если плата на связи, от демона до approve_wait секунд. Плата показывает подсказку
 «удержать — разрешить · нажать — отклонить» и присылает {"button":"approve"|"deny"}.
 Нет нажатия — хук ничего не решает, и Claude Code показывает свой обычный запрос.
+
+Чат claude.ai (расширение, agent = claude-web): на WebWait фоновая часть расширения ждёт решения тем же
+длинным запросом, а получив его, нажимает в чате «Разрешить один раз» или «Отклонить». Любое другое
+событие той же вкладки (ответили прямо в чате) снимает ожидание — cancel().
 """
 import threading
 
@@ -17,9 +21,9 @@ def enabled(settings):
 def wait_seconds(settings):
     """Сколько хук ждёт кнопку, 1..120 с."""
     try:
-        return float(max(1, min(120, int(settings.get("approve_wait", 20)))))
+        return float(max(1, min(120, int(settings.get("approve_wait", 60)))))
     except (TypeError, ValueError):
-        return 20.0
+        return 60.0
 
 
 class Approvals:
@@ -50,6 +54,15 @@ class Approvals:
             if slot is None or slot[0].is_set():
                 return False
             slot[1] = decision
+            slot[0].set()
+            return True
+
+    def cancel(self, key):
+        """Ответили не кнопкой (например, нажали «Разрешить» прямо в чате): ожидание без решения."""
+        with self._lock:
+            slot = self._pending.get(key)
+            if slot is None or slot[0].is_set():
+                return False
             slot[0].set()
             return True
 

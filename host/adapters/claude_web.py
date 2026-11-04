@@ -5,7 +5,7 @@
 
   WebPrompt   {"prompt": "...", "title": "..."}   отправлен новый вопрос
   WebBusy     {"phase": "thinking"|"writing"|"tool", "tool": "..."}   Claude думает, пишет или что-то делает
-  WebWait     {"message": "..."}                  ждёт разрешения (окно «Разрешить» для инструмента)
+  WebWait     {"command": "..."} или {"message": "..."}   ждёт разрешения (окно «Разрешить» / «Allow once»)
   WebDone     {}                                  ответ готов
   WebError    {"message": "..."}                  ответ оборвался
   SessionEnd  {}                                  вкладку закрыли
@@ -48,7 +48,10 @@ def handle(ev, state, ctx):
 
     if name == "WebWait":
         state["state"] = "wait"
-        state["step"] = short(ev.get("message") or t("needs_you"), 60)
+        if ev.get("command"):                                 # окно «Allow Claude to run this command?»
+            state["step"] = short(t("allow_cmd", cmd=ev["command"]), 60)
+        else:
+            state["step"] = short(ev.get("message") or t("needs_you"), 60)
         return True
 
     if name == "WebDone":

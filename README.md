@@ -174,7 +174,7 @@ The board's BOOT button (GPIO0) works without any wiring:
 | Long (1.2 s) | Mutes or unmutes sounds |
 | Any, while the screen sleeps | Wakes it |
 
-**Approve from the board (Claude Code).** On by default while the board is connected: when Claude asks for permission, the screen shows *Hold — allow · tap — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `approve_wait` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks and the claude.ai chat cannot answer permission requests, so there the screen only shows that the agent is waiting, and a press says *Answer on the computer* (instead of muting or switching the scene). If your `config.toml` still has `button_approve = false` (older `config --init` wrote it), turn it on with `python host/daemon.py config set button_approve true`; `false` turns it off. To wait longer or shorter: `config set approve_wait 40`.
+**Approve from the board (Claude Code and the claude.ai chat).** On by default while the board is connected: when Claude asks for permission, the screen shows *Hold — allow · tap — deny* with a fill bar. Hold to allow, tap to deny. A question with options (*AskUserQuestion*) shows as *Question → first option*: hold picks that first option, tap skips the question. If nobody presses within `approve_wait` seconds (60 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. In the claude.ai chat the browser extension does the same: when a tool asks for permission, hold the button to press *Allow once* in the chat (never *Always allow*), tap it to press *Deny*; answering in the chat yourself works too and clears the hint on the board. Codex hooks cannot answer permission requests, so there the screen only shows that the agent is waiting, and a press says *Answer on the computer* (instead of muting or switching the scene). If your `config.toml` still has `button_approve = false` (older `config --init` wrote it), turn it on with `python host/daemon.py config set button_approve true`; `false` turns it off. To wait longer or shorter: `config set approve_wait 40`.
 
 A passive buzzer is optional: connect it through a ~100 Ω resistor between a free GPIO (for example 43 or 44) and GND, and set *Buzzer GPIO* in `idf.py menuconfig → Agent Status Bar`. The board then chirps on *waiting*, *done* and *error*, repeats the reminder every minute while you are away, and clicks on button actions. A second button pin can be set in the same menu.
 
@@ -448,7 +448,7 @@ The extension watches the page and shows it on the board with the Claude theme:
 |---|---|
 | You sent a question | "Thinking…", title — your question |
 | Claude is writing the answer | "Writing the answer", title — the chat name |
-| An "Allow" prompt for a tool | Waiting for you |
+| An "Allow" prompt for a tool | Waiting for you; hold the button — *Allow once*, tap — *Deny* |
 | The answer is ready | Done · "Answer ready" |
 | The tab was closed | Idle scene |
 
@@ -608,7 +608,7 @@ autostart = true         # the hook starts the daemon when it is not running
 idle_claude = "robot"    # robot | cursor
 idle_codex = "cursor"    # cursor | typist
 button_approve = true    # answer Claude Code permission requests with the button
-approve_wait = 20        # seconds the hook waits for the button (1–120)
+approve_wait = 60        # seconds the hook waits for the button (1–120)
 transport = "auto"       # auto (cable, otherwise Wi-Fi) | usb | wifi
 wifi_host = ""           # the board's IP, only if it is not found on the network by itself
 ```
