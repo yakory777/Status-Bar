@@ -450,7 +450,7 @@ python host/daemon.py pair
 | `could not open port 'COM3'`, `Access is denied`, порт занят | Порт держит другая программа — чаще всего запущенный демон или `idf.py monitor` | Закрыть Claude Code и монитор. Если не помогло, в PowerShell: `Get-CimInstance Win32_Process -Filter "Name like 'py%'" \| ? CommandLine -like '*daemon.py*' \| % { Stop-Process -Id $_.ProcessId }` |
 | После прошивки экран чёрный, мигает или только светится подсветка | Прошивка для другой платы (AMOLED-прошивка на LCD-плате или наоборот) | Для LCD — `firmware\prebuilt\agent-status-bar-tdisplay-s3.bin` или *Board: T-Display-S3* в menuconfig; для AMOLED — *T-Display-S3 AMOLED*. Проверка панели — *Flash red, green and blue at boot* |
 | Картинка вверх ногами | Плата стоит перевёрнутой | menuconfig → *Rotate the picture 180 degrees* |
-| После прошивки `wifi list` пишет `Saved networks: none` | Прошивки до 0.4.0 хранили сети там, куда пишет готовый образ, и каждая прошивка их стирала | Прошить текущую и один раз добавить сети заново (`wifi add`). Дальше они переживают любую перепрошивку |
+| После прошивки `wifi list` пишет `Saved networks: none` | Прошивки до 0.4.0 хранили сети там, куда пишет готовый образ; страница настройки до 1.0.0 стирала плату целиком без вопроса | Прошить текущую и один раз добавить сети заново. На странице настройки установщик спрашивает «Erase device» — галочку не ставить, тогда сети останутся |
 | Анимация медленная, дёргается | Старая прошивка | Прошить текущую. `idf.py -p COM3 monitor` раз в 5 с пишет `perf: … fps` — пришлите эту строку в issue |
 
 **Компьютер и Claude Code**

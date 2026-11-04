@@ -450,7 +450,7 @@ Everything we have already run into, with causes and fixes.
 | `could not open port 'COM3'`, `Access is denied`, port busy | Another program holds the port — usually a running daemon or `idf.py monitor` | Close Claude Code and the monitor. Still busy — in PowerShell: `Get-CimInstance Win32_Process -Filter "Name like 'py%'" \| ? CommandLine -like '*daemon.py*' \| % { Stop-Process -Id $_.ProcessId }` |
 | After flashing the screen is black, flickers or only the backlight glows | Firmware for the other board (AMOLED firmware on the LCD board or vice versa) | LCD — `firmware\prebuilt\agent-status-bar-tdisplay-s3.bin` or *Board: T-Display-S3* in menuconfig; AMOLED — *T-Display-S3 AMOLED*. Panel test — *Flash red, green and blue at boot* |
 | Picture upside down | The board is mounted the other way | menuconfig → *Rotate the picture 180 degrees* |
-| After flashing, `wifi list` says `Saved networks: none` | Firmware before 0.4.0 kept networks where the ready-made image writes, so every flash wiped them | Flash the current one and add the networks once more (`wifi add`). From then on they survive any reflash |
+| After flashing, `wifi list` says `Saved networks: none` | Firmware before 0.4.0 kept networks where the ready-made image writes; the setup page before 1.0.0 wiped the whole board without asking | Flash the current one and add the networks once more. On the setup page the installer asks “Erase device” — leave it unticked and the networks stay |
 | Animation slow and choppy | Old firmware | Flash the current one. `idf.py -p COM3 monitor` prints `perf: … fps` every 5 s — attach that line to an issue |
 
 **Computer and Claude Code**

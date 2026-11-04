@@ -30,8 +30,8 @@
                        ru: "Сначала закройте программу статус-бара на компьютере (Claude Code, окно демона) — пока она работает, порт занят." },
     flash_tip_boot: { en: "The board doesn't show up or flashing fails: hold BOOT, press RST, release BOOT, and try again.",
                       ru: "Плата не появляется в списке или прошивка не идёт: зажмите BOOT, нажмите RST, отпустите BOOT и попробуйте снова." },
-    flash_tip_keep: { en: "Saved Wi-Fi networks survive flashing (since 0.4.0). Don't tick “erase device” if the installer offers it.",
-                      ru: "Сохранённые сети Wi-Fi переживают прошивку (начиная с 0.4.0). Если установщик предложит «стереть устройство», не соглашайтесь." },
+    flash_tip_keep: { en: "The installer asks “Erase device” — leave it unticked and saved Wi-Fi networks stay. Tick it only to wipe the board clean.",
+                      ru: "Установщик спросит «Erase device» — оставьте галочку снятой, и сохранённые сети Wi-Fi останутся. Ставьте её, только чтобы стереть плату начисто." },
     s3_title: { en: "Wi-Fi", ru: "Wi-Fi" },
     s3_sub: { en: "The board remembers up to five networks and joins the strongest one nearby. Then it works from any charger.",
               ru: "Плата помнит до пяти сетей и подключается к самой сильной поблизости. После этого её можно питать от любой зарядки." },
@@ -144,6 +144,8 @@
 
   var ESPRESSIF_VID = 0x303A;
   var port = null, reader = null, closing = false;
+  var connecting = false, reconnecting = false;
+  var openedAt = 0;                       // порт пропал вскоре после открытия — плата перезагрузилась, а не выдернута
   var waiters = [];
   var info = { id: null, fw: null, wifi: null };
   var statusKey = "", statusCls = "", statusVars = null;
@@ -178,14 +180,16 @@
   }
 
   async function send(obj) {
+    if (!port) throw new Error("not connected");
     var w = port.writable.getWriter();
     try { await w.write(new TextEncoder().encode(JSON.stringify(obj) + "\n")); }
     finally { w.releaseLock(); }
   }
 
   async function request(obj, key, ms) {
+    if (!port) return null;
     var p = waitFor(key, ms || 3000);
-    await send(obj);
+    try { await send(obj); } catch (e) { return null; }      // порт пропал посреди запроса
     return p;
   }
 
@@ -221,9 +225,10 @@
       var busy = /busy|in use|access|failed to open/i.test(String(e && e.message));
       throw new Error(busy ? "busy" : String(e && e.message || e));
     }
-    try { await p.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) { /* не везде есть */ }
+    // Линии DTR/RTS не трогаем: у ESP32-S3 по USB их переключение — команда перезагрузки
     port = p;
     closing = false;
+    openedAt = Date.now();
     readLoop(p);
   }
 
@@ -238,6 +243,7 @@
   async function greet() {
     // Плата могла перезагрузиться при открытии порта — несколько попыток
     for (var k = 0; k < 4; k++) {
+      if (!port) return false;
       var hello = await request({ hello: { name: "web setup" } }, "welcome", 2000);
       if (hello) {
         info.id = hello.welcome.id || null;
@@ -262,13 +268,18 @@
         p = await navigator.serial.requestPort({ filters: [{ usbVendorId: ESPRESSIF_VID }] });
         setStatus("st_hello");
       }
+      connecting = true;
       await openPort(p);
     } catch (e) {
+      connecting = false;
       if (e && e.name === "NotFoundError") { setStatus(""); return false; }      // окно выбора закрыли
       setStatus(e.message === "busy" ? "st_busy" : "st_error", "bad", { msg: e.message });
       return false;
     }
-    if (!(await greet())) {
+    var ok = await greet();
+    connecting = false;
+    if (!ok && (reconnecting || !port)) return false;      // плата перезагрузилась — переподключение идёт само
+    if (!ok) {
       await closePort();
       setStatus("st_no_answer", "bad");
       render();
@@ -282,14 +293,17 @@
   // Плата перезагружается после изменения сетей: порт пропадает и появляется снова
   async function onPortLost(p) {
     port = null;
-    if (!expectReboot) {
+    if (!expectReboot && !connecting && Date.now() - openedAt > 5000) {
       info = { id: null, fw: null, wifi: null };
       setStatus("st_lost", "warn");
       render();
       return;
     }
+    var afterChange = expectReboot;          // перезагрузка после изменения сетей, а не при подключении
     expectReboot = false;
-    setStatus("st_rebooting", "info");
+    connecting = false;
+    reconnecting = true;
+    setStatus(afterChange ? "st_rebooting" : "st_hello", "info");
     render();
     var deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
@@ -301,9 +315,15 @@
       })[0];
       if (!again) continue;
       try { await openPort(again); } catch (e) { continue; }
-      if (await greet()) { await waitJoined(); return; }
+      if (await greet()) {
+        reconnecting = false;
+        if (afterChange) await waitJoined();
+        else { await refreshWifi(); setStatus("st_connected", "ok"); }
+        return;
+      }
       await closePort();
     }
+    reconnecting = false;
     setStatus("st_reconnect_manual", "warn");
     render();
   }
