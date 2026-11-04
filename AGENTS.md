@@ -64,18 +64,21 @@ cd firmware && idf.py set-target esp32s3 && idf.py build
 
 ## Rules
 
-- `hooks/forward.py` must always exit 0 and must never block the agent for long: keep network timeouts short. The only thing it may print to stdout is the PermissionRequest decision when `AGENT_STATUS_BUTTON_APPROVE=1` and the button was pressed; the wait is capped by `AGENT_STATUS_APPROVE_WAIT` (≤120 s, below the hook timeout of 130 s in `hooks/hooks.json`).
+- `hooks/forward.py` must always exit 0 and must never block the agent for long: keep network timeouts short. The only thing it may print to stdout is the PermissionRequest decision when `button_approve` is on (the default; the daemon waits only while a board is connected) and the button was pressed; the wait is capped by `AGENT_STATUS_APPROVE_WAIT` (≤120 s, below the hook timeout of 130 s in `hooks/hooks.json`).
+- During a `wait` without `approve`, the board's presses only show *Answer on the computer* (`wait_hint()` in `ui_input.c`) — they must not mute or switch scenes there.
 - Board → host lines are `{"button":"approve"|"deny"}` and `{"button":"scene_next","scene":...}`, handled in `handle_board_line()` in `host/daemon.py`. Approvals live in `host/approvals.py`.
 - The boot splash (`splash_draw()` in `ui_screen.c`) waits for Wi-Fi up to `UI_SPLASH_MAX_MS`, never shorter than `UI_SPLASH_MIN_MS`, and leaves early on Wi-Fi, a task, a pairing request or a button press (`tick_cb()`); its end time may only move closer. `platform_wifi_configured()` tells it whether there is anything to wait for; in the simulator `{"sim":{"wifi_saved":false}}` turns that off. The firmware fonts are subsets — draw symbols such as ✓ with `d_line`, not as glyphs.
 - Battery, Wi-Fi and mute indicators (`ui_icons.c`) must stay visible on every screen. A new full-screen object on `lv_layer_top()` goes below them: call `ui_icons_to_front()` after creating it. Position objects by constants, not `lv_obj_get_width()` before the first layout — it returns 0 then.
 - Button and buzzer pins are Kconfig options (`firmware/main/Kconfig.projbuild`), not hard-coded.
-- `hardware/case/case.py` generates the STL files; edit `PARAMS` there and keep `case.scad` in sync. Run it and check that every part reports watertight.
+- `hardware/case/lcd/` is the LCD + 103565 case: `geometry.py` (pure Python, also inlined into the Fusion 360 script), `fusion_builder.py`, `make.py` (fit checks, `fusion/AgentStatusBarCase/`). Parts are boxes: `solids` minus `holes` plus `inner` (features inside the cut cavity), then round `cyl_holes`, side `prisms` (legs), the front `logo` and the wall `deco` slots (sketch profiles cut in Fusion). Fusion is the source of the STL files (exported by the script). Edit `geometry.py`, rerun `make.py` — it must report no clashes.
+- `hardware/case/amoled/case.py` generates the AMOLED case STL files; edit `PARAMS` there and keep `case.scad` in sync. Run it and check that every part reports watertight.
 - Python on the host side: standard library only, except `pyserial` in the daemon (imported lazily, so `daemon.py config` works without it). `hooks/forward.py` imports `host/config.py` on every event — keep it light.
 - Never hard-code a user-facing string: on the board use `tr()` from `ui_i18n.h`, on the host `i18n.t()`, and add both `en` and `ru`. Host log lines are English.
 - Firmware: all LVGL calls go through `ui_lock()`/`ui_unlock()` in `main.c`; LVGL is not thread-safe.
 - LVGL 9.2: object fields are private — use accessors (`lv_obj_get_coords`, `dctx_from_event`), not `obj->coords`.
 - After changing anything in `firmware/main/ui_*.c`, run the relevant simulator scenario and look at the frames (`--png-at`).
 - Keep `README.md` (English) and `README.ru.md` (Russian) in sync when behavior or setup changes.
+- The project logo (`docs/logo/logo.svg`) is drawn in three places with the same shapes on a 100 × 100 grid: the SVG, `draw_logo()` in `ui_screen.c` (the splash opens with it for `LOGO_INTRO` seconds) and `LOGO` in `hardware/case/lcd/geometry.py` (engraved on the case front). Change all three together; the README banners `docs/logo/banner-*.png` are rendered from the SVG.
 - Mascots are original characters. Do not add logos or brand characters of Anthropic, OpenAI or anyone else; brand colors are fine.
 - Bump `version` in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` and `.codex-plugin/plugin.json` together.
 - Never hard-code screen sizes in UI code beyond `UI_W`/`UI_H` (536×240): the LCD board relies on scaling that size.

@@ -274,8 +274,8 @@ class ButtonApprovals(unittest.TestCase):
 
     def test_env_switch(self):
         from approvals import enabled, wait_seconds
-        self.assertFalse(enabled(settings()))
-        self.assertTrue(enabled(settings(AGENT_STATUS_BUTTON_APPROVE="1")))
+        self.assertTrue(enabled(settings()))                              # по умолчанию включено
+        self.assertFalse(enabled(settings(AGENT_STATUS_BUTTON_APPROVE="0")))
         self.assertEqual(wait_seconds(settings(AGENT_STATUS_APPROVE_WAIT="500")), 120.0)
 
     def test_scene_choice_from_button(self):
@@ -331,9 +331,23 @@ class Language(unittest.TestCase):
 class Config(unittest.TestCase):
     def test_defaults_and_env(self):
         c = settings()
-        self.assertEqual((c["http_port"], c["idle_claude"], c["button_approve"]), (8765, "robot", False))
+        self.assertEqual((c["http_port"], c["idle_claude"], c["button_approve"]), (8765, "robot", True))
         c = settings(AGENT_STATUS_PORT="9000", AGENT_STATUS_AUTOSTART="0", AGENT_STATUS_LANG="EN")
         self.assertEqual((c["http_port"], c["autostart"], c["language"]), (9000, False, "en"))
+
+    def test_set_value(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            env = {"AGENT_STATUS_HOME": d}
+            config.set_value("button_approve", "false", env)
+            config.set_value("approve_wait", "35", env)
+            config.set_value("wifi_host", "192.168.1.7", env)
+            c = config.load(env)
+            self.assertEqual((c["button_approve"], c["approve_wait"], c["wifi_host"]), (False, 35, "192.168.1.7"))
+            config.set_value("button_approve", "on", env)
+            self.assertTrue(config.load(env)["button_approve"])
+            with open(config.config_path(env), encoding="utf-8") as fh:
+                self.assertEqual(fh.read().count("button_approve ="), 1)
 
     def test_auto_language_from_locale(self):
         self.assertEqual(settings(LANG="ru_RU.UTF-8")["language"], "ru")

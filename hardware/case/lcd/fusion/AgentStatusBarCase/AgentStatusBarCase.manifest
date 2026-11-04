@@ -1,0 +1,8 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "script",
+  "author": "yakory777",
+  "description": {"": "Agent Status Bar case: T-Display-S3 LCD + 103565 battery"},
+  "supportedOS": "windows|mac",
+  "editEnabled": true
+}

@@ -21,6 +21,7 @@ typedef enum {
     TR_SCENE_ROBOT, TR_SCENE_CURSOR, TR_SCENE_TYPIST,
     TR_PAIR_TITLE, TR_PAIR_HINT1, TR_PAIR_HINT2, TR_PAIRED, TR_PAIR_CANCELLED,
     TR_BOOT_WIFI_WAIT, TR_BOOT_WIFI_OK, TR_BOOT_WIFI_NONE,
+    TR_ANSWER_ON_PC,    /* ждём решения, но кнопкой его не принять */
     TR_COUNT
 } tr_id_t;
 

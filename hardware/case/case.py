@@ -52,6 +52,7 @@ class Part:
     def __init__(self, name):
         self.name = name
         self.solids, self.holes = [], []
+        self.inner = []                         # блоки, которые добавляются после вырезов (внутри полости)
 
     def add(self, *b):
         self.solids.append(tuple(map(float, b)))
@@ -63,7 +64,7 @@ class Part:
 
     def mesh(self):
         """Треугольники поверхности: массив (N, 3, 3)."""
-        boxes = self.solids + self.holes
+        boxes = self.solids + self.holes + self.inner
         xs = sorted({b[0] for b in boxes} | {b[3] for b in boxes})
         ys = sorted({b[1] for b in boxes} | {b[4] for b in boxes})
         zs = sorted({b[2] for b in boxes} | {b[5] for b in boxes})
@@ -80,6 +81,8 @@ class Part:
             fill |= inside(b)
         for b in self.holes:
             fill &= ~inside(b)
+        for b in self.inner:
+            fill |= inside(b)
 
         pad = np.pad(fill, 1)                       # снаружи — пусто
         tris = []

@@ -16,7 +16,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Syntax check
-        run: python -m py_compile hooks/forward.py host/*.py host/adapters/*.py hardware/case/case.py tools/*.py tools/sim/*.py
+        run: python -m py_compile hooks/forward.py host/*.py host/adapters/*.py hardware/case/amoled/case.py hardware/case/lcd/geometry.py hardware/case/lcd/make.py tools/*.py tools/sim/*.py
       - name: Adapter tests
         run: python tests/test_adapters.py
       - name: Wi-Fi link against a fake board

@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo/banner-en.png" width="720" alt="Agent Status Bar"></p>
+
 # Agent Status Bar
 
 **English** · [Русский](README.ru.md)
@@ -78,7 +80,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
     <td align="center"><img src="docs/firmware/en/codex/wait.gif" width="400" alt="Waiting too long, Codex"></td>
   </tr>
   <tr>
-    <td colspan="2"><b>Button: approve, deny, next scene, mute</b> — Hold to allow, tap to deny (Claude Code, opt-in). A double press switches the idle scene, a long press mutes — the crossed-out speaker stays in the corner.</td>
+    <td colspan="2"><b>Button: approve, deny, next scene, mute</b> — Hold to allow, tap to deny (Claude Code). When the wait cannot be answered with the button, the board says *Answer on the computer*. The rest of the time a double press switches the idle scene, a long press mutes — the crossed-out speaker stays in the corner.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/firmware/en/claude/button.gif" width="400" alt="Button: approve, deny, next scene, mute, Claude"></td>
@@ -121,7 +123,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
   </tr>
   <tr>
     <td align="center" valign="top"><img src="docs/firmware/en/sessions.gif" width="400" alt="Several sessions"><br><b>Several sessions</b><br>Codex works in one terminal, Claude asks for permission in another: the screen shows whatever needs you, the rest is a “+1 session” badge and the theme follows the session on screen.</td>
-    <td align="center" valign="top"><img src="docs/firmware/en/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>A starry sky, the mascots take turns hopping and sending hearts, the name shimmers, and the bottom shows the Wi-Fi status and a loading bar. It waits up to 15 seconds for Wi-Fi and leaves as soon as the network is up; press the button to skip.</td>
+    <td align="center" valign="top"><img src="docs/firmware/en/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>The logo draws itself in the middle — the prompt, the progress segments, the "live" dot — then flies next to the name; a starry sky, the mascots take turns hopping and sending hearts, the name shimmers, and the bottom shows the Wi-Fi status and a loading bar. It waits up to 15 seconds for Wi-Fi and leaves as soon as the network is up; press the button to skip.</td>
   </tr>
 </table>
 
@@ -172,7 +174,7 @@ The board's BOOT button (GPIO0) works without any wiring:
 | Long (1.2 s) | Mutes or unmutes sounds |
 | Any, while the screen sleeps | Wakes it |
 
-**Approve from the board (Claude Code, opt-in).** Set `button_approve = true` in the [settings file](#settings-file) (or `AGENT_STATUS_BUTTON_APPROVE=1`) and, when Claude asks for permission, the screen shows *Hold — allow · tap — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `approve_wait` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks cannot answer permission requests, so there the screen only shows that it is waiting.
+**Approve from the board (Claude Code).** On by default while the board is connected: when Claude asks for permission, the screen shows *Hold — allow · tap — deny* with a fill bar. Hold to allow, tap to deny. If nobody presses within `approve_wait` seconds (20 by default), the hook steps aside and Claude Code shows its usual prompt — so for that time the prompt in the terminal appears a little later. Codex hooks and the claude.ai chat cannot answer permission requests, so there the screen only shows that the agent is waiting, and a press says *Answer on the computer* (instead of muting or switching the scene). If your `config.toml` still has `button_approve = false` (older `config --init` wrote it), turn it on with `python host/daemon.py config set button_approve true`; `false` turns it off. To wait longer or shorter: `config set approve_wait 40`.
 
 A passive buzzer is optional: connect it through a ~100 Ω resistor between a free GPIO (for example 43 or 44) and GND, and set *Buzzer GPIO* in `idf.py menuconfig → Agent Status Bar`. The board then chirps on *waiting*, *done* and *error*, repeats the reminder every minute while you are away, and clicks on button actions. A second button pin can be set in the same menu.
 
@@ -205,13 +207,42 @@ No soldering required.
 
 ### Case
 
-`hardware/case/` has a three-part 3D-printable case: a tray with room for a small Li-ion cell under the board and openings for USB-C and the side buttons, a screen bezel that snaps in, and a 22° desk stand. The STL files are ready to slice (PLA, 0.2 mm layers, no supports; print the bezel face down). Assembled it is about 65 × 30 × 19 mm.
+**T-Display-S3 (LCD) + 103565 battery** — in [`hardware/case/lcd/`](hardware/case/lcd/). Three printed parts, 82 × 42.9 × 28.2 mm without the cheeks. The case stands on the desk by itself, the screen at 60° to the desk: the end walls continue into rounded side cheeks with cut-outs, one piece with the shell. The project logo is engraved 0.5 mm deep on the front, next to the screen, and both long walls carry a row of slanted decorative slots, 1 mm deep (half the wall, so nothing shows through), longest in the middle.
+
+<p align="center"><img src="hardware/case/lcd/case-front.png" width="210" alt="Case, front with the logo"> <img src="hardware/case/lcd/case-top.png" width="210" alt="Decorative slots on the top wall"> <img src="hardware/case/lcd/case-back.png" width="210" alt="Case, back"> <img src="hardware/case/lcd/fusion-inside.png" width="210" alt="Case without the lid"></p>
+
+Ready-to-slice STL files (millimetres, every part checked watertight):
+
+| File | Part | Print orientation | Size, mm |
+|---|---|---|---|
+| [`asb-lcd-shell.stl`](hardware/case/lcd/asb-lcd-shell.stl) | Shell with the cheeks, window, pushers, logo, decorative slots | face (screen side) down | 82 × 57.7 × 55.1 |
+| [`asb-lcd-divider.stl`](hardware/case/lcd/asb-lcd-divider.stl) | Divider: board rails, battery nest, lid standoffs | nest up | 77.5 × 38.4 × 14.2 |
+| [`asb-lcd-lid.stl`](hardware/case/lcd/asb-lcd-lid.stl) | Back lid with the engraving | engraving up | 77.6 × 38.5 × 2.4 |
+
+PLA or PETG, 0.2 mm layers, no supports.
+
+You also need: eight **M2×8** self-tapping screws (pan head up to Ø4 mm), a 103565 Li-ion cell with a 2-pin 1.25 mm plug for the board, optionally an SS12D00 slide switch.
+
+Assembly:
+1. Board face down into the shell, USB-C into the end opening.
+2. Divider on top — its rails press the board. **Four screws** in the corners go through the divider into the shell's columns.
+3. Battery into the nest (0.3 mm clearance, snug), wires through the notch and the hole by the end.
+4. Lid flush on top — **four screws** into the divider's standoffs at the ends. To change the battery, remove only the lid: the board stays clamped.
+
+Each level has its own screws, so nothing rattles even with the lid off. The buttons are pressed through the case: a flexible **BOOT pusher** on the front and the same **RESET pusher** on the top (a tongue with a nub reaching the button). The end opposite the USB has an opening for an SS12D00 switch closed by a 0.6 mm skin — cut it out when you fit the switch.
+
+Changing the case: dimensions live in `geometry.py`; `python hardware/case/lcd/make.py` checks how the board, battery and screw heads fit and rebuilds the Fusion 360 script (`fusion/AgentStatusBarCase`: Utilities → Scripts and Add-Ins → "+" → Run), which builds the model with full history and saves the STL files next to itself. Board dimensions (62 × 26 × 10 mm) come from specs and have not been checked against a real board: check the BOOT (`boot_from_usb`, `boot_dy`) and RESET (`rst_from_usb`, `rst_from_back`) button positions, the nub height (`nub_h`) and the display window before printing.
+
+**T-Display-S3 AMOLED** — below.
+
+
+[`hardware/case/amoled/`](hardware/case/amoled/) has a three-part 3D-printable case: a tray with room for a small Li-ion cell under the board and openings for USB-C and the side buttons, a screen bezel that snaps in, and a 22° desk stand. The STL files are ready to slice (PLA, 0.2 mm layers, no supports; print the bezel face down). Assembled it is about 65 × 30 × 19 mm.
 
 <p align="center">
-  <img src="hardware/case/preview.png" width="720" alt="Tray, bezel and stand">
+  <img src="hardware/case/amoled/preview.png" width="720" alt="Tray, bezel and stand">
 </p>
 
-Dimensions come from the board specs (60 × 25.5 × 10 mm), not from a drawing — measure your board and change `PARAMS` in `hardware/case/case.py` (or the variables in `case.scad` for OpenSCAD), then run `python hardware/case/case.py` (needs `numpy` and `matplotlib`) to regenerate the STL. LilyGO also publishes an official case model in the [board repository](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED) (`shell/`).
+Dimensions come from the board specs (60 × 25.5 × 10 mm), not from a drawing — measure your board and change `PARAMS` in `hardware/case/amoled/case.py` (or the variables in `case.scad` for OpenSCAD), then run `python hardware/case/amoled/case.py` (needs `numpy` and `matplotlib`) to regenerate the STL. LilyGO also publishes an official case model in the [board repository](https://github.com/Xinyuan-LilyGO/T-Display-S3-AMOLED) (`shell/`).
 
 ## Step-by-step setup from scratch
 
@@ -271,7 +302,7 @@ py -3 -m esptool --chip esp32s3 -p COM3 -b 460800 write_flash 0x0 firmware\prebu
 
 It takes about a minute and ends with `Hash of data verified`. `Failed to connect` — hold BOOT, press RST, release BOOT and run it again.
 
-After flashing press RST or replug the cable. You'll see the splash — it waits up to 15 seconds for Wi-Fi (4.5 seconds with no networks saved; press the button to skip) — and then the idle scene with **"No connection to the computer"** at the top — that's expected: nothing on the computer is talking to the board yet.
+After flashing press RST or replug the cable. You'll see the splash — it waits up to 15 seconds for Wi-Fi (6 seconds with no networks saved; press the button to skip) — and then the idle scene with **"No connection to the computer"** at the top — that's expected: nothing on the computer is talking to the board yet.
 
 ### Step 7. Test without an agent
 
@@ -566,6 +597,7 @@ The daemon and the hooks read `~/.agent-status/config.toml`. Create it with comm
 ```bash
 python host/daemon.py config --init   # creates ~/.agent-status/config.toml
 python host/daemon.py config          # prints the effective settings and where each comes from
+python host/daemon.py config set button_approve true   # changes one setting in the file
 ```
 
 ```toml
@@ -575,7 +607,7 @@ http_port = 8765
 autostart = true         # the hook starts the daemon when it is not running
 idle_claude = "robot"    # robot | cursor
 idle_codex = "cursor"    # cursor | typist
-button_approve = false   # answer Claude Code permission requests with the button
+button_approve = true    # answer Claude Code permission requests with the button
 approve_wait = 20        # seconds the hook waits for the button (1–120)
 transport = "auto"       # auto (cable, otherwise Wi-Fi) | usb | wifi
 wifi_host = ""           # the board's IP, only if it is not found on the network by itself
@@ -651,7 +683,8 @@ firmware/main/         ESP-IDF project, LVGL 9:
   ui_i18n.c              on-screen labels in English and Russian
   net_esp.c              Wi-Fi: saved networks, discovery, TCP link, trusted computers, pairing
   platform_esp.c         brightness, battery ADC, buzzer; input_esp.c — buttons; display_st7789.c, display_rm67162.c — panel drivers (LCD, AMOLED), display_scale.c — scaling for the LCD
-hardware/case/         3D-printable case: case.py (generator), case.scad, STL, preview
+hardware/case/lcd/     LCD + 103565 case: geometry.py, make.py, Fusion 360 script, STL
+hardware/case/amoled/  AMOLED case: case.py (generator), case.scad, STL, preview
 docs/firmware/         firmware GIFs: en/ and ru/, each with claude/ and codex/; browser emulator in docs/
 tools/                 renderers for the design previews
 tools/windows/         autostart.cmd — start the daemon at Windows sign-in (for the extension)

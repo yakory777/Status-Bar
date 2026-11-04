@@ -10,7 +10,7 @@
 #define UI_BRIGHT_ON        0xD0
 #define UI_BRIGHT_SLEEP     0x30
 #define UI_SPLASH_MAX_MS    15000              /* заставка ждёт Wi-Fi не дольше 15 с */
-#define UI_SPLASH_MIN_MS    4500               /* и не меньше — анимация успевает отыграть */
+#define UI_SPLASH_MIN_MS    6000               /* и не меньше — логотип и анимация успевают отыграть */
 #define UI_SPLASH_WIFI_MS   1500               /* Wi-Fi подключился — ещё полторы секунды «готово» */
 #define UI_SPLASH_TASK_MS   2200               /* пришла задача — уступаем раньше, но не моргаем */
 #define UI_DONE_TO_IDLE_MS  (90 * 1000)        /* «Готово» висит полторы минуты, потом сцена ожидания */

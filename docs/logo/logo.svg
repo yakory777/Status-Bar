@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+  <!-- Agent Status Bar logo. Same shapes in firmware/main/ui_screen.c (draw_logo) and hardware/case/lcd/geometry.py (LOGO). -->
+  <rect x="7.5" y="17.5" width="85" height="65" rx="12" fill="#17151C" stroke="#F5F0E8" stroke-width="7"/>
+  <polyline points="24,34 40,46 24,58" fill="none" stroke="#D97757" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="46" y="52" width="16" height="6" rx="1.5" fill="#F5F0E8"/>
+  <rect x="22" y="67" width="10" height="7" rx="1.5" fill="#D97757"/>
+  <rect x="34" y="67" width="10" height="7" rx="1.5" fill="#FFD68C"/>
+  <rect x="46" y="67" width="10" height="7" rx="1.5" fill="#78E6C4"/>
+  <rect x="58" y="67" width="10" height="7" rx="1.5" fill="#3A3A40"/>
+  <rect x="70" y="67" width="10" height="7" rx="1.5" fill="#3A3A40"/>
+  <circle cx="78" cy="32" r="8" fill="#78E6C4" opacity="0.25"/>
+  <circle cx="78" cy="32" r="4.5" fill="#78E6C4"/>
+</svg>

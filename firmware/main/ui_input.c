@@ -53,9 +53,20 @@ static bool answer_pairing(bool accept)
     return true;
 }
 
+/* Ждём решения, но хост не предложил ответить кнопкой (button_approve выключен, Codex или хук уже
+ * отпустил запрос): нажатия не выключают звук и не листают сцены, а подсказывают, где отвечать. */
+static bool wait_hint(void)
+{
+    if (ui_status_get_state() != ST_WAIT || ui_status_approve_pending()) return false;
+    ui_sound_play(SND_CLICK);
+    ui_screen_toast(tr(TR_ANSWER_ON_PC), ui_status_state_color(ST_WAIT));
+    return true;
+}
+
 static void on_short(void)
 {
     if (answer_pairing(true)) return;
+    if (wait_hint()) return;
     if (ui_status_approve_pending()) {
         send_button("deny", NULL);
         ui_status_set_approve(false);
@@ -70,6 +81,7 @@ static void on_short(void)
 static void on_long(void)
 {
     if (answer_pairing(false)) return;
+    if (wait_hint()) return;
     if (ui_status_approve_pending()) {
         send_button("approve", NULL);
         ui_status_set_approve(false);
@@ -99,7 +111,7 @@ static void tick_cb(lv_timer_t *t)
         return;
     }
     if (clicks && lv_tick_elaps(last_up_t) >= UI_DOUBLE_CLICK_MS) {
-        if (clicks >= 2) next_scene();
+        if (clicks >= 2 && !wait_hint()) next_scene();
         else on_short();
         clicks = 0;
     }

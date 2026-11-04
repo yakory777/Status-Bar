@@ -1,8 +1,8 @@
 """
 Решение запросов разрешения кнопкой на плате.
 
-Хук PermissionRequest (только Claude Code, только при button_approve = true в настройках
-или AGENT_STATUS_BUTTON_APPROVE=1) ждёт ответа от демона до approve_wait секунд. Плата показывает подсказку
+Хук PermissionRequest (только Claude Code; button_approve в настройках, по умолчанию включено,
+выключить — AGENT_STATUS_BUTTON_APPROVE=0) ждёт ответа, если плата на связи, от демона до approve_wait секунд. Плата показывает подсказку
 «удержать — разрешить · нажать — отклонить» и присылает {"button":"approve"|"deny"}.
 Нет нажатия — хук ничего не решает, и Claude Code показывает свой обычный запрос.
 """

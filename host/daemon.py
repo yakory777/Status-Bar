@@ -390,7 +390,15 @@ def demo():
 
 
 def show_config():
-    """python host/daemon.py config [--init]"""
+    """python host/daemon.py config [--init] | config set KEY VALUE"""
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if len(args) >= 2 and args[1] == "set":
+        if len(args) != 4 or args[2] not in config.DEFAULTS:
+            print("usage: config set KEY VALUE; keys: " + ", ".join(config.DEFAULTS), file=sys.stderr)
+            sys.exit(2)
+        path, val = config.set_value(args[2], args[3])
+        print(f"{args[2]} = {json.dumps(val)}  → {path}")
+        return
     if "--init" in sys.argv:
         path, created = config.init_file()
         print(("created " if created else "already exists: ") + path)

@@ -8,6 +8,7 @@
 
     python host/daemon.py config          # показать итоговые настройки и путь к файлу
     python host/daemon.py config --init   # создать файл с комментариями
+    python host/daemon.py config set button_approve true   # поменять одну настройку
 
 Рядом с конфигом лежит state.json — то, что демон запоминает сам (сцена, выбранная кнопкой).
 Только стандартная библиотека: хук импортирует этот модуль на каждом событии.
@@ -22,7 +23,7 @@ DEFAULTS = {
     "autostart": True,         # хук сам поднимает демон
     "idle_claude": "robot",    # robot | cursor
     "idle_codex": "cursor",    # cursor | typist
-    "button_approve": False,   # решать запросы разрешения кнопкой (Claude Code)
+    "button_approve": True,    # решать запросы разрешения кнопкой (Claude Code); ждём, только если плата на связи
     "approve_wait": 20,        # сколько секунд хук ждёт кнопку, 1..120
     "transport": "auto",       # auto — кабель, а без него Wi-Fi | usb | wifi
     "wifi_host": "",           # IP платы, если поиск в сети не проходит (роутер режет широковещание)
@@ -190,6 +191,28 @@ def init_file(env=None):
     with open(path, "w", encoding="utf-8") as f:
         f.write(TEMPLATE.format(**vals))
     return path, True
+
+
+def set_value(key, value, env=None):
+    """Записать одну настройку в файл (создав его при необходимости). Возвращает (путь, значение)."""
+    import re
+    if key not in DEFAULTS:
+        raise KeyError(key)
+    val = _coerce(key, value)
+    text = str(val).lower() if isinstance(val, bool) else (str(val) if isinstance(val, int) else json.dumps(val))
+    path, _ = init_file(env)
+    with open(path, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    pat = re.compile(r"^\s*" + re.escape(key) + r"\s*=")
+    for i, line in enumerate(lines):
+        if pat.match(line):
+            lines[i] = f"{key} = {text}"
+            break
+    else:
+        lines.append(f"{key} = {text}")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return path, val
 
 
 # ---------- то, что демон запоминает сам ----------

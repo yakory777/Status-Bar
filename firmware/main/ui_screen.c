@@ -172,6 +172,51 @@ static void draw_heart(dctx_t *d, float x, float y, float age, uint32_t col, flo
     draw_ascii_sprite(d, HEART, 7, 6, "H", cols, x + sinf(age * 7) * 3, y - age * 34, 14 * s, 12 * s, a);
 }
 
+/* ---------- логотип: экран с «>_», делениями прогресса и точкой «в эфире» ----------
+ * Те же фигуры, что в docs/logo/logo.svg и LOGO в hardware/case/lcd/geometry.py: квадрат 100 × 100 единиц.
+ * s — пикселей на единицу; t — секунды от начала появления (большие t — всё уже на месте). */
+
+#define LOGO_INTRO  1.5f                 /* сколько логотип один в центре, с */
+#define LOGO_FLY    0.55f                /* перелёт к названию, с */
+
+static void draw_logo(dctx_t *d, float cx, float cy, float s, float t, float k)
+{
+#define LX(u) (cx + ((u) - 50) * s)
+#define LY(v) (cy + ((v) - 50) * s)
+    const lv_color_t cream = c_hex(0xF5F0E8);
+    float fa = clamp01(t / 0.2f) * k;
+    d_rect(d, LX(4), LY(14), LX(96), LY(86), c_dim(cream, fa), LV_OPA_COVER, (int32_t)(15.5f * s));
+    d_rect(d, LX(11), LY(21), LX(89), LY(79), c_dim(c_hex(0x17151C), fa), LV_OPA_COVER, (int32_t)(8.5f * s));
+
+    float p = clamp01((t - 0.25f) / 0.3f);                                   /* «>» прочерчивается */
+    if (p > 0) {
+        lv_color_t o = c_dim(c_hex(C_CLAUDE), k);
+        float a = clamp01(p * 2), b = clamp01(p * 2 - 1);
+        d_line(d, LX(24), LY(34), LX(24 + 16 * a), LY(34 + 12 * a), 7 * s, o, LV_OPA_COVER);
+        if (b > 0) d_line(d, LX(40), LY(46), LX(40 - 16 * b), LY(46 + 12 * b), 7 * s, o, LV_OPA_COVER);
+    }
+    if (t > 0.55f && fmodf(t - 0.55f, 1.0f) < 0.6f)                          /* курсор мигает */
+        d_rect(d, LX(46), LY(52), LX(62), LY(58), c_dim(cream, k), LV_OPA_COVER, (int32_t)(1.5f * s));
+
+    static const uint32_t SEG[3] = { C_CLAUDE, C_GOLD, C_MINT };
+    for (int i = 0; i < 5; i++) {
+        float u = 22 + 12 * i;
+        float on = i < 3 ? clamp01((t - 0.6f - i * 0.15f) / 0.12f) : 0;
+        lv_color_t c = c_mix(c_hex(0x3A3A40), c_hex(i < 3 ? SEG[i] : 0x3A3A40), on);
+        if (i == 3 && t > 1.2f) c = c_mix(c, c_hex(C_GOLD), 0.25f + 0.25f * sinf(t * 5));   /* четвёртое — «в работе» */
+        float pop = i < 3 && on > 0 && on < 1 ? 1.5f * (1 - on) : 0;
+        d_rect(d, LX(u - pop), LY(67 - pop), LX(u + 10 + pop), LY(74 + pop), c_dim(c, fa), LV_OPA_COVER, (int32_t)(1.5f * s));
+    }
+    float da = clamp01((t - 1.0f) / 0.2f) * k;                               /* точка «в эфире» пульсирует */
+    if (da > 0) {
+        float pulse = 0.5f + 0.5f * sinf((t - 1.0f) * 4);
+        d_circle(d, LX(78), LY(32), (6 + 3 * pulse) * s, c_dim(c_hex(C_MINT), da * 0.3f), LV_OPA_COVER);
+        d_circle(d, LX(78), LY(32), 4.5f * s, c_dim(c_hex(C_MINT), da), LV_OPA_COVER);
+    }
+#undef LX
+#undef LY
+}
+
 /* текст по буквам: каждая буква своим цветом и своей высотой (только ASCII) */
 typedef lv_color_t (*letter_color_fn)(int i, float t);
 static void d_letters(dctx_t *d, const lv_font_t *f, const char *txt, float x0, float base, float t,
@@ -202,6 +247,20 @@ static void splash_draw(lv_event_t *e)
     d_fill(&d, lv_color_black());
     draw_stars(&d, t, k);
     draw_meteor(&d, t, k);
+
+    /* сначала логотип крупно в центре, потом он перелетает к названию, и начинается остальное */
+    const lv_font_t *ft = ui_status_font(1), *fs = ui_status_font(0);
+    const char *title = "Agent Status Bar";
+    const float ls = 0.42f, gap = 10;                                        /* маленький логотип у названия */
+    float lock_w = 92 * ls + gap + text_w(ft, title);
+    float tx = (UI_W - lock_w) / 2 + 92 * ls + gap;                          /* название сдвинуто вправо */
+    float q = ease_out_q(clamp01((t - LOGO_INTRO) / LOGO_FLY));
+    float lpop = t < 0.45f ? 1 - springf(t, 1.6f, 6.0f) * 0.35f : 1;         /* выпрыгивает */
+    float big = 1.25f * lpop;
+    draw_logo(&d, lerpf(UI_W / 2.0f, (UI_W - lock_w) / 2 + 46 * ls, q), lerpf(108, 164 - 10, q),
+              lerpf(big, ls, q), t, k);
+    t -= LOGO_INTRO;                                                         /* дальше — прежняя заставка */
+    if (t < 0) return;
 
     /* маскоты: падают, пружинят, потом прыгают по очереди и пускают сердечки */
     float cx = UI_W / 2.0f, ground = 118;
@@ -240,10 +299,8 @@ static void splash_draw(lv_event_t *e)
         draw_heart(&d, cx + (j % 2 ? 26 : -26), ground - 56, t - at, HC[j % 4], k);
     }
 
-    /* название по буквам, перелив; подпись волной */
-    const lv_font_t *ft = ui_status_font(1), *fs = ui_status_font(0);
-    const char *title = "Agent Status Bar";
-    d_letters(&d, ft, title, (UI_W - text_w(ft, title)) / 2, 164, t, 0.8f, 0.05f, 0, 0, title_color, k);
+    /* название по буквам рядом с логотипом, перелив; подпись волной */
+    d_letters(&d, ft, title, tx, 164, t, 0.4f, 0.05f, 0, 0, title_color, k);
     const char *credit = "prod by yakory777";
     d_letters(&d, fs, credit, (UI_W - text_w(fs, credit)) / 2, 193, t, 1.7f, 0.035f, 2.5f, 8, credit_color, k);
 
@@ -276,7 +333,7 @@ static void splash_draw(lv_event_t *e)
     }
     if (line[0]) d_text(&d, fs, line, (UI_W - text_w(fs, line)) / 2, 222, c_dim(lc, st), LV_OPA_COVER);
 
-    float prog = clamp01(t / end);
+    float prog = clamp01((t + LOGO_INTRO) / end);
     float bw = UI_W - 2 * 120.0f, bx = 120, by = 232;
     d_rect(&d, bx, by, bx + bw, by + 3, c_dim(c_hex(0x2C2C2E), k), LV_OPA_COVER, 2);
     if (prog > 0.01f) {

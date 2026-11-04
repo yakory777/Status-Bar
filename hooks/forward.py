@@ -9,7 +9,7 @@
 Настройки — host/config.py: ~/.agent-status/config.toml и переменные AGENT_STATUS_*.
 Хук всегда завершается с кодом 0 и никогда не мешает работе агента.
 
-Решение кнопкой (button_approve = true, только Claude Code): на PermissionRequest
+Решение кнопкой (button_approve, по умолчанию включено, только Claude Code): на PermissionRequest
 хук ждёт нажатия до approve_wait секунд (по умолчанию 20) и печатает решение.
 Не нажали — хук молчит, и Claude Code спрашивает как обычно.
 """
@@ -33,7 +33,7 @@ try:
     i18n.set_language(SETTINGS["language"])
 except Exception:                       # хук не должен падать ни при каких настройках
     config = i18n = None
-    SETTINGS = {"http_port": 8765, "autostart": True, "button_approve": False, "approve_wait": 20}
+    SETTINGS = {"http_port": 8765, "autostart": True, "button_approve": True, "approve_wait": 20}
 
 PORT = SETTINGS["http_port"]
 URL = f"http://127.0.0.1:{PORT}/"
