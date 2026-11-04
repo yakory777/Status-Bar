@@ -73,41 +73,216 @@ static const uint32_t ROBOT_COLS[] = { 0xD97757, 0xA04E34, 0x26140E, 0xA04E34, 0
 static const uint32_t SLIME_COLS[] = { 0x10A37F, 0x78E6C4, 0x096C54, 0x061C16 };
 
 /* ---------- заставка ---------- */
+/*
+ * Ночное небо, робот Claude и слайм Codex по очереди подпрыгивают и пускают сердечки,
+ * название набирается по буквам переливом оранжевого в зелёный, подпись «prod by yakory777»
+ * колышется волной. Внизу — статус Wi-Fi и полоска загрузки. Заставка ждёт Wi-Fi до 15 с
+ * (UI_SPLASH_MAX_MS), уходит раньше, когда сеть подключилась, пришла задача, сопряжение
+ * или нажали кнопку, — см. tick_cb().
+ */
+
+static uint32_t splash_end = UI_SPLASH_MAX_MS;   /* когда заставка уходит, мс от старта; только уменьшается */
+static uint32_t boot_wifi_at;                    /* когда подключился Wi-Fi (0 — ещё нет) */
+static bool boot_skip;                           /* нажали кнопку или пришло сопряжение */
+static uint32_t splash_fade = 450;               /* затухание в конце, мс; при пропуске короче */
+
+static const char *const HEART[6] = { ".HH.HH.", "HHHHHHH", "HHHHHHH", ".HHHHH.", "..HHH..", "...H..." };
+
+#define C_CLAUDE 0xD97757
+#define C_GOLD   0xFFD68C
+#define C_CODEX  0x10A37F
+#define C_MINT   0x78E6C4
+
+/* переливы по кругу: оранжевый → золотой → зелёный → мятный → оранжевый */
+static lv_color_t shimmer(float u)
+{
+    static const uint32_t P[4] = { C_CLAUDE, C_GOLD, C_CODEX, C_MINT };
+    u -= floorf(u);
+    float x = u * 4;
+    int i = (int)x;
+    return c_mix(c_hex(P[i % 4]), c_hex(P[(i + 1) % 4]), x - i);
+}
+
+static float hash01(uint32_t n)                    /* детерминированный «случай» для звёзд */
+{
+    n ^= n >> 16; n *= 0x7FEB352Du;
+    n ^= n >> 15; n *= 0x846CA68Bu;
+    n ^= n >> 16;
+    return (n >> 8) / 16777216.0f;
+}
+
+/* падающая звезда раз в несколько секунд: голова и хвост переливом */
+static void draw_meteor(dctx_t *d, float t, float k)
+{
+    const float every = 3.6f, dur = 0.7f;
+    if (t < 2.2f) return;
+    int n = (int)((t - 2.2f) / every);
+    float p = (t - 2.2f - n * every) / dur;
+    if (p > 1) return;
+    float x0 = 120 + hash01(n * 13 + 3) * 300, y0 = 10 + hash01(n * 13 + 4) * 30;
+    float hx = x0 + p * 170, hy = y0 + p * 70;
+    float a = sinf(p * (float)M_PI) * k;
+    for (int j = 0; j < 6; j++) {
+        float q = j / 6.0f;
+        d_line(d, hx - (q) * 60, hy - q * 24.7f, hx - (q + 1 / 6.0f) * 60, hy - (q + 1 / 6.0f) * 24.7f, 2.2f - q * 1.6f,
+               c_dim(shimmer(n * 0.3f + q * 0.4f), a * (1 - q)), LV_OPA_COVER);
+    }
+    d_circle(d, hx, hy, 2.2f, c_dim(c_hex(0xFFFFFF), a), LV_OPA_COVER);
+}
+
+static void draw_stars(dctx_t *d, float t, float k)
+{
+    for (int i = 0; i < 46; i++) {
+        float x = hash01(i * 3 + 1) * UI_W, y = 8 + hash01(i * 3 + 2) * 132;
+        x = fmodf(x - t * (4 + 6 * hash01(i * 7)) + UI_W, UI_W);           /* медленно плывут влево */
+        float tw = 0.35f + 0.65f * (0.5f + 0.5f * sinf(t * (1.3f + 2.2f * hash01(i * 5)) + i));
+        float appear = clamp01((t - hash01(i * 11) * 0.8f) / 0.5f);
+        float a = tw * appear * k;
+        lv_color_t c = (i % 5 == 0) ? c_hex(C_CLAUDE) : (i % 5 == 1) ? c_hex(C_MINT) : c_hex(0xFFFFFF);
+        float r = (i % 9 == 0) ? 1.6f : 1.0f;
+        d_rect(d, x - r, y - r, x + r, y + r, c_dim(c, a), LV_OPA_COVER, 0);
+        if (i % 9 == 0 && tw > 0.85f) {                                       /* яркие — искоркой-крестиком */
+            float l = 4 * (tw - 0.85f) / 0.15f;
+            d_rect(d, x - l, y - 0.5f, x + l, y + 0.5f, c_dim(c, a * 0.7f), LV_OPA_COVER, 0);
+            d_rect(d, x - 0.5f, y - l, x + 0.5f, y + l, c_dim(c, a * 0.7f), LV_OPA_COVER, 0);
+        }
+    }
+}
+
+/* прыжок по кругу: 0 — на земле, иначе высота; sx, sy — сплющивание на толчке и приземлении */
+static float hop(float t, float phase, float *sx, float *sy)
+{
+    const float period = 2.4f, dur = 0.55f;
+    float p = fmodf(t - phase + period * 10, period);
+    *sx = *sy = 1;
+    if (p < 0.08f) { float q = p / 0.08f; *sy = 1 - 0.18f * sinf(q * (float)M_PI); *sx = 1 / sqrtf(*sy); return 0; }
+    p -= 0.08f;
+    if (p < dur) return sinf(p / dur * (float)M_PI) * 16;
+    p -= dur;
+    if (p < 0.12f) { float q = p / 0.12f; *sy = 1 - 0.2f * sinf(q * (float)M_PI); *sx = 1 / sqrtf(*sy); }
+    return 0;
+}
+
+static void draw_heart(dctx_t *d, float x, float y, float age, uint32_t col, float k)
+{
+    if (age < 0 || age > 1.3f) return;
+    float a = (1 - clamp01((age - 0.7f) / 0.6f)) * k;
+    float s = 0.6f + 0.4f * ease_out_q(clamp01(age / 0.25f));
+    const uint32_t cols[1] = { col };
+    draw_ascii_sprite(d, HEART, 7, 6, "H", cols, x + sinf(age * 7) * 3, y - age * 34, 14 * s, 12 * s, a);
+}
+
+/* текст по буквам: каждая буква своим цветом и своей высотой (только ASCII) */
+typedef lv_color_t (*letter_color_fn)(int i, float t);
+static void d_letters(dctx_t *d, const lv_font_t *f, const char *txt, float x0, float base, float t,
+                      float reveal_t0, float per, float wave, int wave_from, letter_color_fn color, float k)
+{
+    int n = (int)strlen(txt);
+    for (int i = 0; i < n; i++) {
+        float age = t - (reveal_t0 + i * per);
+        if (age < 0) break;
+        char ch[2] = { txt[i], 0 };
+        float pop = (1 - ease_out_q(clamp01(age / 0.25f))) * 7;                /* буква «впрыгивает» */
+        float y = base - pop + (i >= wave_from ? sinf(t * 3.2f + i * 0.55f) * wave : 0);
+        float a = clamp01(age / 0.15f) * k;
+        d_text(d, f, ch, x0 + text_w_n(f, txt, (uint32_t)i), y, c_dim(color(i, t), a), LV_OPA_COVER);
+    }
+}
+
+static lv_color_t title_color(int i, float t) { return shimmer(t * 0.18f - i * 0.035f); }
+static lv_color_t credit_color(int i, float t) { return i < 8 ? c_hex(0x8E8E93) : shimmer(t * 0.35f + (i - 8) * 0.09f); }
 
 static void splash_draw(lv_event_t *e)
 {
     dctx_t d = dctx_from_event(e);
     float t = since_s(boot_t0);
-    float out = clamp01((t - (UI_SPLASH_MS / 1000.0f - 0.45f)) / 0.45f);   /* гаснет в конце */
-    float k = 1 - out;
+    float end = splash_end / 1000.0f;
+    float fade = splash_fade / 1000.0f;
+    float k = 1 - clamp01((t - (end - fade)) / fade);                         /* гаснет в конце */
     d_fill(&d, lv_color_black());
+    draw_stars(&d, t, k);
+    draw_meteor(&d, t, k);
 
-    /* два маскота падают и пружинят: робот Claude и слайм Codex */
+    /* маскоты: падают, пружинят, потом прыгают по очереди и пускают сердечки */
+    float cx = UI_W / 2.0f, ground = 118;
     for (int i = 0; i < 2; i++) {
-        float t0 = 0.15f + i * 0.18f, x = UI_W / 2.0f + (i ? 36 : -36), ground = 112;
+        float t0 = 0.15f + i * 0.18f, x = cx + (i ? 48 : -48);
         if (t < t0) continue;
         float dt = t - t0, y, sx = 1, sy = 1;
         if (dt < 0.35f) {
             float q = ease_in(dt / 0.35f);
             y = lerpf(-60, ground, q);
             sy = 1 + 0.35f * q; sx = 1 / sqrtf(sy);
-        } else {
+        } else if (t < 1.6f) {
             y = ground;
             float s = springf(dt - 0.35f, 3.2f, 5.0f) * 0.3f;
             sy = 1 - s; sx = 1 + s * 0.8f;
+        } else {
+            y = ground - hop(t, 1.6f + i * 1.2f, &sx, &sy);
         }
-        if (i == 0) draw_ascii_sprite(&d, ROBOT, 12, 13, "BDSFLE", ROBOT_COLS, x, y, 48 * sx, 52 * sy, k);
-        else        draw_ascii_sprite(&d, SLIME, 12, 10, "GHDE", SLIME_COLS, x, y, 48 * sx, 40 * sy, k);
+        if (i == 0) {
+            uint32_t cols[6];
+            memcpy(cols, ROBOT_COLS, sizeof cols);
+            if (fmodf(t, 0.8f) > 0.4f) cols[4] = 0xFF8A5C;                   /* огонёк антенны мигает */
+            draw_ascii_sprite(&d, ROBOT, 12, 13, "BDSFLE", cols, x, y, 60 * sx, 65 * sy, k);
+        } else {
+            uint32_t cols[4];
+            memcpy(cols, SLIME_COLS, sizeof cols);
+            if (fmodf(t + 0.9f, 2.7f) < 0.13f) cols[3] = cols[0];             /* слайм моргает */
+            draw_ascii_sprite(&d, SLIME, 12, 10, "GHDE", cols, x, y, 60 * sx, 50 * sy, k);
+        }
     }
-    float tk = clamp01((t - 0.8f) / 0.4f) * k;
+    /* сердечко при приземлении и на вершине каждого прыжка — цвета чередуются */
+    draw_heart(&d, cx, ground - 34, t - 0.75f, 0xFF5C8A, k);
+    for (int j = 0; j < 8; j++) {
+        float at = 1.6f + j * 1.2f + 0.35f;
+        static const uint32_t HC[4] = { C_CLAUDE, C_MINT, 0xFF5C8A, C_GOLD };
+        draw_heart(&d, cx + (j % 2 ? 26 : -26), ground - 56, t - at, HC[j % 4], k);
+    }
+
+    /* название по буквам, перелив; подпись волной */
     const lv_font_t *ft = ui_status_font(1), *fs = ui_status_font(0);
     const char *title = "Agent Status Bar";
-    float w = text_w(ft, title);
-    d_text(&d, ft, title, (UI_W - w) / 2, 168, c_dim(c_hex(0xFFFFFF), tk), LV_OPA_COVER);
-    char ver[32];
-    snprintf(ver, sizeof ver, "Claude Code · Codex · v%s", FW_VERSION);
-    w = text_w(fs, ver);
-    d_text(&d, fs, ver, (UI_W - w) / 2, 200, c_dim(c_hex(0x8E8E93), tk), LV_OPA_COVER);
+    d_letters(&d, ft, title, (UI_W - text_w(ft, title)) / 2, 164, t, 0.8f, 0.05f, 0, 0, title_color, k);
+    const char *credit = "prod by yakory777";
+    d_letters(&d, fs, credit, (UI_W - text_w(fs, credit)) / 2, 193, t, 1.7f, 0.035f, 2.5f, 8, credit_color, k);
+
+    char ver[16];
+    snprintf(ver, sizeof ver, "v%s", FW_VERSION);
+    d_text(&d, fs, ver, 16, 30, c_dim(c_hex(0x6E6E73), clamp01((t - 1.0f) / 0.4f) * k), LV_OPA_COVER);
+
+    /* статус Wi-Fi и полоска загрузки */
+    float st = clamp01((t - 1.2f) / 0.4f) * k;
+    char line[80];
+    lv_color_t lc = c_hex(0x8E8E93);
+    if (boot_wifi_at) {
+        snprintf(line, sizeof line, "%s", tr(TR_BOOT_WIFI_OK));
+        lc = c_hex(0x34C759);
+        float pop = ease_out_q(clamp01((t - boot_wifi_at / 1000.0f) / 0.3f));   /* галочка рисуется линиями — */
+        float x = (UI_W - text_w(fs, line)) / 2 + 12, y = 216;                  /* в урезанном шрифте её нет */
+        d_line(&d, x - 30, y - 1, x - 30 + 5 * pop, y + 4 * pop, 2.5f, c_dim(lc, st), LV_OPA_COVER);
+        if (pop > 0.5f)
+            d_line(&d, x - 25, y + 4, x - 25 + 10 * (pop - 0.5f) * 2, y + 4 - 11 * (pop - 0.5f) * 2, 2.5f, c_dim(lc, st), LV_OPA_COVER);
+        d_text(&d, fs, line, x, 222, c_dim(lc, st), LV_OPA_COVER);
+        line[0] = 0;
+    } else if (!platform_wifi_configured()) {
+        snprintf(line, sizeof line, "%s", tr(TR_BOOT_WIFI_NONE));
+    } else {
+        int dots = (int)(t * 2.5f) % 4;
+        snprintf(line, sizeof line, "%s%.*s", tr(TR_BOOT_WIFI_WAIT), dots, "...");
+        float w = text_w(fs, tr(TR_BOOT_WIFI_WAIT));                           /* точки не двигают текст */
+        d_text(&d, fs, line, (UI_W - w) / 2 - 6, 222, c_dim(lc, st), LV_OPA_COVER);
+        line[0] = 0;
+    }
+    if (line[0]) d_text(&d, fs, line, (UI_W - text_w(fs, line)) / 2, 222, c_dim(lc, st), LV_OPA_COVER);
+
+    float prog = clamp01(t / end);
+    float bw = UI_W - 2 * 120.0f, bx = 120, by = 232;
+    d_rect(&d, bx, by, bx + bw, by + 3, c_dim(c_hex(0x2C2C2E), k), LV_OPA_COVER, 2);
+    if (prog > 0.01f) {
+        d_rect(&d, bx, by, bx + bw * prog, by + 3, c_dim(shimmer(t * 0.25f), k), LV_OPA_COVER, 2);
+        d_circle(&d, bx + bw * prog, by + 1.5f, 3.2f, c_dim(c_hex(0xFFFFFF), k * (0.6f + 0.4f * sinf(t * 8))), LV_OPA_COVER);
+    }
 }
 
 /* ---------- конфетти на «Готово» ---------- */
@@ -175,6 +350,7 @@ static void pairing_draw(lv_event_t *e)
 
 void ui_screen_pairing(const char *code)
 {
+    if (code && *code && mode == MODE_BOOT) boot_skip = true;                 /* сопряжение — не ждём конца заставки */
     if (code && *code) {
         strncpy(pair_code, code, sizeof pair_code - 1);
         pair_code[sizeof pair_code - 1] = '\0';
@@ -296,6 +472,7 @@ bool ui_screen_is_off(void) { return screen_off; }
 
 void ui_screen_toggle(void)
 {
+    if (mode == MODE_BOOT) { boot_skip = true; return; }                       /* кнопка на заставке — пропустить */
     if (ui_screen_wake()) return;
     if (mode == MODE_IDLE) go_task();
     else if (mode == MODE_TASK) go_idle();
@@ -372,7 +549,20 @@ static void tick_cb(lv_timer_t *t)
     (void)t;
     if (mode == MODE_BOOT) {
         lv_obj_invalidate(splash);
-        if (lv_tick_elaps(boot_t0) >= UI_SPLASH_MS) {
+        uint32_t el = lv_tick_elaps(boot_t0), want = UI_SPLASH_MAX_MS;
+        if (!boot_wifi_at && platform_wifi_level() >= 0) boot_wifi_at = el ? el : 1;
+        if (boot_wifi_at) want = boot_wifi_at + UI_SPLASH_WIFI_MS;                 /* сеть есть — ещё чуть-чуть */
+        else if (!platform_wifi_configured()) want = UI_SPLASH_MIN_MS;            /* ждать нечего */
+        if (want < UI_SPLASH_MIN_MS) want = UI_SPLASH_MIN_MS;
+        if (pending_task) want = el > UI_SPLASH_TASK_MS ? el : UI_SPLASH_TASK_MS;  /* задача важнее заставки */
+        if (boot_skip) want = el;
+        if (want < el + 250) want = el + 250;                                       /* короткое затухание, а не обрыв */
+        if (want < splash_end) {                                                    /* конец только приближается */
+            uint32_t left = splash_end > el ? splash_end - el : 0;
+            if (want - el < 450 && left > 450) splash_fade = want - el;           /* затухание начинается с полной яркости */
+            splash_end = want;
+        }
+        if (el >= splash_end) {
             lv_obj_add_flag(splash, LV_OBJ_FLAG_HIDDEN);
             if (pending_task) {
                 mode = MODE_IDLE;               /* через сцену не идём — сразу экран задачи */

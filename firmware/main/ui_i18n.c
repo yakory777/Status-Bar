@@ -36,6 +36,9 @@ static const char *const TEXT[TR_COUNT][LANG_COUNT] = {
     [TR_PAIR_HINT2]   = { "Press — confirm · hold — cancel", "Нажать — подтвердить · удержать — отмена" },
     [TR_PAIRED]       = { "Paired", "Сопряжено" },
     [TR_PAIR_CANCELLED] = { "Pairing cancelled", "Сопряжение отменено" },
+    [TR_BOOT_WIFI_WAIT] = { "Connecting to Wi-Fi", "Подключаюсь к Wi-Fi" },
+    [TR_BOOT_WIFI_OK]   = { "Wi-Fi connected",     "Wi-Fi подключён" },
+    [TR_BOOT_WIFI_NONE] = { "No Wi-Fi set up · working over USB", "Wi-Fi не настроен · работаю по USB" },
 };
 
 static ui_lang_t lang = (CONFIG_ASB_LANGUAGE[0] == 'r') ? LANG_RU : LANG_EN;

@@ -9,12 +9,14 @@
 static uint8_t brightness = 0xD0;
 static platform_battery_t battery = { .present = false, .pct = 100, .charging = false, .mv = 0 };
 static int wifi = -1;
+static bool wifi_saved = true;
 static int beeps;
 static FILE *tx_log;
 
 void platform_set_brightness(uint8_t level) { brightness = level; }
 platform_battery_t platform_battery(void) { return battery; }
 int platform_wifi_level(void) { return wifi; }
+bool platform_wifi_configured(void) { return wifi_saved; }
 void platform_tone(uint16_t hz) { if (hz) beeps++; }
 
 void platform_send_line(const char *json)
@@ -37,6 +39,7 @@ void sim_set_battery(bool present, int pct, bool charging)
 }
 
 void sim_set_wifi(int level) { wifi = level; }
+void sim_set_wifi_saved(bool saved) { wifi_saved = saved; }
 
 void platform_pair_answer(bool accept)
 {

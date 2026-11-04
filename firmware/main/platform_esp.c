@@ -97,6 +97,7 @@ platform_battery_t platform_battery(void)
 }
 
 int platform_wifi_level(void) { return net_wifi_level(); }
+bool platform_wifi_configured(void) { return net_wifi_configured(); }
 
 void platform_pair_answer(bool accept) { net_pair_answer(accept); }
 

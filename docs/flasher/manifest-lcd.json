@@ -1,6 +1,6 @@
 {
   "name": "Agent Status Bar — T-Display-S3 (LCD)",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "new_install_prompt_erase": false,
   "new_install_improv_wait_time": 0,
   "builds": [

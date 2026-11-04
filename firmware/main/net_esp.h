@@ -39,6 +39,7 @@ void net_send_line(const char *json);
 
 /* -1 — не подключена, 0..3 — сила сигнала */
 int net_wifi_level(void);
+bool net_wifi_configured(void);   /* в памяти есть хоть одна сеть */
 
 /* Ответ кнопкой на запрос сопряжения */
 void net_pair_answer(bool accept);

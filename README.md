@@ -121,7 +121,7 @@ Every GIF here is rendered by the **real firmware UI code** running in the [simu
   </tr>
   <tr>
     <td align="center" valign="top"><img src="docs/firmware/en/sessions.gif" width="400" alt="Several sessions"><br><b>Several sessions</b><br>Codex works in one terminal, Claude asks for permission in another: the screen shows whatever needs you, the rest is a “+1 session” badge and the theme follows the session on screen.</td>
-    <td align="center" valign="top"><img src="docs/firmware/en/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>Both mascots drop in and bounce, then the name and version fade in. Battery and Wi-Fi are already in the corner.</td>
+    <td align="center" valign="top"><img src="docs/firmware/en/splash.gif" width="400" alt="Boot splash"><br><b>Boot splash</b><br>A starry sky, the mascots take turns hopping and sending hearts, the name shimmers, and the bottom shows the Wi-Fi status and a loading bar. It waits up to 15 seconds for Wi-Fi and leaves as soon as the network is up; press the button to skip.</td>
   </tr>
 </table>
 
@@ -271,7 +271,7 @@ py -3 -m esptool --chip esp32s3 -p COM3 -b 460800 write_flash 0x0 firmware\prebu
 
 It takes about a minute and ends with `Hash of data verified`. `Failed to connect` — hold BOOT, press RST, release BOOT and run it again.
 
-After flashing press RST or replug the cable. You'll see the splash and then the idle scene with **"No connection to the computer"** at the top — that's expected: nothing on the computer is talking to the board yet.
+After flashing press RST or replug the cable. You'll see the splash — it waits up to 15 seconds for Wi-Fi (4.5 seconds with no networks saved; press the button to skip) — and then the idle scene with **"No connection to the computer"** at the top — that's expected: nothing on the computer is talking to the board yet.
 
 ### Step 7. Test without an agent
 

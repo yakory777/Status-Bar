@@ -21,6 +21,8 @@ platform_battery_t platform_battery(void);
 
 /* Уровень Wi-Fi: -1 — не подключена к сети (перечёркнутый веер), 0..3 — полоски. */
 int platform_wifi_level(void);
+/* Есть ли в памяти хоть одна сеть Wi-Fi: нет — заставке незачем ждать подключения */
+bool platform_wifi_configured(void);
 
 /* Пищалка: включить тон, Гц; 0 — тишина. Не блокирует — длительность ведёт ui_sound.c. */
 void platform_tone(uint16_t hz);

@@ -289,6 +289,7 @@ static void pair_finish(bool accept, bool hide_screen)
 /* ---------- Wi-Fi ---------- */
 
 int net_wifi_level(void) { return level; }
+bool net_wifi_configured(void) { return n_nets > 0; }
 
 static void on_wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {

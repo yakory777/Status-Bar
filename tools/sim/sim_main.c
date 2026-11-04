@@ -11,6 +11,7 @@
  * Строки {"sim":{...}} не уходят в прошивку, а настраивают «железо» симулятора:
  *   {"sim":{"battery":35,"charging":true}}   — батарея (battery:-1 — нет батареи)
  *   {"sim":{"wifi":3}}                        — уровень Wi-Fi (-1 — режим USB)
+ *   {"sim":{"wifi_saved":false}}              — в памяти нет сетей Wi-Fi (заставка не ждёт подключения)
  *   {"sim":{"press":200}}                     — нажать кнопку на 200 мс (1500 — удержание)
  * Что плата отправила бы хосту (нажатия кнопки), печатается в stderr строками [tx].
  */
@@ -55,6 +56,7 @@ static bool sim_command(const char *json)
     cJSON *b = cJSON_GetObjectItem(sim, "battery"), *c = cJSON_GetObjectItem(sim, "charging");
     cJSON *w = cJSON_GetObjectItem(sim, "wifi");
     cJSON *press = cJSON_GetObjectItem(sim, "press");
+    cJSON *ws = cJSON_GetObjectItem(sim, "wifi_saved");
     if (cJSON_IsNumber(press)) {
         ui_input_button(true);
         release_at = sim_ms + (uint32_t)press->valueint;
@@ -63,6 +65,7 @@ static bool sim_command(const char *json)
     if (cJSON_IsBool(c)) charging = cJSON_IsTrue(c);
     if (b || c) sim_set_battery(present, pct, charging);
     if (cJSON_IsNumber(w)) sim_set_wifi(w->valueint);
+    if (cJSON_IsBool(ws)) sim_set_wifi_saved(cJSON_IsTrue(ws));
     cJSON_Delete(j);
     return true;
 }

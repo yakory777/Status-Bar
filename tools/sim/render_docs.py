@@ -45,7 +45,7 @@ JOBS = {
     'idle_cursor': ('idle_claude_cursor.txt', (2.5, 13),  ('claude',), None),
     'idle_codex_cursor': ('idle_codex_cursor.txt', (2.5, 13), ('codex',), None),
     'idle_typist': ('idle_codex_typist.txt', (2.5, 10.5), ('codex',), None),
-    'splash':      ('idle_transitions.txt',  (0, 3),      (None,), None),
+    'splash':      ('boot_wifi.txt',         (0, 8.3),    (None,), None),
     'sessions':    ('sessions.txt',          (2.5, 13),   (None,), None),
 }
 

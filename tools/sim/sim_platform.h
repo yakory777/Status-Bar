@@ -7,4 +7,5 @@ uint8_t sim_brightness(void);
 int sim_beeps(void);
 void sim_set_battery(bool present, int pct, bool charging);
 void sim_set_wifi(int level);
+void sim_set_wifi_saved(bool saved);
 void sim_set_tx_log(FILE *f);
