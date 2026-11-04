@@ -206,6 +206,40 @@ def _engrave_walls(comp, body, decos):
         ext.add(inp).name = f"прорези {k + 1}"
 
 
+def _usb_port(comp, body, usb):
+    """Проём USB-C: капсула сквозь торец (эскиз в плоскости YZ) и фаска по наружному краю."""
+    sk = comp.sketches.add(comp.yZConstructionPlane)
+    sk.name = "проём USB-C"
+    sk.isComputeDeferred = True
+    lines = sk.sketchCurves.sketchLines
+    pts = [sk.modelToSketchSpace(adsk.core.Point3D.create(0, y * CM, z * CM)) for y, z in usb["profile"]]
+    for j in range(len(pts)):
+        lines.addByTwoPoints(pts[j], pts[(j + 1) % len(pts)])
+    sk.isComputeDeferred = False
+    ext = comp.features.extrudeFeatures
+    inp = ext.createInput(sk.profiles.item(0), adsk.fusion.FeatureOperations.CutFeatureOperation)
+    inp.startExtent = adsk.fusion.OffsetStartDefinition.create(_v(usb["x0"]))
+    inp.setDistanceExtent(False, _v(usb["x1"] - usb["x0"]))
+    inp.participantBodies = [body]
+    ext.add(inp).name = "проём USB-C"
+    if not usb.get("chamfer"):
+        return
+    x_out = body.boundingBox.maxPoint.x
+    b = usb["box"]
+    col = adsk.core.ObjectCollection.create()
+    for e in body.edges:                                   # рёбра проёма на наружной стороне торца
+        a, c = e.startVertex.geometry if e.startVertex else None, e.endVertex.geometry if e.endVertex else None
+        pts_ = [q for q in (a, c) if q is not None] or [e.pointOnEdge]
+        if all(abs(q.x - x_out) < 1e-5 and b[1] - 0.1 <= q.y / CM <= b[4] + 0.1 and b[2] - 0.1 <= q.z / CM <= b[5] + 0.1
+               for q in pts_):
+            col.add(e)
+    if col.count:
+        ch = comp.features.chamferFeatures
+        ci = ch.createInput2()
+        ci.chamferEdgeSets.addEqualDistanceChamferEdgeSet(col, _v(usb["chamfer"]), True)
+        ch.add(ci)
+
+
 def _engrave(comp, body, d, p):
     """Надпись на наружной стороне крышки, между винтами."""
     z = d["depth"]
@@ -282,6 +316,11 @@ def run(context):
             if spec.get("recut"):                      # проёмы в торцах заново — щёки их закрыли
                 _combine(comp, body, [_box(comp, b, f"{name} проём {i + 1}") for i, b in enumerate(spec["recut"])],
                          adsk.fusion.FeatureOperations.CutFeatureOperation)
+            if spec.get("usb"):
+                try:
+                    _usb_port(comp, body, spec["usb"])
+                except Exception as e:
+                    notes.append(f"проём USB — {e}")
             if name == "shell":
                 try:
                     _fillet(comp, body, CORNER_R) or notes.append("углы корпуса не скруглены")
@@ -301,6 +340,11 @@ def run(context):
                         _engrave_walls(comp, body, spec["deco"])
                     except Exception as e:
                         notes.append(f"прорези — {e}")
+                if spec.get("side_holes"):
+                    try:
+                        _engrave_walls(comp, body, spec["side_holes"])
+                    except Exception as e:
+                        notes.append(f"отверстие кнопки питания — {e}")
             if spec.get("cyl_holes"):
                 _cyl_holes(comp, body, spec["cyl_holes"], name)
             body.name = TITLES[name]

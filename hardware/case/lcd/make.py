@@ -151,6 +151,14 @@ def checks(parts, d, p):
                     errors.append(f"прорезь задевает вырез {[round(x, 1) for x in h]}")
         if deco["depth"] > p["wall"] - 0.8:
             errors.append("прорези слишком глубокие для стенки")
+    pb = d["pwr"]["body"]                                          # корпус кнопки питания внутри
+    for kind in ("inner",):
+        for b in parts["shell"][kind]:
+            if ov(pb, b):
+                errors.append(f"кнопке питания мешает {[round(x, 1) for x in b]}")
+    for b in parts["divider"]["solids"] + [board]:
+        if ov(pb, b):
+            errors.append(f"кнопке питания мешает {[round(x, 1) for x in b]}")
     if max(d["bite_div"], d["bite_lid"]) > p["pilot_depth"] - 0.3:
         errors.append("винт длиннее отверстия под него")
     assert abs((bat[3] - bat[0]) - p["bat_l"]) < 1e-6 and abs((bat[4] - bat[1]) - p["bat_w"]) < 1e-6

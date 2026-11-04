@@ -207,31 +207,31 @@ No soldering required.
 
 ### Case
 
-**T-Display-S3 (LCD) + 103565 battery** — in [`hardware/case/lcd/`](hardware/case/lcd/). Three printed parts, 82 × 42.9 × 28.2 mm without the cheeks. The case stands on the desk by itself, the screen at 60° to the desk: the end walls continue into rounded side cheeks with cut-outs, one piece with the shell. The project logo is engraved 0.5 mm deep on the front, next to the screen, and both long walls carry a row of slanted decorative slots, 1 mm deep (half the wall, so nothing shows through), longest in the middle.
+**T-Display-S3 (LCD) + 103565 battery** — in [`hardware/case/lcd/`](hardware/case/lcd/). Three printed parts, 86.2 × 44.1 × 26.7 mm without the cheeks. The board, its buttons and connectors are placed from LilyGO's official 3D model of the T-Display-S3 (`dimensions/t-display-s3-full.stl` in their repository): board 60.8 × 26 × 9.9 mm. The case stands on the desk by itself, the screen at 60° to the desk: the end walls continue into rounded side cheeks with cut-outs, one piece with the shell. The project logo is engraved 0.5 mm deep on the front, and both long walls carry a row of slanted decorative slots, 1 mm deep.
 
-<p align="center"><img src="hardware/case/lcd/case-front.png" width="210" alt="Case, front with the logo"> <img src="hardware/case/lcd/case-top.png" width="210" alt="Decorative slots on the top wall"> <img src="hardware/case/lcd/case-back.png" width="210" alt="Case, back"> <img src="hardware/case/lcd/fusion-inside.png" width="210" alt="Case without the lid"></p>
+<p align="center"><img src="hardware/case/lcd/case-front.png" width="270" alt="Case, front: the button pusher by the USB end and the logo"> <img src="hardware/case/lcd/case-fit.png" width="270" alt="The board model inside the case, seen through the front"></p>
 
 Ready-to-slice STL files (millimetres, every part checked watertight):
 
 | File | Part | Print orientation | Size, mm |
 |---|---|---|---|
-| [`asb-lcd-shell.stl`](hardware/case/lcd/asb-lcd-shell.stl) | Shell with the cheeks, window, pushers, logo, decorative slots | face (screen side) down | 82 × 57.7 × 55.1 |
-| [`asb-lcd-divider.stl`](hardware/case/lcd/asb-lcd-divider.stl) | Divider: board rails, battery nest, lid standoffs | nest up | 77.5 × 38.4 × 14.2 |
-| [`asb-lcd-lid.stl`](hardware/case/lcd/asb-lcd-lid.stl) | Back lid with the engraving | engraving up | 77.6 × 38.5 × 2.4 |
+| [`asb-lcd-shell.stl`](hardware/case/lcd/asb-lcd-shell.stl) | Shell with the cheeks, window, pushers, logo, decorative slots | face (screen side) down | 86.2 × 58.1 × 53.6 |
+| [`asb-lcd-divider.stl`](hardware/case/lcd/asb-lcd-divider.stl) | Divider: pads that clamp the board, battery nest, cable hole, lid standoffs | nest up | 81.7 × 39.6 × 16.3 |
+| [`asb-lcd-lid.stl`](hardware/case/lcd/asb-lcd-lid.stl) | Back lid with the engraving | engraving up | 81.8 × 39.7 × 2.4 |
 
 PLA or PETG, 0.2 mm layers, no supports.
 
-You also need: eight **M2×8** self-tapping screws (pan head up to Ø4 mm), a 103565 Li-ion cell with a 2-pin 1.25 mm plug for the board, optionally an SS12D00 slide switch.
+You also need: eight **M2×8** self-tapping screws (pan head up to Ø4 mm), a 103565 Li-ion cell with a 2-pin 1.25 mm plug (the nest takes up to 68 × 36 × 10.5 mm including the protection board), optionally a **PBS-101G1** latching power button.
 
 Assembly:
-1. Board face down into the shell, USB-C into the end opening.
-2. Divider on top — its rails press the board. **Four screws** in the corners go through the divider into the shell's columns.
-3. Battery into the nest (0.3 mm clearance, snug), wires through the notch and the hole by the end.
-4. Lid flush on top — **four screws** into the divider's standoffs at the ends. To change the battery, remove only the lid: the board stays clamped.
+1. Board glass to the window, USB-C into the end opening, the RST button on the side edge facing the top wall. Side ribs and an end stop hold it with 0.15 mm clearance.
+2. Divider on top — four pads press the edge of the board where its back has no parts, so the board does not move front to back. **Four screws** in the corners go through the divider into the shell's columns.
+3. Battery into the nest with the protection board and wires **towards the USB end**: that end of the nest is open, and the wire goes down through the hole right above the battery connector of the board.
+4. Lid flush on top — **four screws** into the divider's standoffs. To change the battery, remove only the lid: the board stays clamped.
 
-Each level has its own screws, so nothing rattles even with the lid off. The buttons are pressed through the case: a flexible **BOOT pusher** on the front and the same **RESET pusher** on the top (a tongue with a nub reaching the button). The end opposite the USB has an opening for an SS12D00 switch closed by a 0.6 mm skin — cut it out when you fit the switch.
+The buttons are pressed through the case. **BOOT and KEY** sit on the face of the board by the USB-C, one on each side of it; a flexible tongue in the front panel presses the upper one. **RST** is on the side edge of the board, and its tongue is in the top wall — put the board in with the RST button up. The top wall, near the end opposite the USB, has a Ø7.2 mm hole for a **PBS-101G1** latching power button: inside there is free room for its body (up to Ø10 × 17 mm) in front of the divider, where the board does not reach. If the thread of your button is thicker, drill the hole out (`pwr_hole` in `geometry.py`).
 
-Changing the case: dimensions live in `geometry.py`; `python hardware/case/lcd/make.py` checks how the board, battery and screw heads fit and rebuilds the Fusion 360 script (`fusion/AgentStatusBarCase`: Utilities → Scripts and Add-Ins → "+" → Run), which builds the model with full history and saves the STL files next to itself. Board dimensions (62 × 26 × 10 mm) come from specs and have not been checked against a real board: check the BOOT (`boot_from_usb`, `boot_dy`) and RESET (`rst_from_usb`, `rst_from_back`) button positions, the nub height (`nub_h`) and the display window before printing.
+Changing the case: dimensions live in `geometry.py`; `python hardware/case/lcd/make.py` checks how the board, battery, buttons and screw heads fit and rebuilds the Fusion 360 script (`fusion/AgentStatusBarCase`: Utilities → Scripts and Add-Ins → "+" → Run), which builds the model with full history and saves the STL files next to itself. The fit was checked against LilyGO's model, not a printed part: if your board revision differs, adjust `btn_*`, `rst_*` and `usb_from_glass`.
 
 **T-Display-S3 AMOLED** — below.
 
