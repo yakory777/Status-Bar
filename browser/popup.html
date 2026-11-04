@@ -23,6 +23,9 @@
   input[type=number] { width: 70px; background: transparent; color: var(--fg); border: 1px solid var(--line);
                        border-radius: 6px; padding: 3px 6px; }
   input[type=checkbox] { accent-color: var(--accent); }
+  .setup { display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; cursor: pointer;
+           background: var(--accent); color: #fff; font: inherit; font-weight: 600; }
+  .setup:hover { filter: brightness(1.06); }
 </style>
 </head>
 <body>
@@ -40,6 +43,10 @@
   </section>
   <section>
     <label><span data-i18n="popup_port"></span><input type="number" id="port" min="1" max="65535"></label>
+  </section>
+  <section>
+    <button type="button" class="setup" id="setup" data-i18n="popup_setup"></button>
+    <p class="hint" data-i18n="popup_setup_hint"></p>
   </section>
   <script src="popup.js"></script>
 </body>

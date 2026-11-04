@@ -1,5 +1,6 @@
 var t = chrome.i18n.getMessage;
 var DEFAULTS = { enabled: true, port: 8765 };
+var SETUP_URL = "https://yakory777.github.io/Status-Bar/";
 
 document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = t(el.dataset.i18n); });
 
@@ -54,6 +55,11 @@ async function checkPage() {
     hint("page_hint", "");
   }
 }
+
+document.getElementById("setup").addEventListener("click", function () {
+  chrome.tabs.create({ url: SETUP_URL });
+  window.close();
+});
 
 chrome.storage.local.get(DEFAULTS).then(function (s) {
   var en = document.getElementById("enabled"), port = document.getElementById("port");

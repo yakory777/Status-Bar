@@ -67,5 +67,11 @@
   },
   "hint_reload": {
     "message": "Reload the claude.ai tab (F5) — the extension was installed after it was opened."
+  },
+  "popup_setup": {
+    "message": "Flash the board · set up Wi-Fi"
+  },
+  "popup_setup_hint": {
+    "message": "Opens the setup page. Close the program on the computer first — the board's port must be free."
   }
 }

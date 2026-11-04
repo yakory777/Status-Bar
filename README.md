@@ -428,7 +428,7 @@ Every tab is a separate session, so the chat and Claude Code share the screen: t
 1. Open `chrome://extensions`, turn on **Developer mode** (top right), press **Load unpacked** and pick the project's `browser` folder.
 2. Reload open claude.ai tabs (F5).
 3. Start the daemon. The chat has no hooks to start it, so on Windows turn on autostart: double-click `tools\windows\autostart.cmd`. The daemon starts right away and then with every Windows sign-in, without a window. To turn it off: `tools\windows\autostart.cmd remove`. By hand: `py -3 host\daemon.py`; on macOS and Linux `python3 host/daemon.py`.
-4. Click the extension icon. The popup shows whether the program on the computer is running, how the board is connected, what the page looks like and which signals fired. You can switch the extension off there too.
+4. Click the extension icon. The popup shows whether the program on the computer is running, how the board is connected, what the page looks like and which signals fired. You can switch the extension off there too, and the **Flash the board · set up Wi-Fi** button opens the [setup page](https://yakory777.github.io/Status-Bar/).
 
 <p align="center">
   <img src="docs/browser-popup-en.png" width="320" alt="Extension popup">
