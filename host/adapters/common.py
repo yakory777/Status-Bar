@@ -16,6 +16,28 @@ IDLE = {
 ACTIVE = ("start", "work", "wait", "error", "compact")
 
 
+# Служебные вставки, которые приложение дописывает к сообщению пользователя: на экран не нужны
+_SERVICE_BLOCK = re.compile(
+    r"<(system-reminder|command-message|local-command-stdout|local-command-stderr|user-memory-snapshot)\b[^>]*>.*?</\1>"
+    r"|<(system-reminder|local-command-stdout|local-command-stderr)\b[^>]*>.*\Z",      # незакрытый — до конца
+    re.S | re.I)
+_COMMAND = re.compile(r"<command-name>\s*(.*?)\s*</command-name>", re.S | re.I)
+_TAG = re.compile(r"</?[A-Za-z][\w-]*(\s[^<>]*)?>")
+
+
+def clean_prompt(text):
+    """Текст задачи без служебных вставок. Слэш-команда — её имя с аргументами."""
+    text = str(text or "")
+    cmd = _COMMAND.search(text)
+    args = re.search(r"<command-args>\s*(.*?)\s*</command-args>", text, re.S | re.I)
+    text = _SERVICE_BLOCK.sub(" ", text)
+    if cmd:
+        text = cmd.group(1) + (" " + args.group(1) if args and args.group(1) else "")
+    text = _TAG.sub(" ", text)                          # прочие теги — убрать, текст внутри оставить
+    text = re.sub(r"^\s*\[Request interrupted[^\]]*\]\s*", "", text)
+    return " ".join(text.split())
+
+
 def short(text, n):
     """Схлопывает пробелы и обрезает строку до n символов."""
     text = " ".join(str(text or "").split())
@@ -25,7 +47,7 @@ def short(text, n):
 def start_task(state, ctx, prompt):
     state.update(
         state="start",
-        title=short(prompt, 60) or t("new_task"),
+        title=short(clean_prompt(prompt), 60) or t("new_task"),
         step=t("thinking"),
         done=0,
         total=1,

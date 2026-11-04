@@ -147,6 +147,23 @@ class CodexScenarios(unittest.TestCase):
         self.assertEqual(h[1]["state"], "work")
 
 
+class CleanPrompt(unittest.TestCase):
+    def test_service_blocks_removed_from_title(self):
+        h = run("claude", [{"hook_event_name": "UserPromptSubmit", "prompt":
+            "<system-reminder>\nAs you answer the user's questions...\n</system-reminder>\nПочини тесты в модуле оплаты"}])
+        self.assertEqual(h[0]["title"], "Почини тесты в модуле оплаты")
+
+    def test_only_service_text_gives_new_task(self):
+        h = run("claude-web", [{"hook_event_name": "WebPrompt", "prompt": "<system-reminder>служебное</system-reminder>"}])
+        self.assertEqual(h[0]["title"], "Новая задача")
+
+    def test_slash_command_and_plain_brackets(self):
+        from adapters.common import clean_prompt
+        self.assertEqual(clean_prompt("<command-message>review</command-message><command-name>/review</command-name>"
+                                      "<command-args>PR 42</command-args>"), "/review PR 42")
+        self.assertEqual(clean_prompt("Почему a < b и b > c?"), "Почему a < b и b > c?")
+
+
 class ClaudeWebAdapter(unittest.TestCase):
     def test_chat_answer(self):
         h = run("claude-web", [
