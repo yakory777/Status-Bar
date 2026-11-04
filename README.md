@@ -207,7 +207,7 @@ No soldering required.
 
 ### Case
 
-**T-Display-S3 (LCD) + 103565 battery** — in [`hardware/case/lcd/`](hardware/case/lcd/). Three printed parts, 86.2 × 44.1 × 26.7 mm without the cheeks. The board, its buttons and connectors are placed from LilyGO's official 3D model of the T-Display-S3 (`dimensions/t-display-s3-full.stl` in their repository): board 60.8 × 26 × 9.9 mm. The case stands on the desk by itself, the screen at 60° to the desk: the end walls continue into rounded side cheeks with cut-outs, one piece with the shell. The project logo is engraved 0.5 mm deep on the front, and both long walls carry a row of slanted decorative slots, 1 mm deep.
+**T-Display-S3 (LCD) + 103565 battery** — in [`hardware/case/lcd/`](hardware/case/lcd/). Three printed parts, 87.2 × 44.1 × 26.7 mm without the cheeks. The board, its buttons and connectors are placed from LilyGO's official 3D model of the T-Display-S3 (`dimensions/t-display-s3-full.stl` in their repository): board 60.8 × 26 × 9.9 mm. The case stands on the desk by itself, the screen at 60° to the desk: the end walls continue into rounded side cheeks with cut-outs, one piece with the shell. The project logo is engraved 0.5 mm deep on the front, and both long walls carry a row of slanted decorative slots, 1 mm deep.
 
 <p align="center"><img src="hardware/case/lcd/case-front.png" width="270" alt="Case, front: the button pusher by the USB end and the logo"> <img src="hardware/case/lcd/case-fit.png" width="270" alt="The board model inside the case, seen through the front"></p>
 
@@ -215,9 +215,9 @@ Ready-to-slice STL files (millimetres, every part checked watertight):
 
 | File | Part | Print orientation | Size, mm |
 |---|---|---|---|
-| [`asb-lcd-shell.stl`](hardware/case/lcd/asb-lcd-shell.stl) | Shell with the cheeks, window, pushers, logo, decorative slots | face (screen side) down | 86.2 × 58.1 × 53.6 |
-| [`asb-lcd-divider.stl`](hardware/case/lcd/asb-lcd-divider.stl) | Divider: pads that clamp the board, battery nest, cable hole, lid standoffs | nest up | 81.7 × 39.6 × 16.3 |
-| [`asb-lcd-lid.stl`](hardware/case/lcd/asb-lcd-lid.stl) | Back lid with the engraving | engraving up | 81.8 × 39.7 × 2.4 |
+| [`asb-lcd-shell.stl`](hardware/case/lcd/asb-lcd-shell.stl) | Shell with the cheeks, window, pushers, logo, decorative slots | face (screen side) down | 87.2 × 58.1 × 53.6 |
+| [`asb-lcd-divider.stl`](hardware/case/lcd/asb-lcd-divider.stl) | Divider: pads that clamp the board, battery nest, cable hole, lid standoffs | nest up | 82.7 × 39.6 × 16.3 |
+| [`asb-lcd-lid.stl`](hardware/case/lcd/asb-lcd-lid.stl) | Back lid with the engraving | engraving up | 82.8 × 39.7 × 2.4 |
 
 PLA or PETG, 0.2 mm layers, no supports.
 
@@ -229,7 +229,7 @@ Assembly:
 3. Battery into the nest with the protection board and wires **towards the USB end**: that end of the nest is open, and the wire goes down through the hole right above the battery connector of the board.
 4. Lid flush on top — **four screws** into the divider's standoffs. To change the battery, remove only the lid: the board stays clamped.
 
-The buttons are pressed through the case. **BOOT and KEY** sit on the face of the board by the USB-C, one on each side of it; a flexible tongue in the front panel presses the upper one. **RST** is on the side edge of the board, and its tongue is in the top wall — put the board in with the RST button up. The top wall, near the end opposite the USB, has a Ø7.2 mm hole for a **PBS-101G1** latching power button: inside there is free room for its body (up to Ø10 × 17 mm) in front of the divider, where the board does not reach. If the thread of your button is thicker, drill the hole out (`pwr_hole` in `geometry.py`).
+The buttons are pressed through the case. **BOOT and KEY** sit on the face of the board by the USB-C, one on each side of it; a flexible tongue in the front panel presses the upper one. **RST** is on the side edge of the board, and its tongue is in the top wall — put the board in with the RST button up. The top wall, near the end opposite the USB, has a Ø7.2 mm hole for a **PBS-101G1** latching power button: inside there is free room for its body (up to Ø10 × 17 mm) in front of the divider, where the board does not reach. If the thread of your button is thicker, drill the hole out (`pwr_hole` in `geometry.py`). The divider has a Ø6 mm hole for a wire at the end opposite the USB, with a cut in the nest wall above it, so a wire from the power button reaches the battery compartment. The display window is 41 mm long — the measured visible part of the screen.
 
 Changing the case: dimensions live in `geometry.py`; `python hardware/case/lcd/make.py` checks how the board, battery, buttons and screw heads fit and rebuilds the Fusion 360 script (`fusion/AgentStatusBarCase`: Utilities → Scripts and Add-Ins → "+" → Run), which builds the model with full history and saves the STL files next to itself. The fit was checked against LilyGO's model, not a printed part: if your board revision differs, adjust `btn_*`, `rst_*` and `usb_from_glass`.
 

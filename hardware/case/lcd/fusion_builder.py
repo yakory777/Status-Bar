@@ -207,9 +207,9 @@ def _engrave_walls(comp, body, decos):
 
 
 def _usb_port(comp, body, usb):
-    """Проём USB-C: капсула сквозь торец (эскиз в плоскости YZ) и фаска по наружному краю."""
+    """Проём в торце (USB-C, провод): контур в плоскости YZ сквозь стенку и фаска по наружному краю."""
     sk = comp.sketches.add(comp.yZConstructionPlane)
-    sk.name = "проём USB-C"
+    sk.name = "проём в торце"
     sk.isComputeDeferred = True
     lines = sk.sketchCurves.sketchLines
     pts = [sk.modelToSketchSpace(adsk.core.Point3D.create(0, y * CM, z * CM)) for y, z in usb["profile"]]
@@ -221,10 +221,10 @@ def _usb_port(comp, body, usb):
     inp.startExtent = adsk.fusion.OffsetStartDefinition.create(_v(usb["x0"]))
     inp.setDistanceExtent(False, _v(usb["x1"] - usb["x0"]))
     inp.participantBodies = [body]
-    ext.add(inp).name = "проём USB-C"
+    ext.add(inp).name = "проём в торце"
     if not usb.get("chamfer"):
         return
-    x_out = body.boundingBox.maxPoint.x
+    x_out = body.boundingBox.maxPoint.x if usb.get("face", "max") == "max" else body.boundingBox.minPoint.x
     b = usb["box"]
     col = adsk.core.ObjectCollection.create()
     for e in body.edges:                                   # рёбра проёма на наружной стороне торца
@@ -316,11 +316,11 @@ def run(context):
             if spec.get("recut"):                      # проёмы в торцах заново — щёки их закрыли
                 _combine(comp, body, [_box(comp, b, f"{name} проём {i + 1}") for i, b in enumerate(spec["recut"])],
                          adsk.fusion.FeatureOperations.CutFeatureOperation)
-            if spec.get("usb"):
+            for port in spec.get("ports") or []:
                 try:
-                    _usb_port(comp, body, spec["usb"])
+                    _usb_port(comp, body, port)
                 except Exception as e:
-                    notes.append(f"проём USB — {e}")
+                    notes.append(f"проём в торце — {e}")
             if name == "shell":
                 try:
                     _fillet(comp, body, CORNER_R) or notes.append("углы корпуса не скруглены")

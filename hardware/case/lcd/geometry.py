@@ -35,8 +35,12 @@ PARAMS = dict(
     usb_w=12.4,          # проём — «капсула» по форме штекера USB-C с корпусом кабеля
     usb_h=6.8,
     usb_chamfer=0.8,     # фаска по краю проёма снаружи
+    wire_d=6.02,         # отверстие под провод в перегородке у торца напротив USB (6 мм + 0,02)
+    wire_room=1.0,       # гнездо сдвинуто от этого торца, чтобы отверстие поместилось
+    wire_in_end=False,   # True — то же отверстие ещё и в торце корпуса
+    wire_chamfer=0.5,
     win_from_usb=31.6,   # центр стекла дисплея от края платы с USB
-    win_l=44.0,          # окно: видимая область 42,7 × 22,7 мм + запас
+    win_l=41.02,         # окно: видимая часть дисплея 41 мм (измерено) + 0,02
     win_w=24.0,
     # кнопки BOOT и KEY — на лице платы у USB, по обе стороны от разъёма; толкатель в лице — над верхней
     btn_from_usb=2.25,   # от края платы с USB до центра кнопки
@@ -220,7 +224,7 @@ def dims(p):
     nest_l = p["bat_l"] + 2 * (p["bat_fit"] + p["frame_t"])          # гнездо снаружи
     nest_w = p["bat_w"] + 2 * (p["bat_fit"] + p["frame_t"])
     d["nest_l"], d["nest_w"] = nest_l, nest_w
-    d["il"] = max(p["boss"] + 0.4 + nest_l + p["cable_gap"], p["board_l"] + 2 * p["clear"] + p["guide_t"] + p["boss"])
+    d["il"] = max(p["boss"] + 0.4 + p["wire_room"] + nest_l + p["cable_gap"], p["board_l"] + 2 * p["clear"] + p["guide_t"] + p["boss"])
     d["iw"] = max(nest_w + 2 * p["divider_gap"] + 0.4, p["board_w"] + 2 * (p["clear"] + p["guide_t"] + p["boss"]))
     d["ol"] = d["il"] + 2 * w
     d["ow"] = d["iw"] + 2 * w
@@ -239,7 +243,7 @@ def dims(p):
                    (w + b / 2, w + iw - b / 2), (w + il - b / 2, w + iw - b / 2)]
     g = p["divider_gap"]
     ly = p["lid_screw_y"]
-    d["nx0"] = w + b + 0.4                               # гнездо — от торца напротив USB, у USB — место под провод
+    d["nx0"] = w + b + 0.4 + p["wire_room"]              # гнездо — от торца напротив USB, у USB — место под провод
     d["nx1"] = d["nx0"] + nest_l
     lx0, lx1 = d["nx0"] - 1.5, d["nx1"] + 1.5          # стойки крышки: у стенок гнезда, мимо головок угловых винтов
     d["lid_screws"] = [(lx0, ly), (lx1, ly), (lx0, d["ow"] - ly), (lx1, d["ow"] - ly)]
@@ -292,7 +296,12 @@ def build(p):
     r_usb = p["usb_h"] / 2 - 0.01                                         # капсула: полукруглые концы
     usb = dict(profile=_round_rect(ow / 2 - p["usb_w"] / 2, uz - p["usb_h"] / 2, ow / 2 + p["usb_w"] / 2,
                                    uz + p["usb_h"] / 2, r_usb, n=10),
-               x0=ol - w - 0.5, x1=ol + 0.5, chamfer=p["usb_chamfer"], box=usb_hole)
+               x0=ol - w - 0.5, x1=ol + 0.5, chamfer=p["usb_chamfer"], box=usb_hole, face="max")
+    wz = (ft + zd0) / 2                                                  # провод: торец напротив USB, отсек платы
+    r_w = p["wire_d"] / 2
+    wire = dict(profile=_circle(ow / 2, wz, r_w, n=36), x0=-0.5, x1=w + 0.5, chamfer=p["wire_chamfer"],
+                box=(-0.5, ow / 2 - r_w, wz - r_w, w + 0.5, ow / 2 + r_w, wz + r_w), face="min")
+    d["wire_hole"] = wire["box"]
     tw, tl, s_, tt = p["tongue_w"], p["tongue_l"], p["slot"], p["tongue_t"]
     nubs, tongues = [], []
     # толкатели RST (по умолчанию — только в верхней стенке): язычок вдоль стенки, корень — к середине
@@ -376,7 +385,7 @@ def build(p):
     logo = dict(shapes=logo_shapes(d["logo_at"][0], ow / 2, p["logo_mm"]), depth=p["logo_depth"])
     deco = [dict(y=yy, depth=p["deco_depth"], shapes=deco_shapes(ol / 2, dep / 2, p)) for yy in (0.0, ow)]
     side_holes = [dict(y=ow, depth=w + 0.5, shapes=[[_circle(p["pwr_x"], pz, p["pwr_hole"] / 2, n=36)]])]   # сквозь стенку
-    parts["shell"] = dict(solids=S, holes=H, inner=I, cyl_holes=C, prisms=P, recut=recut, logo=logo, deco=deco, usb=usb,
+    parts["shell"] = dict(solids=S, holes=H, inner=I, cyl_holes=C, prisms=P, recut=recut, logo=logo, deco=deco, ports=[usb, wire] if p["wire_in_end"] else [usb],
                           side_holes=side_holes)
 
     # ---------- перегородка: гнездо аккумулятора, стойки под винты ----------
@@ -394,7 +403,12 @@ def build(p):
     for sx, sy in d["lid_screws"]:                                       # стойки под винты крышки
         S.append((sx - b / 2, sy - b / 2, zd1, sx + b / 2, sy + b / 2, oh))
     H = [(nx1 + 0.4, ow / 2 - p["cable_w"] / 2, zd0 - 1, w + il - g - 0.6, ow / 2 + p["cable_w"] / 2, zd1 + 1)]   # провод вниз — к разъёму у USB
+    wx_ = nx0 - 0.6 - p["frame_t"] / 2                                   # провод сквозь перегородку у торца напротив USB
+    H.append((wx_ - p["wire_d"] / 2, ow / 2 - p["wire_d"] / 2, zd1 - 0.1, wx_ + p["wire_d"] / 2,
+              ow / 2 + p["wire_d"] / 2, fh + 1))                         # и вырез в торцевой стенке гнезда над ним
     C = [(sx, sy, zd0 - 1, zd1 + 1, p["screw_d"]) for sx, sy in d["screws"]]        # винты в колонны корпуса
+    C.append((wx_, ow / 2, zd0 - 1, zd1 + 1, p["wire_d"]))
+    d["div_wire"] = (wx_, ow / 2)
     C += [(sx, sy, oh - p["pilot_depth"], oh + 0.1, p["pilot_d"]) for sx, sy in d["lid_screws"]]
     parts["divider"] = dict(solids=S, holes=H, cyl_holes=C)
 
